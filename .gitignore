@@ -1,0 +1,5 @@
+env/
+frames/
+cache/
+__pycache__/
+ui/ui.glade~

@@ -1,0 +1,2 @@
+# AstraStack
+Astronomy Stacking application
