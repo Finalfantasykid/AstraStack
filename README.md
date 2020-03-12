@@ -31,7 +31,7 @@ $ python UI.py
 
 # References
 1. PyStackReg - https://pypi.org/project/pystackreg/
-    1. TurboReg - http://bigwww.epfl.ch/thevenaz/turboreg/
-    1. StackReg - http://bigwww.epfl.ch/thevenaz/StackReg/
-    1. A Pyramid Approach to Subpixel Registration Based on Intensity - http://bigwww.epfl.ch/publications/thevenaz9801.html
+1. TurboReg - http://bigwww.epfl.ch/thevenaz/turboreg/
+1. StackReg - http://bigwww.epfl.ch/thevenaz/StackReg/
+1. A Pyramid Approach to Subpixel Registration Based on Intensity - http://bigwww.epfl.ch/publications/thevenaz9801.html
 1. Image Sharpening using Unsharp Masking and Wavelet Transform - http://ijarcsms.com/docs/paper/volume2/issue6/V2I6-0003.pdf
