@@ -30,7 +30,7 @@ $ python UI.py
 ```
 
 # References
-1. Registax - https://www.astronomie.be/registax/
+1. RegiStax - https://www.astronomie.be/registax/
 1. PyStackReg - https://pypi.org/project/pystackreg/
 1. TurboReg - http://bigwww.epfl.ch/thevenaz/turboreg/
 1. StackReg - http://bigwww.epfl.ch/thevenaz/StackReg/
