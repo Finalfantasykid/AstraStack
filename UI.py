@@ -70,11 +70,18 @@ class UI:
     # Stops listening to the given listener
     def stopListening(self, watch):
         GObject.source_remove(watch)
+    
+    # Shows the error dialog with the given title and message
+    def showErrorDialog(self, message):
+        errorDialog = self.builder.get_object("errorDialog")
+        errorDialog.format_secondary_text(message)
+        response = errorDialog.run()
+        errorDialog.hide()
         
     # Sets the number of threads to use
     def setThreads(self, *args):
         g.nThreads = int(self.cpus.get_value())
-        
+    
     # Opens the file chooser to open load a file
     def openFileDialog(self, *args):
         openDialog = self.builder.get_object("openDialog")
@@ -85,6 +92,18 @@ class UI:
             self.video = Video()
             thread = Thread(target=self.video.run, args=())
             thread.start()
+            
+    # Opens the file chooser to save the final image
+    def saveFileDialog(self, *args):
+        saveDialog = self.builder.get_object("saveDialog")
+        response = saveDialog.run()
+        saveDialog.hide()
+        if(response == Gtk.ResponseType.OK):
+            fileName = saveDialog.get_filename()
+            try:
+                cv2.imwrite(fileName, self.sharpen.finalImage)
+            except: # Save Failed
+                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")     
         
     # Called when the video is finished loading
     def finishedVideo(self):

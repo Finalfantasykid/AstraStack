@@ -94,6 +94,71 @@
       <action-widget response="-5">button2</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkFileFilter" id="filefilter2">
+    <mime-types>
+      <mime-type>image/*</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkFileChooserDialog" id="saveDialog">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <property name="action">save</property>
+    <property name="filter">filefilter2</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button4">
+                <property name="label" translatable="yes">Save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button3</action-widget>
+      <action-widget response="-5">button4</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkAdjustment" id="frameSlider">
     <property name="upper">1</property>
     <property name="step_increment">1</property>
@@ -114,6 +179,40 @@
     <property name="value">0.5</property>
     <property name="step_increment">0.5</property>
     <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius2">
+    <property name="lower">0.5</property>
+    <property name="upper">100</property>
+    <property name="value">0.5</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius3">
+    <property name="lower">0.5</property>
+    <property name="upper">100</property>
+    <property name="value">0.5</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen1">
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen2">
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen3">
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
+    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkWindow" id="mainWindow">
@@ -999,7 +1098,18 @@ filtered frames.</property>
                           <placeholder/>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkButton">
+                            <property name="label" translatable="yes">Save Image</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="saveFileDialog" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1153,38 +1263,53 @@ filtered frames.</property>
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="radius2">
-    <property name="lower">0.5</property>
-    <property name="upper">100</property>
-    <property name="value">0.5</property>
-    <property name="step_increment">0.5</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius3">
-    <property name="lower">0.5</property>
-    <property name="upper">100</property>
-    <property name="value">0.5</property>
-    <property name="step_increment">0.5</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen1">
-    <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen2">
-    <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen3">
-    <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  <object class="GtkMessageDialog" id="errorDialog">
+    <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="attached_to">mainWindow</property>
+    <property name="message_type">error</property>
+    <property name="text" translatable="yes">An error occured</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="button5">
+                <property name="label" translatable="yes">Ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-5">button5</action-widget>
+    </action-widgets>
   </object>
 </interface>
