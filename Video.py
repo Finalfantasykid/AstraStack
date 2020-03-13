@@ -11,8 +11,10 @@ class Video:
 
     # Returns a list of file paths for the frames of the given video fileName
     def run(self):
-        os.makedirs("frames")
-        os.makedirs("cache")
+        if not os.path.exists("frames"):
+            os.makedirs("frames")
+        if not os.path.exists("cache"):
+            os.makedirs("cache")
         self.cleanFrames()
         vidcap = cv2.VideoCapture(g.file)
         count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
