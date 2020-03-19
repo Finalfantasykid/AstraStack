@@ -26,7 +26,15 @@ You may need to install some additional system packages, like some python develo
 You can run the application with
 
 ```
-$ python UI.py
+$ python AstraStack.py
+```
+
+# Build Instructions
+In order to build the project for Linux, you will need to install pyinstaller using pip, and then run the build command
+
+```
+$ pip install pyinstaller
+$ ./build.sh
 ```
 
 # References

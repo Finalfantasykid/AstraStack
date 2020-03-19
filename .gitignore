@@ -1,7 +1,11 @@
 env/
 frames/
 cache/
+dist/
+build/
 __pycache__/
 ui/ui.glade~
 *.png
 *.jpg
+AstraStack.spec
+AstraStack.tar.gz

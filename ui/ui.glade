@@ -241,6 +241,7 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkNotebook" id="tabs">
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_right">5</property>
@@ -367,8 +368,8 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">The reference frame is  used when aligning and
-stacking.  It should be a frame that looks sharpest.</property>
+                                <property name="label" translatable="yes">The reference frame is  used when aligning and stacking.  
+It should be a frame that looks sharpest.</property>
                                 <property name="xalign">0</property>
                                 <attributes>
                                   <attribute name="absolute-size" value="12000"/>
@@ -461,9 +462,9 @@ stacking.  It should be a frame that looks sharpest.</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">This step is optional.  If the object drifts accross the 
-frame, then it is best to set these points.  The points
-don't need to be exact, only an estimate.</property>
+                                <property name="label" translatable="yes">This step is optional.  If the object drifts accross the frame, 
+then it is best to set these points.  The points don't need to 
+be exact, only an estimate.</property>
                                 <property name="wrap">True</property>
                                 <property name="xalign">0</property>
                                 <attributes>
@@ -528,14 +529,14 @@ don't need to be exact, only an estimate.</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">This is a the type of transformation to perform
-during alignment.  The 4 types of transformation
-are described below:
+                                <property name="label" translatable="yes">This is a the type of transformation to perform during alignment.  
+The 4 types of transformation are described below:
 
 - Translation
 - Rigid Body (Translation + Rotation)
 - Scaled Rotation (Translation + Rotation + Scaling)
 - Affine (Translation + Rotation + Scaling + Shearing)</property>
+                                <property name="xalign">0</property>
                                 <attributes>
                                   <attribute name="absolute-size" value="12000"/>
                                 </attributes>
@@ -613,7 +614,6 @@ are described below:
                     </child>
                     <child>
                       <object class="GtkBox">
-                        <property name="width_request">250</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
@@ -647,8 +647,8 @@ are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">The final stack only uses the best frames.  Specify
-the number of frames to stack.</property>
+                                <property name="label" translatable="yes">The final stack only uses the best frames.  
+Specify the number of frames to stack.</property>
                                 <property name="xalign">0</property>
                                 <attributes>
                                   <attribute name="absolute-size" value="12000"/>
@@ -867,7 +867,7 @@ filtered frames.</property>
                             </child>
                             <child>
                               <object class="GtkScale">
-                                <property name="width_request">300</property>
+                                <property name="width_request">365</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="adjustment">sharpen3</property>
@@ -883,7 +883,7 @@ filtered frames.</property>
                             </child>
                             <child>
                               <object class="GtkScale">
-                                <property name="width_request">300</property>
+                                <property name="width_request">365</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="adjustment">sharpen2</property>
@@ -899,7 +899,7 @@ filtered frames.</property>
                             </child>
                             <child>
                               <object class="GtkScale">
-                                <property name="width_request">300</property>
+                                <property name="width_request">365</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="adjustment">sharpen1</property>
@@ -930,6 +930,7 @@ filtered frames.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="margin_left">5</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius3</property>
                                 <property name="digits">1</property>
@@ -957,6 +958,7 @@ filtered frames.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="margin_left">5</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius2</property>
                                 <property name="digits">1</property>
@@ -984,6 +986,7 @@ filtered frames.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="margin_left">5</property>
                                 <property name="adjustment">radius1</property>
                                 <property name="digits">1</property>
                                 <property name="value">0.5</property>
@@ -1090,7 +1093,7 @@ filtered frames.</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>

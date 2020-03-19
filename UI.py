@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import sys
 import time
@@ -17,7 +15,7 @@ from Globals import g
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GObject, Pango
+from gi.repository import Gtk, Gdk, GObject
 
 class UI:
     
@@ -293,9 +291,12 @@ class UI:
     def close(self, *args):
         Gtk.main_quit()
 
-if __name__ == "__main__":
+def run():
     g.ui = UI()
     GObject.threads_init()
     Gdk.threads_init()
+    
+    Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
+    Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
 
     Gtk.main()

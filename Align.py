@@ -198,6 +198,8 @@ def image_similarity_vectors_via_numpy(filepath1, filepath2):
     from numpy import average, linalg, dot
     import sys
     
+    image1 = Image.open
+    
     image1 = Image.open(filepath1)
     image2 = Image.open(filepath2)
  

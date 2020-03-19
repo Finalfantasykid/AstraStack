@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AstraStack
+Comment=Astronomy Stacking Application
+Exec=bash -c "cd `dirname %k` && ./astra-stack"
+Terminal=false
+MimeType=x-scheme-handler/exodus;
+Categories=Application;
