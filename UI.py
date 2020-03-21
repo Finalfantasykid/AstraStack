@@ -1,6 +1,5 @@
-import os
+from os import cpu_count
 import sys
-import time
 import math
 import cv2
 from threading import Thread
@@ -13,8 +12,8 @@ from Stack import Stack
 from Sharpen import Sharpen
 from Globals import g
 
-import gi
-gi.require_version('Gtk', '3.0')
+from gi import require_version
+require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GObject
 
 class UI:
@@ -48,8 +47,8 @@ class UI:
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
 
-        self.cpus.set_upper(os.cpu_count())
-        self.cpus.set_value(math.ceil(os.cpu_count()/2))
+        self.cpus.set_upper(cpu_count())
+        self.cpus.set_value(math.ceil(cpu_count()/2))
         
         self.processThread = None
         
@@ -296,7 +295,7 @@ def run():
     GObject.threads_init()
     Gdk.threads_init()
     
-    Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
     Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
+    Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
 
     Gtk.main()

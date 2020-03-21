@@ -1,7 +1,7 @@
 import cv2
 import glob
 import sh
-import os
+from os import path, makedirs
 from Globals import g
 
 class Video:
@@ -11,10 +11,10 @@ class Video:
 
     # Returns a list of file paths for the frames of the given video fileName
     def run(self):
-        if not os.path.exists("frames"):
-            os.makedirs("frames")
-        if not os.path.exists("cache"):
-            os.makedirs("cache")
+        if not path.exists("frames"):
+            makedirs("frames")
+        if not path.exists("cache"):
+            makedirs("cache")
         self.cleanFrames()
         vidcap = cv2.VideoCapture(g.file)
         count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))

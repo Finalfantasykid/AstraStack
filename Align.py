@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 from PIL import Image
-from multiprocessing import Manager, Process, Value, Lock, Pipe
+from multiprocessing import Manager, Process, Value, Lock
 from pystackreg import StackReg
 from Globals import g
 
@@ -194,11 +194,6 @@ class Align:
 def image_similarity_vectors_via_numpy(filepath1, filepath2):
     # source: http://www.syntacticbayleaves.com/2008/12/03/determining-image-similarity/
     # may throw: Value Error: matrices are not aligned . 
-    from PIL import Image 
-    from numpy import average, linalg, dot
-    import sys
-    
-    image1 = Image.open
     
     image1 = Image.open(filepath1)
     image2 = Image.open(filepath2)
@@ -212,13 +207,13 @@ def image_similarity_vectors_via_numpy(filepath1, filepath2):
     for image in images:
         vector = []
         for pixel_tuple in image.getdata():
-            vector.append(average(pixel_tuple))
+            vector.append(np.average(pixel_tuple))
         vectors.append(vector)
-        norms.append(linalg.norm(vector, 2))
+        norms.append(np.linalg.norm(vector, 2))
     a, b = vectors
     a_norm, b_norm = norms
     # ValueError: matrices are not aligned !
-    res = dot(a / a_norm, b / b_norm)
+    res = np.dot(a / a_norm, b / b_norm)
     return res
     
 def get_thumbnail(image, size=(128,128), stretch_to_fit=False, greyscale=False):

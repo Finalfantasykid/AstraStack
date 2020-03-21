@@ -1,9 +1,8 @@
 import cv2
 import numpy as np
 import math
-import pywt
-import pywt.data
-from multiprocessing import Manager, Process, Value, Lock, Pipe
+from pywt import swt2, iswt2
+from multiprocessing import Manager, Process
 
 from Globals import g
 
@@ -41,7 +40,7 @@ class Sharpen:
         img /= 255;
         
         # compute coefficients
-        rets[channel] = list(pywt.swt2(img, 'haar', level=level))
+        rets[channel] = list(swt2(img, 'haar', level=level))
 
     def sharpenChannelLayers(self, c, rets, channel):
         if(g.level3):
@@ -76,7 +75,7 @@ class Sharpen:
                 self.unsharp(c[2][1][2], g.denoise1, -1)
         
         # reconstruction
-        img=pywt.iswt2(c, 'haar');
+        img=iswt2(c, 'haar');
         img *= 255;
         img[img>255] = 255
         img[img<0] = 0
