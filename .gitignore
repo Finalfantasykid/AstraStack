@@ -5,7 +5,7 @@ dist/
 build/
 __pycache__/
 ui/ui.glade~
-*.png
-*.jpg
+/*.png
+/*.jpg
 AstraStack.spec
 AstraStack.tar.gz

@@ -1,5 +1,4 @@
 from os import cpu_count
-import sys
 import math
 import cv2
 from threading import Thread

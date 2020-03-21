@@ -1,3 +1,4 @@
 #!/bin/bash
 
+export LD_PRELOAD=libgdk-3.so.0 # Workaround TLS error on old Ubuntu
 AstraStack/AstraStack
