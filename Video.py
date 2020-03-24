@@ -1,7 +1,6 @@
 import cv2
 import glob
-import sh
-from os import path, makedirs
+from os import path, makedirs, scandir, unlink
 from Globals import g
 
 class Video:
@@ -33,9 +32,7 @@ class Video:
         g.ui.finishedVideo()
     
     def cleanFrames(self):
-        files = glob.glob('frames/*')
-        if(len(files) > 0):
-            sh.rm(files)
-        files = glob.glob('cache/*')
-        if(len(files) > 0):
-            sh.rm(files)
+        for file in scandir("frames"):
+            unlink(file.path)
+        for file in scandir("cache"):
+            unlink(file.path)

@@ -5,5 +5,4 @@ pycairo==1.19.1
 PyGObject==3.34.0
 pystackreg==0.2.2
 PyWavelets==1.1.1
-sh==1.12.14
 tqdm==4.43.0
