@@ -14,10 +14,11 @@ Then activate the virtual environment
 $ source env/bin/activate
 ```
 
-Install required python packages with pip
+Install required python packages with pip.  You may need to first install numpy before running the requirements install if you don't have the numpy system package installed.
 
 
 ```
+$ pip install numpy
 $ pip install -r requirements.txt
 ```
 
