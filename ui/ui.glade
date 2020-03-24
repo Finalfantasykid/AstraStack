@@ -32,6 +32,10 @@
   <object class="GtkFileFilter" id="filefilter1">
     <mime-types>
       <mime-type>video/*</mime-type>
+      <mime-type>video/quicktime</mime-type>
+      <mime-type>video/x-msvideo</mime-type>
+      <mime-type>video/mp4</mime-type>
+      <mime-type>video/x-ms-wmv</mime-type>
     </mime-types>
   </object>
   <object class="GtkFileChooserDialog" id="openDialog">
@@ -97,6 +101,8 @@
   <object class="GtkFileFilter" id="filefilter2">
     <mime-types>
       <mime-type>image/*</mime-type>
+      <mime-type>image/png</mime-type>
+      <mime-type>image/jpeg</mime-type>
     </mime-types>
   </object>
   <object class="GtkFileChooserDialog" id="saveDialog">
