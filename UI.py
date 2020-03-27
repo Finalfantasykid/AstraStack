@@ -13,7 +13,7 @@ from Globals import g
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GLib
 
 class UI:
     
@@ -23,7 +23,7 @@ class UI:
     SHARPEN_TAB = 3
     
     def __init__(self):
-        self.parentConn, self.childConn = Pipe(duplex=False)
+        self.parentConn, self.childConn = Pipe(duplex=True)
         self.video = None
         self.align = None
         self.stack = None
@@ -59,13 +59,22 @@ class UI:
         self.setTransformation()
         self.setThreads()
         
-    # Sets up a listener so that threads can communicate with each other
-    def createListener(self, conn, function):
-        return GObject.io_add_watch(conn.fileno(), GObject.IO_IN, function)
         
-    # Stops listening to the given listener
-    def stopListening(self, watch):
-        GObject.source_remove(watch)
+    # Sets up a listener so that processes can communicate with each other
+    def createListener(self, function):
+        def listener(function):
+            while True:
+                try:
+                    msg = self.parentConn.recv()
+                except:
+                    return False
+                if(msg == "stop"):
+                    return False
+                function(msg)
+                
+        thread = Thread(target=listener, args=(function,))
+        thread.start()
+        return thread
     
     # Shows the error dialog with the given title and message
     def showErrorDialog(self, message):
@@ -103,18 +112,18 @@ class UI:
         
     # Called when the video is finished loading
     def finishedVideo(self):
-        Gdk.threads_enter()
-        self.tabs.next_page()
-        self.limit.set_upper(len(self.video.frames))
-        self.limit.set_value(int(len(self.video.frames)/2))
-        g.driftP1 = (0, 0)
-        g.driftP2 = (0, 0)
+        def update():
+            self.tabs.next_page()
+            self.limit.set_upper(len(self.video.frames))
+            self.limit.set_value(int(len(self.video.frames)/2))
+            g.driftP1 = (0, 0)
+            g.driftP2 = (0, 0)
 
-        self.setReference()
-        self.setDriftPoint()
-        self.setLimit()
-        self.setBlendMode()
-        Gdk.threads_leave()
+            self.setReference()
+            self.setDriftPoint()
+            self.setLimit()
+            self.setBlendMode()
+        GLib.idle_add(update)
         
     def changeTab(self, notebook, page, page_num, user_data=None):
         frameScale = self.builder.get_object("frameScale")
@@ -149,15 +158,15 @@ class UI:
         
     # Updates the progress bar
     def setProgress(self, i=0, total=0, text=""):
-        Gdk.threads_enter()
-        if(total == 0):
-            pass
-            self.progress.hide()
-        else:
-            self.progress.show()
-            self.progress.set_fraction(i/total)
-            self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
-        Gdk.threads_leave()
+        def update():
+            if(total == 0):
+                pass
+                self.progress.hide()
+            else:
+                self.progress.show()
+                self.progress.set_fraction(i/total)
+                self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
+        GLib.idle_add(update)
         
     # Drift Point 1 Button Clicked
     def clickDriftP1(self, *args):
@@ -222,12 +231,12 @@ class UI:
         
     # Called when the Alignment is complete
     def finishedAlign(self):
-        Gdk.threads_enter()
-        self.tabs.next_page()
-        g.driftP1 = (0, 0)
-        g.driftP2 = (0, 0)
-        self.setDriftPoint()
-        Gdk.threads_leave()
+        def update():
+            self.tabs.next_page()
+            g.driftP1 = (0, 0)
+            g.driftP2 = (0, 0)
+            self.setDriftPoint()
+        GLib.idle_add(update)
         
     # Sets the number of frames to use in the Stack
     def setLimit(self, *args):
@@ -248,10 +257,10 @@ class UI:
         
     # Called when the stack is complete
     def finishedStack(self):
-        Gdk.threads_enter()
-        self.sharpen = Sharpen("stacked.png")
-        self.tabs.next_page()
-        Gdk.threads_leave()
+        def update():
+            self.sharpen = Sharpen("stacked.png")
+            self.tabs.next_page()
+        GLib.idle_add(update)
         
     # Sharpens the final Stacked image
     def sharpenImage(self, *args):
@@ -281,9 +290,9 @@ class UI:
             self.frame.set_from_file("sharpened.png")
         
     def finishedSharpening(self):
-        Gdk.threads_enter()
-        self.frame.set_from_file("sharpened.png")
-        Gdk.threads_leave()
+        def update():
+            self.frame.set_from_file("sharpened.png")
+        GLib.idle_add(update)
 
     # Closes the application
     def close(self, *args):
@@ -291,10 +300,9 @@ class UI:
 
 def run():
     g.ui = UI()
-    GObject.threads_init()
-    Gdk.threads_init()
     
     Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
     Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
 
     Gtk.main()
+

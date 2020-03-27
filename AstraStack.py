@@ -4,5 +4,9 @@ from Stack import Stack
 from Globals import g
 from pystackreg import StackReg
 from UI import run
+from multiprocessing import freeze_support
 
-run()
+if __name__ == '__main__':
+    freeze_support()
+    run()
+

@@ -21,16 +21,11 @@ class Align:
         self.total = 0
         
     def run(self):
-        def progress(source, condition):
-            try:
-                msg = g.ui.parentConn.recv()
-            except:
-                return False
+        def progress(msg):
             g.ui.setProgress(self.count.value, self.total, msg)
-            return True
             
         threads = []
-        listener = g.ui.createListener(g.ui.parentConn, progress)
+        g.ui.createListener(progress)
         self.total = len(self.frames)*3
         
         #Drifting
@@ -138,7 +133,7 @@ class Align:
             
         g.ui.setProgress()
         g.ui.finishedAlign()
-        g.ui.stopListening(listener)
+        g.ui.childConn.send("stop")
 
     # Multiprocess function to calculation the transform matricies of each image 
     def align(self, processId, rets, frames, conn):
