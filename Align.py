@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import math
-from PIL import Image
 from multiprocessing import Manager, Process, Value, Lock
 from pystackreg import StackReg
 from Globals import g
@@ -175,10 +174,10 @@ class Align:
     # Multiprocess function to find the best images (ones closest to the reference frame)
     def filter(self, processId, rets, frames, reference, conn):
         similarities = []
-        ref = cv2.imread("cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+        img1 = cv2.resize(cv2.imread("cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
         for frame in frames:
-            img = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
-            diff = image_similarity_vectors_via_numpy("cache/" + reference + ".png", frame.replace("frames", "cache"))
+            img2 = cv2.resize(cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE), (64,64))
+            diff = image_similarity_vectors_via_numpy(img1, img2)
             similarities.append((frame.replace("frames", "cache"), diff))
             with self.lock:
                 self.count.value += 1
@@ -186,22 +185,14 @@ class Align:
         rets[processId] = similarities
 
 # https://github.com/petermat/image_similarity
-def image_similarity_vectors_via_numpy(filepath1, filepath2):
+def image_similarity_vectors_via_numpy(image1, image2):
     # source: http://www.syntacticbayleaves.com/2008/12/03/determining-image-similarity/
-    # may throw: Value Error: matrices are not aligned . 
-    
-    image1 = Image.open(filepath1)
-    image2 = Image.open(filepath2)
- 
-    image1 = get_thumbnail(image1, stretch_to_fit=True, size=(64,64), greyscale=True)
-    image2 = get_thumbnail(image2, stretch_to_fit=True, size=(64,64), greyscale=True)
-    
     images = [image1, image2]
     vectors = []
     norms = []
     for image in images:
         vector = []
-        for pixel_tuple in image.getdata():
+        for pixel_tuple in image.flatten():
             vector.append(np.average(pixel_tuple))
         vectors.append(vector)
         norms.append(np.linalg.norm(vector, 2))
@@ -210,14 +201,3 @@ def image_similarity_vectors_via_numpy(filepath1, filepath2):
     # ValueError: matrices are not aligned !
     res = np.dot(a / a_norm, b / b_norm)
     return res
-    
-def get_thumbnail(image, size=(128,128), stretch_to_fit=False, greyscale=False):
-    " get a smaller version of the image - makes comparison much faster/easier"
-    if not stretch_to_fit:
-        image.thumbnail(size, Image.ANTIALIAS)
-    else:
-        image = image.resize(size); # for faster computation
-    if greyscale:
-        image = image.convert("L")  # Convert it to grayscale.
-    return image
-
