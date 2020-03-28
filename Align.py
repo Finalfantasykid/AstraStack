@@ -66,7 +66,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            thread = Process(target=self.align, args=(i, rets, frames, g.ui.childConn, ))
+            thread = Process(target=self.align, args=(i, rets, frames, g.reference, g.transformation, g.ui.childConn, ))
             threads.append(thread)
         
         for thread in threads:
@@ -117,7 +117,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            thread = Process(target=self.filter, args=(i, rets, frames, g.ui.childConn))
+            thread = Process(target=self.filter, args=(i, rets, frames, g.reference, g.ui.childConn))
             threads.append(thread)
 
         for thread in threads:
@@ -136,9 +136,9 @@ class Align:
         g.ui.childConn.send("stop")
 
     # Multiprocess function to calculation the transform matricies of each image 
-    def align(self, processId, rets, frames, conn):
-        ref = cv2.imread("frames/" + g.reference + ".png", cv2.IMREAD_GRAYSCALE)
-        sr = StackReg(g.transformation)
+    def align(self, processId, rets, frames, reference, transformation, conn):
+        ref = cv2.imread("frames/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+        sr = StackReg(transformation)
         tmats = []
         h, w = ref.shape[:2]
         scaleFactor = 0.5
@@ -173,12 +173,12 @@ class Align:
             conn.send("Transforming Frames")
             
     # Multiprocess function to find the best images (ones closest to the reference frame)
-    def filter(self, processId, rets, frames, conn):
+    def filter(self, processId, rets, frames, reference, conn):
         similarities = []
-        ref = cv2.imread("cache/" + g.reference + ".png", cv2.IMREAD_GRAYSCALE)
+        ref = cv2.imread("cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
         for frame in frames:
             img = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
-            diff = image_similarity_vectors_via_numpy("cache/" + g.reference + ".png", frame.replace("frames", "cache"))
+            diff = image_similarity_vectors_via_numpy("cache/" + reference + ".png", frame.replace("frames", "cache"))
             similarities.append((frame.replace("frames", "cache"), diff))
             with self.lock:
                 self.count.value += 1
@@ -220,3 +220,4 @@ def get_thumbnail(image, size=(128,128), stretch_to_fit=False, greyscale=False):
     if greyscale:
         image = image.convert("L")  # Convert it to grayscale.
     return image
+

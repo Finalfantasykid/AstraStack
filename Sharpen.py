@@ -42,37 +42,37 @@ class Sharpen:
         # compute coefficients
         rets[channel] = list(swt2(img, 'haar', level=level))
 
-    def sharpenChannelLayers(self, c, rets, channel):
-        if(g.level3):
-            if(g.sharpen3 > 0):
-                self.unsharp(c[0][1][0], g.radius3, g.sharpen3*100)
-                self.unsharp(c[0][1][1], g.radius3, g.sharpen3*100)
-                self.unsharp(c[0][1][2], g.radius3, g.sharpen3*100)
-            if(g.denoise3 > 0):
-                self.unsharp(c[0][1][0], g.denoise3, -1)
-                self.unsharp(c[0][1][1], g.denoise3, -1)
-                self.unsharp(c[0][1][2], g.denoise3, -1)
+    def sharpenChannelLayers(self, c, rets, channel, g):
+        if(g['level3']):
+            if(g['sharpen3'] > 0):
+                self.unsharp(c[0][1][0], g['radius3'], g['sharpen3']*100)
+                self.unsharp(c[0][1][1], g['radius3'], g['sharpen3']*100)
+                self.unsharp(c[0][1][2], g['radius3'], g['sharpen3']*100)
+            if(g['denoise3'] > 0):
+                self.unsharp(c[0][1][0], g['denoise3'], -1)
+                self.unsharp(c[0][1][1], g['denoise3'], -1)
+                self.unsharp(c[0][1][2], g['denoise3'], -1)
         
-        if(g.level2):
-            if(g.sharpen2 > 0):
-                self.unsharp(c[1][1][0], g.radius2, g.sharpen2*100)
-                self.unsharp(c[1][1][1], g.radius2, g.sharpen2*100)
-                self.unsharp(c[1][1][2], g.radius2, g.sharpen2*100)
-            if(g.denoise2 > 0):
-                self.unsharp(c[1][1][0], g.denoise2, -1)
-                self.unsharp(c[1][1][1], g.denoise2, -1)
-                self.unsharp(c[1][1][2], g.denoise2, -1)
+        if(g['level2']):
+            if(g['sharpen2'] > 0):
+                self.unsharp(c[1][1][0], g['radius2'], g['sharpen2']*100)
+                self.unsharp(c[1][1][1], g['radius2'], g['sharpen2']*100)
+                self.unsharp(c[1][1][2], g['radius2'], g['sharpen2']*100)
+            if(g['denoise2'] > 0):
+                self.unsharp(c[1][1][0], g['denoise2'], -1)
+                self.unsharp(c[1][1][1], g['denoise2'], -1)
+                self.unsharp(c[1][1][2], g['denoise2'], -1)
         
-        if(g.level1):
-            if(g.sharpen1 > 0):
-                self.unsharp(c[2][1][0], g.radius1, g.sharpen1*100)
-                self.unsharp(c[2][1][1], g.radius1, g.sharpen1*100)
-                self.unsharp(c[2][1][2], g.radius1, g.sharpen1*100)
+        if(g['level1']):
+            if(g['sharpen1'] > 0):
+                self.unsharp(c[2][1][0], g['radius1'], g['sharpen1']*100)
+                self.unsharp(c[2][1][1], g['radius1'], g['sharpen1']*100)
+                self.unsharp(c[2][1][2], g['radius1'], g['sharpen1']*100)
 
-            if(g.denoise1 > 0):
-                self.unsharp(c[2][1][0], g.denoise1, -1)
-                self.unsharp(c[2][1][1], g.denoise1, -1)
-                self.unsharp(c[2][1][2], g.denoise1, -1)
+            if(g['denoise1'] > 0):
+                self.unsharp(c[2][1][0], g['denoise1'], -1)
+                self.unsharp(c[2][1][1], g['denoise1'], -1)
+                self.unsharp(c[2][1][2], g['denoise1'], -1)
         
         # reconstruction
         img=iswt2(c, 'haar');
@@ -101,12 +101,24 @@ class Sharpen:
         self.cB = rets['B']
         
     def sharpenLayers(self):
+        gParam = {'level1': g.level1,
+                  'level2': g.level2,
+                  'level3': g.level3,
+                  'sharpen1': g.sharpen1,
+                  'sharpen2': g.sharpen2,
+                  'sharpen3': g.sharpen3,
+                  'radius1': g.radius1,
+                  'radius2': g.radius2,
+                  'radius3': g.radius3,
+                  'denoise1': g.denoise1,
+                  'denoise2': g.denoise2,
+                  'denoise3': g.denoise3}
         manager = Manager()
         rets = manager.dict()
         threads = []
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cR, rets, 'R', )))
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cG, rets, 'G', )))
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cB, rets, 'B', )))
+        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cR, rets, 'R', gParam, )))
+        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cG, rets, 'G', gParam, )))
+        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cB, rets, 'B', gParam, )))
         
         for thread in threads:
             thread.start()
