@@ -175,29 +175,22 @@ class Align:
     def filter(self, processId, rets, frames, reference, conn):
         similarities = []
         img1 = cv2.resize(cv2.imread("cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
+        a, a_norm = self.calculateNorms(img1)
         for frame in frames:
             img2 = cv2.resize(cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE), (64,64))
-            diff = image_similarity_vectors_via_numpy(img1, img2)
+            b, b_norm = self.calculateNorms(img2)
+            diff = np.dot(a / a_norm, b / b_norm)
             similarities.append((frame.replace("frames", "cache"), diff))
             with self.lock:
                 self.count.value += 1
             conn.send("Calculating Similarities")
         rets[processId] = similarities
 
-# https://github.com/petermat/image_similarity
-def image_similarity_vectors_via_numpy(image1, image2):
-    # source: http://www.syntacticbayleaves.com/2008/12/03/determining-image-similarity/
-    images = [image1, image2]
-    vectors = []
-    norms = []
-    for image in images:
+    def calculateNorms(self, img):
+        # https://github.com/petermat/image_similarity
+        # source: http://www.syntacticbayleaves.com/2008/12/03/determining-image-similarity/
         vector = []
-        for pixel_tuple in image.flatten():
+        for pixel_tuple in img.flatten():
             vector.append(np.average(pixel_tuple))
-        vectors.append(vector)
-        norms.append(np.linalg.norm(vector, 2))
-    a, b = vectors
-    a_norm, b_norm = norms
-    # ValueError: matrices are not aligned !
-    res = np.dot(a / a_norm, b / b_norm)
-    return res
+        norm = np.linalg.norm(vector, 2)
+        return (vector, norm)
