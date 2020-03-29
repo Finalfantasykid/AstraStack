@@ -2,14 +2,12 @@ import cv2
 import numpy as np
 import math
 from pywt import swt2, iswt2
-from concurrent.futures import ProcessPoolExecutor
 
 from Globals import g
 
 class Sharpen:
 
     def __init__(self, stackedImage):
-        self.pool = ProcessPoolExecutor(max_workers=3)
         self.stackedImage = cv2.imread(stackedImage)
         self.finalImage = None
         self.cR = None
@@ -29,9 +27,9 @@ class Sharpen:
     def calculateCoefficients(self):
         (imgB, imgG, imgR) = cv2.split(self.stackedImage)
         
-        futureR = self.pool.submit(calculateChannelCoefficients, imgR, 3)
-        futureG = self.pool.submit(calculateChannelCoefficients, imgG, 3)
-        futureB = self.pool.submit(calculateChannelCoefficients, imgB, 3)
+        futureR = g.pool.submit(calculateChannelCoefficients, imgR, 3)
+        futureG = g.pool.submit(calculateChannelCoefficients, imgG, 3)
+        futureB = g.pool.submit(calculateChannelCoefficients, imgB, 3)
         
         self.cR = futureR.result()
         self.cG = futureG.result()
@@ -51,9 +49,9 @@ class Sharpen:
                   'denoise2': g.denoise2,
                   'denoise3': g.denoise3}
                   
-        futureR = self.pool.submit(sharpenChannelLayers, self.cR, gParam)
-        futureG = self.pool.submit(sharpenChannelLayers, self.cG, gParam)
-        futureB = self.pool.submit(sharpenChannelLayers, self.cB, gParam)
+        futureR = g.pool.submit(sharpenChannelLayers, self.cR, gParam)
+        futureG = g.pool.submit(sharpenChannelLayers, self.cG, gParam)
+        futureB = g.pool.submit(sharpenChannelLayers, self.cB, gParam)
         
         R = futureR.result()
         G = futureG.result()

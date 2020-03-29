@@ -3,6 +3,7 @@ import math
 import cv2
 from threading import Thread
 from multiprocessing import Pipe
+from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
 from Video import Video
@@ -48,6 +49,7 @@ class UI:
 
         self.cpus.set_upper(cpu_count())
         self.cpus.set_value(math.ceil(cpu_count()/2))
+        g.pool = ProcessPoolExecutor(max_workers=cpu_count())
         
         self.processThread = None
         
