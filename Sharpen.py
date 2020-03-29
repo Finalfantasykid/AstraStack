@@ -2,13 +2,14 @@ import cv2
 import numpy as np
 import math
 from pywt import swt2, iswt2
-from multiprocessing import Manager, Process
+from concurrent.futures import ProcessPoolExecutor
 
 from Globals import g
 
 class Sharpen:
 
     def __init__(self, stackedImage):
+        self.pool = ProcessPoolExecutor(max_workers=3)
         self.stackedImage = cv2.imread(stackedImage)
         self.finalImage = None
         self.cR = None
@@ -25,80 +26,16 @@ class Sharpen:
             self.sharpenLayers()
             g.ui.finishedSharpening()
         
-    def calculateChannelCoefficients(self, img, level, rets, channel):
-        # Crop so that dimensions are multiples of 2**level
-        h, w = img.shape[:2]
-        
-        hR = (h % 2**level)
-        wR = (w % 2**level)
-        
-        tmp = np.zeros((h+(2**level - hR), w+(2**level - wR)))
-        tmp[:h,:w] = img
-        img = tmp
-
-        img =  np.float32(img)   
-        img /= 255;
-        
-        # compute coefficients
-        rets[channel] = list(swt2(img, 'haar', level=level))
-
-    def sharpenChannelLayers(self, c, rets, channel, g):
-        if(g['level3']):
-            if(g['sharpen3'] > 0):
-                self.unsharp(c[0][1][0], g['radius3'], g['sharpen3']*100)
-                self.unsharp(c[0][1][1], g['radius3'], g['sharpen3']*100)
-                self.unsharp(c[0][1][2], g['radius3'], g['sharpen3']*100)
-            if(g['denoise3'] > 0):
-                self.unsharp(c[0][1][0], g['denoise3'], -1)
-                self.unsharp(c[0][1][1], g['denoise3'], -1)
-                self.unsharp(c[0][1][2], g['denoise3'], -1)
-        
-        if(g['level2']):
-            if(g['sharpen2'] > 0):
-                self.unsharp(c[1][1][0], g['radius2'], g['sharpen2']*100)
-                self.unsharp(c[1][1][1], g['radius2'], g['sharpen2']*100)
-                self.unsharp(c[1][1][2], g['radius2'], g['sharpen2']*100)
-            if(g['denoise2'] > 0):
-                self.unsharp(c[1][1][0], g['denoise2'], -1)
-                self.unsharp(c[1][1][1], g['denoise2'], -1)
-                self.unsharp(c[1][1][2], g['denoise2'], -1)
-        
-        if(g['level1']):
-            if(g['sharpen1'] > 0):
-                self.unsharp(c[2][1][0], g['radius1'], g['sharpen1']*100)
-                self.unsharp(c[2][1][1], g['radius1'], g['sharpen1']*100)
-                self.unsharp(c[2][1][2], g['radius1'], g['sharpen1']*100)
-
-            if(g['denoise1'] > 0):
-                self.unsharp(c[2][1][0], g['denoise1'], -1)
-                self.unsharp(c[2][1][1], g['denoise1'], -1)
-                self.unsharp(c[2][1][2], g['denoise1'], -1)
-        
-        # reconstruction
-        img=iswt2(c, 'haar');
-        img *= 255;
-        img[img>255] = 255
-        img[img<0] = 0
-        rets[channel] = np.uint8(img)
-        
     def calculateCoefficients(self):
         (imgB, imgG, imgR) = cv2.split(self.stackedImage)
-        manager = Manager()
-        rets = manager.dict()
-        threads = []
-        threads.append(Process(target=self.calculateChannelCoefficients, args=(imgR, 3, rets, 'R', )))
-        threads.append(Process(target=self.calculateChannelCoefficients, args=(imgG, 3, rets, 'G', )))
-        threads.append(Process(target=self.calculateChannelCoefficients, args=(imgB, 3, rets, 'B', )))
         
-        for thread in threads:
-            thread.start()
-
-        for thread in threads:
-            thread.join()
+        futureR = self.pool.submit(calculateChannelCoefficients, imgR, 3)
+        futureG = self.pool.submit(calculateChannelCoefficients, imgG, 3)
+        futureB = self.pool.submit(calculateChannelCoefficients, imgB, 3)
         
-        self.cR = rets['R']
-        self.cG = rets['G']
-        self.cB = rets['B']
+        self.cR = futureR.result()
+        self.cG = futureG.result()
+        self.cB = futureB.result()
         
     def sharpenLayers(self):
         gParam = {'level1': g.level1,
@@ -113,26 +50,78 @@ class Sharpen:
                   'denoise1': g.denoise1,
                   'denoise2': g.denoise2,
                   'denoise3': g.denoise3}
-        manager = Manager()
-        rets = manager.dict()
-        threads = []
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cR, rets, 'R', gParam, )))
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cG, rets, 'G', gParam, )))
-        threads.append(Process(target=self.sharpenChannelLayers, args=(self.cB, rets, 'B', gParam, )))
+                  
+        futureR = self.pool.submit(sharpenChannelLayers, self.cR, gParam)
+        futureG = self.pool.submit(sharpenChannelLayers, self.cG, gParam)
+        futureB = self.pool.submit(sharpenChannelLayers, self.cB, gParam)
         
-        for thread in threads:
-            thread.start()
-
-        for thread in threads:
-            thread.join()
+        R = futureR.result()
+        G = futureG.result()
+        B = futureB.result()
         
         h, w = self.finalImage.shape[:2]
-        self.finalImage = cv2.merge([rets['B'], rets['G'], rets['R']])
+        self.finalImage = cv2.merge([B, G, R])
         self.finalImage = self.finalImage[:h,:w]
         cv2.imwrite("sharpened.png", self.finalImage)
+        
+def calculateChannelCoefficients(img, level):
+    # Crop so that dimensions are multiples of 2**level
+    h, w = img.shape[:2]
     
-    def unsharp(self, image, radius, strength):
-        kSize = max(3, math.ceil(radius*3) + (math.ceil(radius*3)+1) % 2) # kernel size should be at least 3 times the radius
-        blur = cv2.GaussianBlur(image, (kSize,kSize), radius)
-        sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
-        return sharp
+    hR = (h % 2**level)
+    wR = (w % 2**level)
+    
+    tmp = np.zeros((h+(2**level - hR), w+(2**level - wR)))
+    tmp[:h,:w] = img
+    img = tmp
+
+    img =  np.float32(img)   
+    img /= 255;
+    
+    # compute coefficients
+    return list(swt2(img, 'haar', level=level))
+    
+def sharpenChannelLayers(c, g):
+    if(g['level3']):
+        if(g['sharpen3'] > 0):
+            unsharp(c[0][1][0], g['radius3'], g['sharpen3']*100)
+            unsharp(c[0][1][1], g['radius3'], g['sharpen3']*100)
+            unsharp(c[0][1][2], g['radius3'], g['sharpen3']*100)
+        if(g['denoise3'] > 0):
+            unsharp(c[0][1][0], g['denoise3'], -1)
+            unsharp(c[0][1][1], g['denoise3'], -1)
+            unsharp(c[0][1][2], g['denoise3'], -1)
+    
+    if(g['level2']):
+        if(g['sharpen2'] > 0):
+            unsharp(c[1][1][0], g['radius2'], g['sharpen2']*100)
+            unsharp(c[1][1][1], g['radius2'], g['sharpen2']*100)
+            unsharp(c[1][1][2], g['radius2'], g['sharpen2']*100)
+        if(g['denoise2'] > 0):
+            unsharp(c[1][1][0], g['denoise2'], -1)
+            unsharp(c[1][1][1], g['denoise2'], -1)
+            unsharp(c[1][1][2], g['denoise2'], -1)
+    
+    if(g['level1']):
+        if(g['sharpen1'] > 0):
+            unsharp(c[2][1][0], g['radius1'], g['sharpen1']*100)
+            unsharp(c[2][1][1], g['radius1'], g['sharpen1']*100)
+            unsharp(c[2][1][2], g['radius1'], g['sharpen1']*100)
+
+        if(g['denoise1'] > 0):
+            unsharp(c[2][1][0], g['denoise1'], -1)
+            unsharp(c[2][1][1], g['denoise1'], -1)
+            unsharp(c[2][1][2], g['denoise1'], -1)
+    
+    # reconstruction
+    img=iswt2(c, 'haar');
+    img *= 255;
+    img[img>255] = 255
+    img[img<0] = 0
+    return np.uint8(img)
+    
+def unsharp(image, radius, strength):
+    kSize = max(3, math.ceil(radius*3) + (math.ceil(radius*3)+1) % 2) # kernel size should be at least 3 times the radius
+    blur = cv2.GaussianBlur(image, (kSize,kSize), radius)
+    sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
+    return sharp
