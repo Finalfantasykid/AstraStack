@@ -1,4 +1,4 @@
-from os import cpu_count
+from os import cpu_count, rmdir, scandir, unlink, path
 import math
 import cv2
 from threading import Thread
@@ -25,6 +25,7 @@ class UI:
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
+        self.cleanTmp()
         self.video = None
         self.align = None
         self.stack = None
@@ -60,7 +61,6 @@ class UI:
         self.setProgress()
         self.setTransformation()
         self.setThreads()
-        
         
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
@@ -151,7 +151,7 @@ class UI:
         elif(page_num == UI.STACK_TAB):
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
         elif(page_num == UI.SHARPEN_TAB):
-            self.frame.set_from_file("sharpened.png")
+            self.frame.set_from_file(g.tmp + "sharpened.png")
         
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
@@ -260,7 +260,7 @@ class UI:
     # Called when the stack is complete
     def finishedStack(self):
         def update():
-            self.sharpen = Sharpen("stacked.png")
+            self.sharpen = Sharpen(g.tmp + "stacked.png")
             self.tabs.next_page()
         GLib.idle_add(update)
         
@@ -283,22 +283,40 @@ class UI:
         g.level3 = self.builder.get_object("level3").get_active()
         
         if(self.sharpen is None):
-            self.sharpen = Sharpen("stacked.png")
+            self.sharpen = Sharpen(g.tmp + "stacked.png")
         if(self.processThread != None and self.processThread.is_alive()):
             self.sharpen.processAgain = True
         else:
             self.processThread = Thread(target=self.sharpen.run, args=())
             self.processThread.start()
-            self.frame.set_from_file("sharpened.png")
-        
+            self.frame.set_from_file(g.tmp + "sharpened.png")
+    
+    # Called when sharpening is complete
     def finishedSharpening(self):
         def update():
-            self.frame.set_from_file("sharpened.png")
+            self.frame.set_from_file(g.tmp + "sharpened.png")
         GLib.idle_add(update)
+
+    # Cleans the tmp directory
+    def cleanTmp(self):
+        if(path.exists(g.tmp)):
+            if(path.exists(g.tmp + "frames")):
+                for file in scandir(g.tmp + "frames"):
+                    unlink(file.path)
+            if(path.exists(g.tmp + "cache")):
+                for file in scandir(g.tmp + "cache"):
+                    unlink(file.path)
+            for file in scandir(g.tmp):
+                if(path.isdir(file)):
+                    rmdir(file.path)
+                else:
+                    unlink(file.path)
+            rmdir(g.tmp)
 
     # Closes the application
     def close(self, *args):
         Gtk.main_quit()
+        self.cleanTmp()
 
 def run():
     g.ui = UI()

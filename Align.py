@@ -113,7 +113,7 @@ class Align:
         
 # Multiprocess function to calculation the transform matricies of each image 
 def align(frames, reference, transformation, conn):
-    ref = cv2.imread("frames/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+    ref = cv2.imread(g.tmp + "frames/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
@@ -147,7 +147,7 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
 # Multiprocess function to find the best images (ones closest to the reference frame)
 def filter(frames, reference, conn):
     similarities = []
-    img1 = cv2.resize(cv2.imread("cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
+    img1 = cv2.resize(cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
     a, a_norm = calculateNorms(img1)
     for frame in frames:
         img2 = cv2.resize(cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE), (64,64))

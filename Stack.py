@@ -42,6 +42,6 @@ class Stack:
             stacked = np.array(stacked)
             stackedImage = np.median(stacked, axis=0)
         
-        cv2.imwrite("stacked.png",stackedImage)
+        cv2.imwrite(g.tmp + "stacked.png",stackedImage)
         g.ui.setProgress()
         g.ui.finishedStack()

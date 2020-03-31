@@ -60,7 +60,7 @@ class Sharpen:
         h, w = self.finalImage.shape[:2]
         self.finalImage = cv2.merge([B, G, R])
         self.finalImage = self.finalImage[:h,:w]
-        cv2.imwrite("sharpened.png", self.finalImage)
+        cv2.imwrite(g.tmp + "sharpened.png", self.finalImage)
         
 def calculateChannelCoefficients(img, level):
     # Crop so that dimensions are multiples of 2**level
