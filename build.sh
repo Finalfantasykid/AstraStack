@@ -11,9 +11,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm -fr dist/AstraStack/share/themes/
     cp -r share/themes dist/AstraStack/share/
     cp -r share/icons dist/AstraStack/share/
-    cp -r ui dist/
-    cp scripts/astra-stack dist/
-    cp scripts/astra-stack.desktop dist/
+    cp -r ui dist/AstraStack/
+    cp scripts/astrastack dist/AstraStack/
+    cp scripts/astrastack.desktop dist/AstraStack
+    cp scripts/install.sh dist/
     cd dist
     tar cfz ../AstraStack.tar.gz *
 elif [[ "$OSTYPE" == "msys" ]]; then
