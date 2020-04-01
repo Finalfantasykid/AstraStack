@@ -16,7 +16,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     cp scripts/astrastack.desktop dist/AstraStack
     cp scripts/install.sh dist/
     cd dist
-    tar cfz ../AstraStack.tar.gz *
+    tar cjf ../AstraStack.tar.bz2 *
 elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist
     pyinstaller --windowed \

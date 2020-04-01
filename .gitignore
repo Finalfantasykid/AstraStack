@@ -8,5 +8,5 @@ ui/ui.glade~
 /*.png
 /*.jpg
 AstraStack.spec
-AstraStack.tar.gz
+AstraStack.tar.*
 AstraStack_Setup.exe
