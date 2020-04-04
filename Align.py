@@ -54,7 +54,6 @@ class Align:
                 
                 cv2.imwrite(frame, image)
                 i += 1
-                self.count.value += 1
                 g.ui.childConn.send("Drifting Frames")
     
         # Aligning
