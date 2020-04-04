@@ -117,11 +117,11 @@ def align(frames, reference, transformation, conn):
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
-    scaleFactor = 0.5
-    ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_NEAREST)
+    scaleFactor = min(1.0, (100/h))
+    ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
     for frame in frames:
         mov = cv2.imread(frame, cv2.IMREAD_GRAYSCALE)
-        mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_NEAREST)
+        mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
         
         M = sr.register(mov, ref)
         M[0][2] /= scaleFactor # X
