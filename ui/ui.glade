@@ -1080,7 +1080,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Smallest Details</property>
+                                    <property name="tooltip_text" translatable="yes">Smallest Details (1px)</property>
                                     <property name="label" translatable="yes">1:</property>
                                   </object>
                                 </child>
@@ -1102,7 +1102,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Small Details</property>
+                                    <property name="tooltip_text" translatable="yes">Small Details (2px)</property>
                                     <property name="label" translatable="yes">2:</property>
                                   </object>
                                 </child>
@@ -1124,7 +1124,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Medium Details</property>
+                                    <property name="tooltip_text" translatable="yes">Medium Details (4px)</property>
                                     <property name="label" translatable="yes">3:</property>
                                   </object>
                                 </child>
@@ -1146,7 +1146,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Large Details</property>
+                                    <property name="tooltip_text" translatable="yes">Large Details (8px)</property>
                                     <property name="label" translatable="yes">4:</property>
                                   </object>
                                 </child>
@@ -1211,7 +1211,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Largest Details</property>
+                                    <property name="tooltip_text" translatable="yes">Largest Details (16px)</property>
                                     <property name="label" translatable="yes">5:</property>
                                   </object>
                                 </child>
