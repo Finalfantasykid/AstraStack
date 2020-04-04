@@ -269,18 +269,26 @@ class UI:
         g.sharpen1 = self.builder.get_object("sharpen1").get_value()
         g.sharpen2 = self.builder.get_object("sharpen2").get_value()
         g.sharpen3 = self.builder.get_object("sharpen3").get_value()
+        g.sharpen4 = self.builder.get_object("sharpen4").get_value()
+        g.sharpen5 = self.builder.get_object("sharpen5").get_value()
 
         g.radius1 = self.builder.get_object("radius1").get_value()
         g.radius2 = self.builder.get_object("radius2").get_value()
         g.radius3 = self.builder.get_object("radius3").get_value()
+        g.radius4 = self.builder.get_object("radius4").get_value()
+        g.radius5 = self.builder.get_object("radius5").get_value()
         
         g.denoise1 = self.builder.get_object("denoise1").get_value()
         g.denoise2 = self.builder.get_object("denoise2").get_value()
         g.denoise3 = self.builder.get_object("denoise3").get_value()
+        g.denoise4 = self.builder.get_object("denoise4").get_value()
+        g.denoise5 = self.builder.get_object("denoise5").get_value()
         
         g.level1 = self.builder.get_object("level1").get_active()
         g.level2 = self.builder.get_object("level2").get_active()
         g.level3 = self.builder.get_object("level3").get_active()
+        g.level4 = self.builder.get_object("level4").get_active()
+        g.level5 = self.builder.get_object("level5").get_active()
         
         if(self.sharpen is None):
             self.sharpen = Sharpen(g.tmp + "stacked.png")

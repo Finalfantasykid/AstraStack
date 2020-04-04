@@ -29,6 +29,18 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="denoise4">
+    <property name="upper">100</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="denoise5">
+    <property name="upper">100</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkFileFilter" id="filefilter1">
     <mime-types>
       <mime-type>video/*</mime-type>
@@ -203,6 +215,20 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="radius4">
+    <property name="lower">0.5</property>
+    <property name="upper">100</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius5">
+    <property name="lower">0.5</property>
+    <property name="upper">100</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="sharpen1">
     <property name="upper">1</property>
     <property name="step_increment">0.050000000000000003</property>
@@ -216,6 +242,18 @@
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen3">
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen4">
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen5">
     <property name="upper">1</property>
     <property name="step_increment">0.050000000000000003</property>
     <property name="page_increment">0.10000000000000001</property>
@@ -1042,7 +1080,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Fine Details</property>
+                                    <property name="tooltip_text" translatable="yes">Smallest Details</property>
                                     <property name="label" translatable="yes">1:</property>
                                   </object>
                                 </child>
@@ -1064,7 +1102,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Medium Details</property>
+                                    <property name="tooltip_text" translatable="yes">Small Details</property>
                                     <property name="label" translatable="yes">2:</property>
                                   </object>
                                 </child>
@@ -1086,7 +1124,7 @@ filtered frames.</property>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Coarse Details</property>
+                                    <property name="tooltip_text" translatable="yes">Medium Details</property>
                                     <property name="label" translatable="yes">3:</property>
                                   </object>
                                 </child>
@@ -1094,6 +1132,136 @@ filtered frames.</property>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="level4">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="tooltip_text" translatable="yes">Large Details</property>
+                                    <property name="label" translatable="yes">4:</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">8</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">0.0</property>
+                                <property name="adjustment">denoise4</property>
+                                <property name="digits">1</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">8</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">0.5</property>
+                                <property name="adjustment">radius4</property>
+                                <property name="digits">1</property>
+                                <property name="value">0.5</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="top_attach">8</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkScale">
+                                <property name="width_request">365</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="adjustment">sharpen4</property>
+                                <property name="round_digits">2</property>
+                                <property name="digits">2</property>
+                                <property name="value_pos">right</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">9</property>
+                                <property name="width">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="level5">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="tooltip_text" translatable="yes">Largest Details</property>
+                                    <property name="label" translatable="yes">5:</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">10</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">0.0</property>
+                                <property name="adjustment">denoise5</property>
+                                <property name="digits">1</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">10</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">0.5</property>
+                                <property name="adjustment">radius5</property>
+                                <property name="digits">1</property>
+                                <property name="value">0.5</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="top_attach">10</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkScale">
+                                <property name="width_request">365</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="adjustment">sharpen5</property>
+                                <property name="round_digits">2</property>
+                                <property name="digits">2</property>
+                                <property name="value_pos">right</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">11</property>
+                                <property name="width">3</property>
                               </packing>
                             </child>
                           </object>

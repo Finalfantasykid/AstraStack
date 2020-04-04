@@ -27,27 +27,37 @@ class Sharpen:
     def calculateCoefficients(self):
         (imgB, imgG, imgR) = cv2.split(self.stackedImage)
         
-        futureR = g.pool.submit(calculateChannelCoefficients, imgR, 3)
-        futureG = g.pool.submit(calculateChannelCoefficients, imgG, 3)
-        futureB = g.pool.submit(calculateChannelCoefficients, imgB, 3)
+        futureR = g.pool.submit(calculateChannelCoefficients, imgR, 5)
+        futureG = g.pool.submit(calculateChannelCoefficients, imgG, 5)
+        futureB = g.pool.submit(calculateChannelCoefficients, imgB, 5)
         
         self.cR = futureR.result()
         self.cG = futureG.result()
         self.cB = futureB.result()
         
     def sharpenLayers(self):
-        gParam = {'level1': g.level1,
-                  'level2': g.level2,
-                  'level3': g.level3,
-                  'sharpen1': g.sharpen1,
-                  'sharpen2': g.sharpen2,
-                  'sharpen3': g.sharpen3,
-                  'radius1': g.radius1,
-                  'radius2': g.radius2,
-                  'radius3': g.radius3,
-                  'denoise1': g.denoise1,
-                  'denoise2': g.denoise2,
-                  'denoise3': g.denoise3}
+        gParam = {
+            'level' : [g.level1, 
+                       g.level2,
+                       g.level3,
+                       g.level4,
+                       g.level5],
+            'sharpen': [g.sharpen1,
+                        g.sharpen2,
+                        g.sharpen3,
+                        g.sharpen4,
+                        g.sharpen5],
+            'radius': [g.radius1,
+                       g.radius2,
+                       g.radius3,
+                       g.radius4,
+                       g.radius5],
+            'denoise': [g.denoise1,
+                        g.denoise2,
+                        g.denoise3,
+                        g.denoise4,
+                        g.denoise5]
+        }
                   
         futureR = g.pool.submit(sharpenChannelLayers, self.cR, gParam)
         futureG = g.pool.submit(sharpenChannelLayers, self.cG, gParam)
@@ -80,36 +90,18 @@ def calculateChannelCoefficients(img, level):
     return list(swt2(img, 'haar', level=level))
     
 def sharpenChannelLayers(c, g):
-    if(g['level3']):
-        if(g['sharpen3'] > 0):
-            unsharp(c[0][1][0], g['radius3'], g['sharpen3']*100)
-            unsharp(c[0][1][1], g['radius3'], g['sharpen3']*100)
-            unsharp(c[0][1][2], g['radius3'], g['sharpen3']*100)
-        if(g['denoise3'] > 0):
-            unsharp(c[0][1][0], g['denoise3'], -1)
-            unsharp(c[0][1][1], g['denoise3'], -1)
-            unsharp(c[0][1][2], g['denoise3'], -1)
-    
-    if(g['level2']):
-        if(g['sharpen2'] > 0):
-            unsharp(c[1][1][0], g['radius2'], g['sharpen2']*100)
-            unsharp(c[1][1][1], g['radius2'], g['sharpen2']*100)
-            unsharp(c[1][1][2], g['radius2'], g['sharpen2']*100)
-        if(g['denoise2'] > 0):
-            unsharp(c[1][1][0], g['denoise2'], -1)
-            unsharp(c[1][1][1], g['denoise2'], -1)
-            unsharp(c[1][1][2], g['denoise2'], -1)
-    
-    if(g['level1']):
-        if(g['sharpen1'] > 0):
-            unsharp(c[2][1][0], g['radius1'], g['sharpen1']*100)
-            unsharp(c[2][1][1], g['radius1'], g['sharpen1']*100)
-            unsharp(c[2][1][2], g['radius1'], g['sharpen1']*100)
-
-        if(g['denoise1'] > 0):
-            unsharp(c[2][1][0], g['denoise1'], -1)
-            unsharp(c[2][1][1], g['denoise1'], -1)
-            unsharp(c[2][1][2], g['denoise1'], -1)
+    # Go through each wavelet layer and apply sharpening
+    for i in range(0, len(c)):
+        level = (len(c) - i - 1)
+        if(g['level'][level]):
+            if(g['sharpen'][level] > 0):
+                unsharp(c[i][1][0], g['radius'][level], g['sharpen'][level]*100)
+                unsharp(c[i][1][1], g['radius'][level], g['sharpen'][level]*100)
+                unsharp(c[i][1][2], g['radius'][level], g['sharpen'][level]*100)
+            if(g['denoise'][level] > 0):
+                unsharp(c[i][1][0], g['denoise'][level], -1)
+                unsharp(c[i][1][1], g['denoise'][level], -1)
+                unsharp(c[i][1][2], g['denoise'][level], -1)
     
     # reconstruction
     img=iswt2(c, 'haar');
