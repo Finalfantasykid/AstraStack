@@ -279,7 +279,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="sidePanel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -291,7 +291,7 @@
                     <property name="margin_right">5</property>
                     <signal name="switch-page" handler="changeTab" swapped="no"/>
                     <child>
-                      <object class="GtkGrid">
+                      <object class="GtkGrid" id="loadTab">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
@@ -354,7 +354,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="alignTab">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
@@ -620,7 +620,7 @@ The 4 types of transformation are described below:
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton">
+                              <object class="GtkButton" id="alignButton">
                                 <property name="label" translatable="yes">Align</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -657,7 +657,7 @@ The 4 types of transformation are described below:
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="stackTab">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
@@ -866,7 +866,7 @@ filtered frames.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="processTab">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>

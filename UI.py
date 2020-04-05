@@ -47,6 +47,10 @@ class UI:
         self.limit = self.builder.get_object("limit")
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
+        
+        self.builder.get_object("alignTab").set_sensitive(False)
+        self.builder.get_object("stackTab").set_sensitive(False)
+        self.builder.get_object("processTab").set_sensitive(False)
 
         self.cpus.set_upper(cpu_count())
         self.cpus.set_value(math.ceil(cpu_count()/2))
@@ -85,6 +89,13 @@ class UI:
         response = errorDialog.run()
         errorDialog.hide()
         
+    # Disabled inputs
+    def disableUI(self):
+        self.builder.get_object("sidePanel").set_sensitive(False)
+        
+    def enableUI(self):
+        self.builder.get_object("sidePanel").set_sensitive(True)
+        
     # Sets the number of threads to use
     def setThreads(self, *args):
         g.nThreads = int(self.cpus.get_value())
@@ -99,6 +110,7 @@ class UI:
             self.video = Video()
             thread = Thread(target=self.video.run, args=())
             thread.start()
+            self.disableUI()
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
@@ -110,7 +122,7 @@ class UI:
             try:
                 cv2.imwrite(fileName, self.sharpen.finalImage)
             except: # Save Failed
-                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")     
+                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
         
     # Called when the video is finished loading
     def finishedVideo(self):
@@ -125,6 +137,11 @@ class UI:
             self.setDriftPoint()
             self.setLimit()
             self.setBlendMode()
+            self.enableUI()
+            self.builder.get_object("alignTab").set_sensitive(True)
+            self.builder.get_object("stackTab").set_sensitive(False)
+            self.builder.get_object("processTab").set_sensitive(False)
+            self.builder.get_object("alignButton").set_sensitive(False)
         GLib.idle_add(update)
         
     def changeTab(self, notebook, page, page_num, user_data=None):
@@ -157,6 +174,7 @@ class UI:
     def setReference(self, *args):
         g.reference = str(int(self.frameSlider.get_value()))
         self.builder.get_object("referenceLabel").set_text(g.reference)
+        self.builder.get_object("alignButton").set_sensitive(True)
         
     # Updates the progress bar
     def setProgress(self, i=0, total=0, text=""):
@@ -230,6 +248,7 @@ class UI:
         self.align = Align(self.video.frames)
         thread = Thread(target=self.align.run, args=())
         thread.start()
+        self.disableUI()
         
     # Called when the Alignment is complete
     def finishedAlign(self):
@@ -238,6 +257,10 @@ class UI:
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
             self.setDriftPoint()
+            self.enableUI()
+            self.builder.get_object("alignTab").set_sensitive(True)
+            self.builder.get_object("stackTab").set_sensitive(True)
+            self.builder.get_object("processTab").set_sensitive(False)
         GLib.idle_add(update)
         
     # Sets the number of frames to use in the Stack
@@ -256,12 +279,18 @@ class UI:
         self.stack = Stack(self.align.similarities)
         thread = Thread(target=self.stack.run, args=())
         thread.start()
+        self.disableUI()
         
     # Called when the stack is complete
     def finishedStack(self):
         def update():
             self.sharpen = Sharpen(g.tmp + "stacked.png")
             self.tabs.next_page()
+            self.frame.set_from_file(g.tmp + "stacked.png")
+            self.enableUI()
+            self.builder.get_object("alignTab").set_sensitive(True)
+            self.builder.get_object("stackTab").set_sensitive(True)
+            self.builder.get_object("processTab").set_sensitive(True)
         GLib.idle_add(update)
         
     # Sharpens the final Stacked image
