@@ -32,29 +32,14 @@ class Align:
             dx = g.driftP2[0] - g.driftP1[0]
             dy = g.driftP2[1] - g.driftP1[1]
             
-            i = 0
-            for frame in self.frames:
-                image = cv2.imread(frame,1)
-                fdx = dx*i/len(self.frames)
-                fdy = dy*i/len(self.frames)
-                
-                if(dx > 0):
-                    fdx = dx - fdx
-                if(dy > 0):
-                    fdy = dy - fdy
-                
-                fdx1 = abs(dx - fdx)
-                fdy1 = abs(dy - fdy)
-                    
-                fdx = abs(fdx)
-                fdy = abs(fdy)
-                
-                h, w = image.shape[:2]
-                image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
-                
-                cv2.imwrite(frame, image)
-                i += 1
-                g.ui.childConn.send("Drifting Frames")
+            futures = []
+            for i in range(0, g.nThreads):
+                nFrames = math.ceil(len(self.frames)/g.nThreads)
+                frames = self.frames[i*nFrames:(i+1)*nFrames]
+                futures.append(g.pool.submit(drift, frames, len(self.frames), i*nFrames, dx, dy, g.ui.childConn))
+
+            for i in range(0, g.nThreads):
+                futures[i].result()
     
         # Aligning
         futures = []
@@ -109,6 +94,33 @@ class Align:
         g.ui.setProgress()
         g.ui.finishedAlign()
         g.ui.childConn.send("stop")
+        
+# Multiprocess function to drift frames
+def drift(frames, totalFrames, startFrame, dx, dy, conn):
+    i = startFrame
+    for frame in frames:
+        image = cv2.imread(frame,1)
+        fdx = dx*i/totalFrames
+        fdy = dy*i/totalFrames
+        
+        if(dx > 0):
+            fdx = dx - fdx
+        if(dy > 0):
+            fdy = dy - fdy
+        
+        fdx1 = abs(dx - fdx)
+        fdy1 = abs(dy - fdy)
+            
+        fdx = abs(fdx)
+        fdy = abs(fdy)
+        
+        h, w = image.shape[:2]
+        image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
+        
+        cv2.imwrite(frame, image)
+        i += 1
+        conn.send("Drifting Frames")
+    
         
 # Multiprocess function to calculation the transform matricies of each image 
 def align(frames, reference, transformation, conn):
