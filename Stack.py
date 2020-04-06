@@ -31,10 +31,12 @@ class Stack:
                 futures.append(g.pool.submit(blendAverage, frames, g.ui.childConn))
             
             for i in range(0, g.nThreads):
-                if stackedImage is None:
-                    stackedImage = futures[i].result()
-                else:
-                    stackedImage += futures[i].result()
+                result = futures[i].result()
+                if(result is not None):
+                    if stackedImage is None:
+                        stackedImage = result
+                    else:
+                        stackedImage += result
 
             stackedImage /= g.limit
             stackedImage = (stackedImage*255).astype(np.uint8)
