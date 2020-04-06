@@ -28,7 +28,7 @@ class Video:
         
         futures = []
         for t in range(0, g.nThreads):
-            futures.append(g.pool.submit(loadFrames, g.file, t*countPerThread, countPerThread))
+            futures.append(g.pool.submit(loadFrames, g.file, t*countPerThread, countPerThread, g.ui.childConn))
         for t in range(0, g.nThreads):
             self.frames += futures[t].result()
 
@@ -37,7 +37,7 @@ class Video:
         g.ui.childConn.send("stop")
         
 # Multiprocess function to load frames
-def loadFrames(file, start, count):
+def loadFrames(file, start, count, conn):
     vidcap = cv2.VideoCapture(file)
     vidcap.set(cv2.CAP_PROP_POS_FRAMES, start)
     frames = []
@@ -46,6 +46,6 @@ def loadFrames(file, start, count):
         if(success):
             fileName = g.tmp + "frames/%d.png" % (start + i)
             cv2.imwrite(fileName, image)
-            g.ui.childConn.send("Loading Frames")
+            conn.send("Loading Frames")
             frames.append(fileName)
     return frames
