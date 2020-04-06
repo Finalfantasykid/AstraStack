@@ -1173,6 +1173,7 @@ filtered frames.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="margin_left">5</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius4</property>
                                 <property name="digits">1</property>
@@ -1238,6 +1239,7 @@ filtered frames.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="margin_left">5</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius5</property>
                                 <property name="digits">1</property>
