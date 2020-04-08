@@ -103,6 +103,7 @@ class UI:
     # Opens the file chooser to open load a file
     def openFileDialog(self, *args):
         openDialog = self.builder.get_object("openDialog")
+        openDialog.set_current_folder(path.expanduser("~"))
         response = openDialog.run()
         openDialog.hide()
         if(response == Gtk.ResponseType.OK):
@@ -115,6 +116,7 @@ class UI:
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
         saveDialog = self.builder.get_object("saveDialog")
+        saveDialog.set_current_folder(path.expanduser("~"))
         response = saveDialog.run()
         saveDialog.hide()
         if(response == Gtk.ResponseType.OK):
