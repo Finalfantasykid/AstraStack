@@ -38,6 +38,8 @@ class UI:
         self.builder.add_from_file("ui/ui.glade")
         
         self.window = self.builder.get_object("mainWindow")
+        self.saveDialog = self.builder.get_object("saveDialog")
+        self.openDialog = self.builder.get_object("openDialog")
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
         self.progress = self.builder.get_object("progress")
@@ -55,7 +57,7 @@ class UI:
         self.cpus.set_upper(cpu_count())
         self.cpus.set_value(math.ceil(cpu_count()/2))
         g.pool = ProcessPoolExecutor(max_workers=cpu_count())
-        
+
         self.processThread = None
         
         self.builder.connect_signals(self)
@@ -89,6 +91,12 @@ class UI:
         response = errorDialog.run()
         errorDialog.hide()
         
+    def showReplaceDialog(self):
+        replaceDialog = self.builder.get_object("replaceDialog")
+        response = replaceDialog.run()
+        replaceDialog.hide()
+        return response
+        
     # Disabled inputs
     def disableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(False)
@@ -102,12 +110,11 @@ class UI:
     
     # Opens the file chooser to open load a file
     def openFileDialog(self, *args):
-        openDialog = self.builder.get_object("openDialog")
-        openDialog.set_current_folder(path.expanduser("~"))
-        response = openDialog.run()
-        openDialog.hide()
+        self.openDialog.set_current_folder(path.expanduser("~"))
+        response = self.openDialog.run()
+        self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
-            g.file = openDialog.get_filename()
+            g.file = self.openDialog.get_filename()
             self.video = Video()
             thread = Thread(target=self.video.run, args=())
             thread.start()
@@ -115,16 +122,25 @@ class UI:
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
-        saveDialog = self.builder.get_object("saveDialog")
-        saveDialog.set_current_folder(path.expanduser("~"))
-        response = saveDialog.run()
-        saveDialog.hide()
-        if(response == Gtk.ResponseType.OK):
-            fileName = saveDialog.get_filename()
+        def saveFile(fileName):
             try:
                 cv2.imwrite(fileName, self.sharpen.finalImage)
             except: # Save Failed
                 self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
+        if(not self.saveDialog.is_visible()):
+            self.saveDialog.set_current_folder(path.expanduser("~"))
+        response = self.saveDialog.run()
+        if(response == Gtk.ResponseType.OK):
+            fileName = self.saveDialog.get_filename()
+            if(path.isfile(fileName)):
+                replaceResponse = self.showReplaceDialog()
+                if(replaceResponse == Gtk.ResponseType.OK):
+                    saveFile(fileName)
+                else:
+                    self.saveFileDialog()
+            else:
+                saveFile(fileName)
+        self.saveDialog.hide()
         
     # Called when the video is finished loading
     def finishedVideo(self):
