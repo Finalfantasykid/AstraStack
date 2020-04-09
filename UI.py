@@ -103,8 +103,10 @@ class UI:
         g.nThreads = int(self.cpus.get_value())
     
     # Opens the file chooser to open load a file
-    def openFileDialog(self, *args):
+    def openVideo(self, *args):
         self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_select_multiple(False)
+        self.openDialog.set_filter(self.builder.get_object("videoFilter"))
         response = self.openDialog.run()
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
@@ -113,6 +115,46 @@ class UI:
             thread = Thread(target=self.video.run, args=())
             thread.start()
             self.disableUI()
+            
+    # Opens the file chooser to open load a file
+    def openImageSequence(self, *args):
+        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_select_multiple(True)
+        self.openDialog.set_filter(self.builder.get_object("imageFilter"))
+        response = self.openDialog.run()
+        self.openDialog.hide()
+        if(response == Gtk.ResponseType.OK):
+            g.file = self.openDialog.get_filenames()
+            self.video = Video()
+            thread = Thread(target=self.video.run, args=())
+            thread.start()
+            self.disableUI()
+            
+    # Opens the file chooser to open load a file
+    def openImage(self, *args):
+        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_select_multiple(False)
+        self.openDialog.set_filter(self.builder.get_object("imageFilter"))
+        response = self.openDialog.run()
+        self.openDialog.hide()
+        if(response == Gtk.ResponseType.OK):
+            self.disableUI()
+            g.file = self.openDialog.get_filename()
+            try:
+                self.video = Video()
+                self.video.mkdirs()
+                cv2.imwrite(g.tmp + "stacked.png", cv2.imread(g.file))
+                self.sharpen = Sharpen(g.tmp + "stacked.png")
+                self.builder.get_object("alignTab").set_sensitive(False)
+                self.builder.get_object("stackTab").set_sensitive(False)
+                self.builder.get_object("processTab").set_sensitive(True)
+                self.tabs.set_current_page(UI.SHARPEN_TAB)
+                self.frame.set_from_file(g.tmp + "stacked.png")
+            except: # Open Failed
+                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
+            self.enableUI()
+            
+            
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):

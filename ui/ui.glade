@@ -41,76 +41,13 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkFileFilter" id="filefilter1">
-    <mime-types>
-      <mime-type>video/*</mime-type>
-      <mime-type>video/quicktime</mime-type>
-      <mime-type>video/x-msvideo</mime-type>
-      <mime-type>video/mp4</mime-type>
-      <mime-type>video/x-ms-wmv</mime-type>
-    </mime-types>
+  <object class="GtkAdjustment" id="frameSlider">
+    <property name="upper">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="updateImage" swapped="no"/>
   </object>
-  <object class="GtkFileChooserDialog" id="openDialog">
-    <property name="can_focus">False</property>
-    <property name="modal">True</property>
-    <property name="type_hint">dialog</property>
-    <property name="filter">filefilter1</property>
-    <child>
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label" translatable="yes">Open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">button1</action-widget>
-      <action-widget response="-5">button2</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkFileFilter" id="filefilter2">
+  <object class="GtkFileFilter" id="imageFilter">
     <mime-types>
       <mime-type>image/*</mime-type>
       <mime-type>image/png</mime-type>
@@ -122,7 +59,7 @@
     <property name="type_hint">dialog</property>
     <property name="action">save</property>
     <property name="do_overwrite_confirmation">True</property>
-    <property name="filter">filefilter2</property>
+    <property name="filter">imageFilter</property>
     <child>
       <placeholder/>
     </child>
@@ -178,12 +115,6 @@
       <action-widget response="-5">button4</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkAdjustment" id="frameSlider">
-    <property name="upper">1</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="updateImage" swapped="no"/>
-  </object>
   <object class="GtkAdjustment" id="limit">
     <property name="lower">1</property>
     <property name="upper">1</property>
@@ -191,6 +122,65 @@
     <property name="page_increment">10</property>
     <signal name="changed" handler="setLimit" swapped="no"/>
     <signal name="value-changed" handler="setLimit" swapped="no"/>
+  </object>
+  <object class="GtkFileChooserDialog" id="openDialog">
+    <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label" translatable="yes">Open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button1</action-widget>
+      <action-widget response="-5">button2</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkAdjustment" id="radius1">
     <property name="lower">0.5</property>
@@ -303,11 +293,12 @@
                         <property name="column_homogeneous">True</property>
                         <child>
                           <object class="GtkButton" id="openButton">
-                            <property name="label" translatable="yes">Open FIle</property>
+                            <property name="label" translatable="yes">Open Video</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="openFileDialog" swapped="no"/>
+                            <property name="margin_bottom">10</property>
+                            <signal name="clicked" handler="openVideo" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
@@ -319,7 +310,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Load</property>
+                            <property name="label" translatable="yes">Video</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
                             </attributes>
@@ -334,11 +325,94 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Choose a video file to upload</property>
+                            <property name="label" translatable="yes">Choose a video file to stack</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">1</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Image Sequence</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">3</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Select multiple images to stack</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">4</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="openButton1">
+                            <property name="label" translatable="yes">Open Image Sequence</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="margin_bottom">10</property>
+                            <signal name="clicked" handler="openImageSequence" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">5</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Image</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">6</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Select a single image to process</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">7</property>
+                            <property name="width">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="openButton2">
+                            <property name="label" translatable="yes">Open Image</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="openImage" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">8</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -1491,5 +1565,14 @@ filtered frames.</property>
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkFileFilter" id="videoFilter">
+    <mime-types>
+      <mime-type>video/*</mime-type>
+      <mime-type>video/quicktime</mime-type>
+      <mime-type>video/x-msvideo</mime-type>
+      <mime-type>video/mp4</mime-type>
+      <mime-type>video/x-ms-wmv</mime-type>
+    </mime-types>
   </object>
 </interface>

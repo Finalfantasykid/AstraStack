@@ -51,7 +51,8 @@ class Align:
         for i in range(0, g.nThreads):
             self.tmats += futures[i].result()
         
-        for frame in self.frames:
+        # Check how much we need to crop the frames by getting the max and min translations
+        for i, frame in enumerate(self.frames):
             M = self.tmats[i]
             
             if(M[0][2] < 0):
