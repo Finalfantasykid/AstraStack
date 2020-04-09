@@ -91,12 +91,6 @@ class UI:
         response = errorDialog.run()
         errorDialog.hide()
         
-    def showReplaceDialog(self):
-        replaceDialog = self.builder.get_object("replaceDialog")
-        response = replaceDialog.run()
-        replaceDialog.hide()
-        return response
-        
     # Disabled inputs
     def disableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(False)
@@ -122,24 +116,14 @@ class UI:
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
-        def saveFile(fileName):
+        self.saveDialog.set_current_folder(path.expanduser("~"))
+        response = self.saveDialog.run()
+        if(response == Gtk.ResponseType.OK):
+            fileName = self.saveDialog.get_filename()
             try:
                 cv2.imwrite(fileName, self.sharpen.finalImage)
             except: # Save Failed
                 self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
-        if(not self.saveDialog.is_visible()):
-            self.saveDialog.set_current_folder(path.expanduser("~"))
-        response = self.saveDialog.run()
-        if(response == Gtk.ResponseType.OK):
-            fileName = self.saveDialog.get_filename()
-            if(path.isfile(fileName)):
-                replaceResponse = self.showReplaceDialog()
-                if(replaceResponse == Gtk.ResponseType.OK):
-                    saveFile(fileName)
-                else:
-                    self.saveFileDialog()
-            else:
-                saveFile(fileName)
         self.saveDialog.hide()
         
     # Called when the video is finished loading
