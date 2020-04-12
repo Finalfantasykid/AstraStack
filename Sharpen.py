@@ -78,13 +78,13 @@ def calculateChannelCoefficients(img, level):
     
     hR = (h % 2**level)
     wR = (w % 2**level)
-    
-    tmp = np.zeros((h+(2**level - hR), w+(2**level - wR)))
-    tmp[:h,:w] = img
-    img = tmp
 
-    img =  np.float32(img)   
+    img = cv2.copyMakeBorder(img, 0, (2**level - hR), 0, (2**level - wR), cv2.BORDER_REFLECT)
+
+    img =  np.float32(img) 
     img /= 255;
+    
+    cv2.imwrite("test.png", (img*255).astype(np.uint8))
     
     # compute coefficients
     return list(swt2(img, 'haar', level=level))

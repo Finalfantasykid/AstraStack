@@ -154,8 +154,6 @@ class UI:
                 self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
             self.enableUI()
             
-            
-            
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
         self.saveDialog.set_current_folder(path.expanduser("~"))
