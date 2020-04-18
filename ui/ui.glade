@@ -12,32 +12,32 @@
     <signal name="value-changed" handler="setThreads" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise1">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.049999999776482583</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise2">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.049999999776482583</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise3">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.049999999776482583</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise4">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.049999999776482583</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise5">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.050000000000000003</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -183,38 +183,30 @@
     </action-widgets>
   </object>
   <object class="GtkAdjustment" id="radius1">
-    <property name="lower">0.5</property>
     <property name="upper">100</property>
-    <property name="value">0.5</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius2">
-    <property name="lower">0.5</property>
     <property name="upper">100</property>
-    <property name="value">0.5</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius3">
-    <property name="lower">0.5</property>
     <property name="upper">100</property>
-    <property name="value">0.5</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius4">
-    <property name="lower">0.5</property>
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius5">
-    <property name="lower">0.5</property>
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
@@ -222,31 +214,31 @@
   </object>
   <object class="GtkAdjustment" id="sharpen1">
     <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen2">
     <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen3">
     <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen4">
     <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen5">
     <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -1038,7 +1030,7 @@ filtered frames.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">denoise3</property>
-                                <property name="digits">1</property>
+                                <property name="digits">2</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1053,7 +1045,6 @@ filtered frames.</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius3</property>
                                 <property name="digits">1</property>
-                                <property name="value">0.5</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -1066,7 +1057,7 @@ filtered frames.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">denoise2</property>
-                                <property name="digits">1</property>
+                                <property name="digits">2</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1081,7 +1072,6 @@ filtered frames.</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius2</property>
                                 <property name="digits">1</property>
-                                <property name="value">0.5</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -1094,7 +1084,7 @@ filtered frames.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">denoise1</property>
-                                <property name="digits">1</property>
+                                <property name="digits">2</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1108,7 +1098,6 @@ filtered frames.</property>
                                 <property name="margin_left">5</property>
                                 <property name="adjustment">radius1</property>
                                 <property name="digits">1</property>
-                                <property name="value">0.5</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -1237,7 +1226,7 @@ filtered frames.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0.0</property>
                                 <property name="adjustment">denoise4</property>
-                                <property name="digits">1</property>
+                                <property name="digits">2</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1252,7 +1241,6 @@ filtered frames.</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius4</property>
                                 <property name="digits">1</property>
-                                <property name="value">0.5</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -1303,7 +1291,7 @@ filtered frames.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0.0</property>
                                 <property name="adjustment">denoise5</property>
-                                <property name="digits">1</property>
+                                <property name="digits">2</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1318,7 +1306,6 @@ filtered frames.</property>
                                 <property name="text" translatable="yes">0.5</property>
                                 <property name="adjustment">radius5</property>
                                 <property name="digits">1</property>
-                                <property name="value">0.5</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>

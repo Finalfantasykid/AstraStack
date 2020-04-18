@@ -82,9 +82,7 @@ def calculateChannelCoefficients(img, level):
     img = cv2.copyMakeBorder(img, 0, (2**level - hR), 0, (2**level - wR), cv2.BORDER_REFLECT)
 
     img =  np.float32(img) 
-    img /= 255;
-    
-    cv2.imwrite("test.png", (img*255).astype(np.uint8))
+    img /= 255
     
     # compute coefficients
     return list(swt2(img, 'haar', level=level))
@@ -94,18 +92,22 @@ def sharpenChannelLayers(c, g):
     for i in range(0, len(c)):
         level = (len(c) - i - 1)
         if(g['level'][level]):
-            if(g['sharpen'][level] > 0):
-                unsharp(c[i][1][0], g['radius'][level], g['sharpen'][level]*100)
-                unsharp(c[i][1][1], g['radius'][level], g['sharpen'][level]*100)
-                unsharp(c[i][1][2], g['radius'][level], g['sharpen'][level]*100)
+            if(g['radius'][level] > 0):
+                unsharp(c[i][1][0], g['radius'][level], 25)
+                unsharp(c[i][1][1], g['radius'][level], 25)
+                unsharp(c[i][1][2], g['radius'][level], 25)
             if(g['denoise'][level] > 0):
-                unsharp(c[i][1][0], g['denoise'][level], -1)
-                unsharp(c[i][1][1], g['denoise'][level], -1)
-                unsharp(c[i][1][2], g['denoise'][level], -1)
+                unsharp(c[i][1][0], g['denoise'][level]*10, -1)
+                unsharp(c[i][1][1], g['denoise'][level]*10, -1)
+                unsharp(c[i][1][2], g['denoise'][level]*10, -1)
+            if(g['sharpen'][level] > 0):
+                cv2.add(c[i][1][0], c[i][1][0]*g['sharpen'][level]*25, c[i][1][0])
+                cv2.add(c[i][1][1], c[i][1][1]*g['sharpen'][level]*25, c[i][1][1])
+                cv2.add(c[i][1][2], c[i][1][2]*g['sharpen'][level]*25, c[i][1][2])
     
     # reconstruction
-    img=iswt2(c, 'haar');
-    img *= 255;
+    img=iswt2(c, 'haar')
+    img *= 255
     img[img>255] = 255
     img[img<0] = 0
     return np.uint8(img)
