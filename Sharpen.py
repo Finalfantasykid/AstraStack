@@ -85,25 +85,25 @@ def calculateChannelCoefficients(img, level):
     img /= 255
     
     # compute coefficients
-    return list(swt2(img, 'haar', level=level))
+    return list(swt2(img, 'haar', level=level, trim_approx=True))
     
 def sharpenChannelLayers(c, g):
     # Go through each wavelet layer and apply sharpening
-    for i in range(0, len(c)):
+    for i in range(1, len(c)):
         level = (len(c) - i - 1)
         if(g['level'][level]):
             if(g['radius'][level] > 0):
-                unsharp(c[i][1][0], g['radius'][level], 1)
-                unsharp(c[i][1][1], g['radius'][level], 1)
-                unsharp(c[i][1][2], g['radius'][level], 1)
+                unsharp(c[i][0], g['radius'][level], 1)
+                unsharp(c[i][1], g['radius'][level], 1)
+                unsharp(c[i][2], g['radius'][level], 1)
             if(g['sharpen'][level] > 0):
-                cv2.add(c[i][1][0], c[i][1][0]*g['sharpen'][level]*50, c[i][1][0])
-                cv2.add(c[i][1][1], c[i][1][1]*g['sharpen'][level]*50, c[i][1][1])
-                cv2.add(c[i][1][2], c[i][1][2]*g['sharpen'][level]*50, c[i][1][2])
+                cv2.add(c[i][0], c[i][0]*g['sharpen'][level]*50, c[i][0])
+                cv2.add(c[i][1], c[i][1]*g['sharpen'][level]*50, c[i][1])
+                cv2.add(c[i][2], c[i][2]*g['sharpen'][level]*50, c[i][2])
             if(g['denoise'][level] > 0):
-                unsharp(c[i][1][0], g['denoise'][level]*10, -1)
-                unsharp(c[i][1][1], g['denoise'][level]*10, -1)
-                unsharp(c[i][1][2], g['denoise'][level]*10, -1)
+                unsharp(c[i][0], g['denoise'][level]*10, -1)
+                unsharp(c[i][1], g['denoise'][level]*10, -1)
+                unsharp(c[i][2], g['denoise'][level]*10, -1)
     
     # reconstruction
     img=iswt2(c, 'haar')
@@ -113,6 +113,5 @@ def sharpenChannelLayers(c, g):
     return np.uint8(img)
     
 def unsharp(image, radius, strength):
-    kSize = max(3, math.ceil(radius*3) + (math.ceil(radius*3)+1) % 2) # kernel size should be at least 3 times the radius
     blur = cv2.GaussianBlur(image, (0,0), radius)
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
