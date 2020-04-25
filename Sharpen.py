@@ -7,8 +7,13 @@ from Globals import g
 
 class Sharpen:
 
-    def __init__(self, stackedImage):
-        self.stackedImage = cv2.imread(stackedImage)
+    def __init__(self, stackedImage, isFile=False):
+        if(isFile):
+            # Single image provided
+            self.stackedImage = cv2.imread(stackedImage)
+        else:
+            # Use the higher bit depth version from the stacking process
+            self.stackedImage = stackedImage
         self.finalImage = None
         self.cR = None
         self.cG = None
@@ -81,7 +86,7 @@ def calculateChannelCoefficients(img, level):
 
     img = cv2.copyMakeBorder(img, 0, (2**level - hR), 0, (2**level - wR), cv2.BORDER_REFLECT)
 
-    img =  np.float32(img) 
+    img =  np.float32(img)
     img /= 255
     
     # compute coefficients

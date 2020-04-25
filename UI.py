@@ -144,7 +144,7 @@ class UI:
                 self.video = Video()
                 self.video.mkdirs()
                 cv2.imwrite(g.tmp + "stacked.png", cv2.imread(g.file))
-                self.sharpen = Sharpen(g.tmp + "stacked.png")
+                self.sharpen = Sharpen(g.tmp + "stacked.png", True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
                 self.builder.get_object("processTab").set_sensitive(True)
@@ -326,7 +326,7 @@ class UI:
     # Called when the stack is complete
     def finishedStack(self):
         def update():
-            self.sharpen = Sharpen(g.tmp + "stacked.png")
+            self.sharpen = Sharpen(self.stack.stackedImage)
             self.tabs.next_page()
             self.frame.set_from_file(g.tmp + "stacked.png")
             self.enableUI()
@@ -362,7 +362,10 @@ class UI:
         g.level5 = self.builder.get_object("level5").get_active()
         
         if(self.sharpen is None):
-            self.sharpen = Sharpen(g.tmp + "stacked.png")
+            if(self.stack is not None):
+                self.sharpen = Sharpen(self.stack.stackedImage)
+            else:
+                self.sharpen = Sharpen(g.tmp + "stacked.png", True)
         if(self.processThread != None and self.processThread.is_alive()):
             self.sharpen.processAgain = True
         else:

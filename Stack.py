@@ -12,6 +12,7 @@ class Stack:
         self.similarities = similarities
         self.count = 0
         self.total = 0
+        self.stackedImage = None
         
     def run(self):
         def progress(msg):
@@ -19,9 +20,10 @@ class Stack:
             g.ui.setProgress(self.count, self.total, msg)
         g.ui.createListener(progress)
         
-        stackedImage = None
+        self.stackedImage = None
         i = 0
         if(g.blendMode == Stack.AVERAGE):
+            # Average Blend Mode
             similarities = self.similarities[0:g.limit]
             self.total = g.limit
             futures = []
@@ -33,14 +35,14 @@ class Stack:
             for i in range(0, g.nThreads):
                 result = futures[i].result()
                 if(result is not None):
-                    if stackedImage is None:
-                        stackedImage = result
+                    if self.stackedImage is None:
+                        self.stackedImage = result
                     else:
-                        stackedImage += result
+                        self.stackedImage += result
 
-            stackedImage /= g.limit
-            stackedImage = (stackedImage*255).astype(np.uint8)
+            self.stackedImage /= g.limit
         elif(g.blendMode == Stack.MEDIAN):
+            # Median Blend Mode
             stacked = []
             for frame, diff in self.similarities:
                 if(i < g.limit):
@@ -52,17 +54,18 @@ class Stack:
                     break
                     
             stacked = np.array(stacked)
-            stackedImage = np.median(stacked, axis=0)
+            self.stackedImage = np.median(stacked, axis=0)
         
-        cv2.imwrite(g.tmp + "stacked.png",stackedImage)
+        cv2.imwrite(g.tmp + "stacked.png",self.stackedImage.astype(np.uint8))
         g.ui.setProgress()
         g.ui.finishedStack()
         g.ui.childConn.send("stop")
         
+# Multiprocess function which sums the given images
 def blendAverage(similarities, conn):
     stackedImage = None
     for frame, diff in similarities:
-        image = cv2.imread(frame,1).astype(np.float32) / 255
+        image = cv2.imread(frame,1).astype(np.float32)
         if stackedImage is None:
             stackedImage = image
         else:
