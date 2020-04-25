@@ -7,6 +7,8 @@ from Globals import g
 
 class Sharpen:
 
+    LEVEL = 5
+
     def __init__(self, stackedImage, isFile=False):
         if(isFile):
             # Single image provided
@@ -32,9 +34,9 @@ class Sharpen:
     def calculateCoefficients(self):
         (imgB, imgG, imgR) = cv2.split(self.stackedImage)
         
-        futureR = g.pool.submit(calculateChannelCoefficients, imgR, 5)
-        futureG = g.pool.submit(calculateChannelCoefficients, imgG, 5)
-        futureB = g.pool.submit(calculateChannelCoefficients, imgB, 5)
+        futureR = g.pool.submit(calculateChannelCoefficients, imgR)
+        futureG = g.pool.submit(calculateChannelCoefficients, imgG)
+        futureB = g.pool.submit(calculateChannelCoefficients, imgB)
         
         self.cR = futureR.result()
         self.cG = futureG.result()
@@ -72,25 +74,30 @@ class Sharpen:
         G = futureG.result()
         B = futureB.result()
         
+        
         h, w = self.finalImage.shape[:2]
         self.finalImage = cv2.merge([B, G, R])
         self.finalImage = self.finalImage[:h,:w]
         cv2.imwrite(g.tmp + "sharpened.png", self.finalImage)
         
-def calculateChannelCoefficients(img, level):
-    # Crop so that dimensions are multiples of 2**level
+def calculateChannelCoefficients(img):
+    # Pad the image so that there is a border large enough so that edge artifacts don't occur
+    padding = 2**(Sharpen.LEVEL)
+    img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_REFLECT)
+    
+    # Pad so that dimensions are multiples of 2**level
     h, w = img.shape[:2]
     
-    hR = (h % 2**level)
-    wR = (w % 2**level)
+    hR = (h % 2**Sharpen.LEVEL)
+    wR = (w % 2**Sharpen.LEVEL)
 
-    img = cv2.copyMakeBorder(img, 0, (2**level - hR), 0, (2**level - wR), cv2.BORDER_REFLECT)
+    img = cv2.copyMakeBorder(img, 0, (2**Sharpen.LEVEL - hR), 0, (2**Sharpen.LEVEL - wR), cv2.BORDER_REFLECT)
 
     img =  np.float32(img)
     img /= 255
     
     # compute coefficients
-    return list(swt2(img, 'haar', level=level, trim_approx=True))
+    return list(swt2(img, 'haar', level=Sharpen.LEVEL, trim_approx=True))
     
 def sharpenChannelLayers(c, g):
     # Go through each wavelet layer and apply sharpening
@@ -111,7 +118,9 @@ def sharpenChannelLayers(c, g):
                 unsharp(c[i][2], g['denoise'][level]*10, -1)
     
     # reconstruction
+    padding = 2**(Sharpen.LEVEL)
     img=iswt2(c, 'haar')
+    img = img[padding:,padding:]
     img *= 255
     img[img>255] = 255
     img[img<0] = 0
