@@ -123,6 +123,12 @@
     <signal name="changed" handler="setLimit" swapped="no"/>
     <signal name="value-changed" handler="setLimit" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="limitPercent">
+    <property name="upper">100</property>
+    <property name="value">50</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkFileChooserDialog" id="openDialog">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
@@ -759,7 +765,7 @@ The 4 types of transformation are described below:
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">The final stack only uses the best frames.  
-Specify the number of frames to stack.</property>
+Specify the number or percent of frames to stack.</property>
                                 <property name="xalign">0</property>
                                 <attributes>
                                   <attribute name="absolute-size" value="12000"/>
@@ -775,7 +781,21 @@ Specify the number of frames to stack.</property>
                               <object class="GtkSpinButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">1</property>
                                 <property name="adjustment">limit</property>
+                                <property name="value">1</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Best Frames</property>
+                                <property name="xalign">0</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -783,7 +803,29 @@ Specify the number of frames to stack.</property>
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Best Frames (%)</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">1</property>
+                                <property name="adjustment">limitPercent</property>
+                                <property name="value">1</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">3</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>

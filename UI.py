@@ -47,6 +47,7 @@ class UI:
         self.frameSlider = self.builder.get_object("frameSlider")
         self.transformation = self.builder.get_object("transformation")
         self.limit = self.builder.get_object("limit")
+        self.limitPercent = self.builder.get_object("limitPercent")
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
         
@@ -61,6 +62,9 @@ class UI:
         self.processThread = None
         
         self.builder.connect_signals(self)
+        
+        # Needed so it can be temporarily removed
+        self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent) 
         
         self.window.show_all()
         self.builder.get_object("blendGrid").hide() # Not overlly useful, might enable later
@@ -172,12 +176,14 @@ class UI:
             self.tabs.next_page()
             self.limit.set_upper(len(self.video.frames))
             self.limit.set_value(int(len(self.video.frames)/2))
+            self.limitPercent.set_value(round(self.limit.get_value()/len(self.video.frames)*100))
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
 
             self.setReference()
             self.setDriftPoint()
             self.setLimit()
+            self.setLimitPercent()
             self.setBlendMode()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
@@ -307,7 +313,15 @@ class UI:
         
     # Sets the number of frames to use in the Stack
     def setLimit(self, *args):
+        self.limitPercent.disconnect(self.limitPercentSignal)
         g.limit = int(self.limit.get_value())
+        self.limitPercent.set_value(round(g.limit/len(self.video.frames)*100))
+        self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent)
+        
+    # Sets the number of frames to use in the Stack
+    def setLimitPercent(self, *args):
+        limitPercent = self.limitPercent.get_value()/100
+        self.limit.set_value(round(limitPercent*len(self.video.frames)))
        
     # Sets the blend mode of the Stack (Average or Median)
     def setBlendMode(self, *args):
