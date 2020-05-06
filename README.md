@@ -22,7 +22,7 @@ $ pip install numpy
 $ pip install -r requirements.txt
 ```
 
-You may need to install some additional system packages, like some python development packages.
+You may need to install some additional system packages, ie: libcairo2-dev, pkg-config, python3-dev, libgirepository1.0-dev
 
 You can run the application with
 
@@ -37,6 +37,8 @@ In order to build the project for Linux, you will need to install pyinstaller us
 $ pip install pyinstaller
 $ ./build.sh
 ```
+
+The project can also be built in Windows using a mingw64 installation.  You can install the python packages via the pacman package manager that it comes with, as well as with pip.
 
 # References
 1. RegiStax - https://www.astronomie.be/registax/
