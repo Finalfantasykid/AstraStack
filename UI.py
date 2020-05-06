@@ -45,6 +45,7 @@ class UI:
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
         self.frameSlider = self.builder.get_object("frameSlider")
+        self.normalize = self.builder.get_object("normalize")
         self.transformation = self.builder.get_object("transformation")
         self.limit = self.builder.get_object("limit")
         self.limitPercent = self.builder.get_object("limitPercent")
@@ -69,6 +70,7 @@ class UI:
         self.window.show_all()
         self.builder.get_object("blendGrid").hide() # Not overlly useful, might enable later
         self.setProgress()
+        self.setNormalize()
         self.setTransformation()
         self.setThreads()
         
@@ -278,6 +280,10 @@ class UI:
             self.builder.get_object("driftPointLabel1").set_text(str(self.mousePosition))
         if(self.clickedDriftP2):
             self.builder.get_object("driftPointLabel2").set_text(str(self.mousePosition))
+    
+    # Sets whether or not to normalize the frames during alignment
+    def setNormalize(self, *args):
+        g.normalize = self.normalize.get_active()
     
     # Sets the type of transformation
     def setTransformation(self, *args):

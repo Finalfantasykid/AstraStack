@@ -693,6 +693,21 @@ The 4 types of transformation are described below:
                               </packing>
                             </child>
                             <child>
+                              <object class="GtkCheckButton" id="normalize">
+                                <property name="label" translatable="yes">Normalize frames during alignment</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="setNormalize" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                                <property name="width">2</property>
+                              </packing>
+                            </child>
+                            <child>
                               <object class="GtkButton" id="alignButton">
                                 <property name="label" translatable="yes">Align</property>
                                 <property name="visible">True</property>
@@ -702,7 +717,7 @@ The 4 types of transformation are described below:
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
+                                <property name="top_attach">2</property>
                                 <property name="width">2</property>
                               </packing>
                             </child>

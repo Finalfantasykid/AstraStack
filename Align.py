@@ -46,7 +46,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.ui.childConn))
+            futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, g.ui.childConn))
         
         for i in range(0, g.nThreads):
             self.tmats += futures[i].result()
@@ -85,7 +85,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(filter, frames, g.reference, g.ui.childConn))
+            futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, g.ui.childConn))
         
         for i in range(0, g.nThreads):
             self.similarities += futures[i].result()
@@ -124,17 +124,20 @@ def drift(frames, totalFrames, startFrame, dx, dy, conn):
     
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, reference, transformation, conn):
+def align(frames, reference, transformation, normalize, conn):
     ref = cv2.imread(g.tmp + "frames/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
     scaleFactor = min(1.0, (100/h))
     ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
+    if(normalize):
+        ref = cv2.normalize(ref, ref, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     for frame in frames:
         mov = cv2.imread(frame, cv2.IMREAD_GRAYSCALE)
         mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
-        
+        if(normalize):
+            mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         M = sr.register(mov, ref)
         M[0][2] /= scaleFactor # X
         M[1][2] /= scaleFactor # Y
@@ -157,12 +160,16 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
         conn.send("Transforming Frames")
     
 # Multiprocess function to find the best images (ones closest to the reference frame)
-def filter(frames, reference, conn):
+def filter(frames, reference, normalize, conn):
     similarities = []
     img1 = cv2.resize(cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
+    if(normalize):
+        img1 = cv2.normalize(img1, img1, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     a, a_norm = calculateNorms(img1)
     for frame in frames:
         img2 = cv2.resize(cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE), (64,64))
+        if(normalize):
+            img2 = cv2.normalize(img2, img2, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         b, b_norm = calculateNorms(img2)
         diff = np.dot(a / a_norm, b / b_norm)
         similarities.append((frame.replace("frames", "cache"), diff))
