@@ -75,6 +75,7 @@ class UI:
         self.setNormalize()
         self.setTransformation()
         self.setThreads()
+        g.reference = "0"
         
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
@@ -260,8 +261,10 @@ class UI:
         self.endFrame.set_lower(g.startFrame+1)
         self.frameSlider.set_lower(g.startFrame)
         self.frameSlider.set_value(max(g.startFrame, self.frameSlider.get_value()))
-        g.reference = str(int(self.frameSlider.get_value()))
-        self.builder.get_object("referenceLabel").set_text(g.reference)
+        if(int(g.startFrame) > int(g.reference)):
+            # Reference is outside of the range, fix it
+            g.reference = str(int(g.startFrame))
+            self.builder.get_object("referenceLabel").set_text(g.reference)
         
     # Sets the end frame for trimming
     def setEndFrame(self, *args):
@@ -269,8 +272,10 @@ class UI:
         self.startFrame.set_upper(g.endFrame-1)
         self.frameSlider.set_upper(g.endFrame)
         self.frameSlider.set_value(min(g.endFrame, self.frameSlider.get_value()))
-        g.reference = str(int(self.frameSlider.get_value()))
-        self.builder.get_object("referenceLabel").set_text(g.reference)
+        if(int(g.endFrame) < int(g.reference)):
+            # Reference is outside of the range, fix it
+            g.reference = str(int(g.endFrame))
+            self.builder.get_object("referenceLabel").set_text(g.reference)
         
     # Drift Point 1 Button Clicked
     def clickDriftP1(self, *args):
