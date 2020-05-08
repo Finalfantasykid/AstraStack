@@ -24,22 +24,20 @@ class Align:
         
         threads = []
         g.ui.createListener(progress)
-        self.total = len(self.frames)*3
+        self.total = len(self.frames)*4
         
         #Drifting
-        if(g.driftP1 != (0, 0) or g.driftP1 != (0, 0)):
-            self.total += len(self.frames)
-            dx = g.driftP2[0] - g.driftP1[0]
-            dy = g.driftP2[1] - g.driftP1[1]
-            
-            futures = []
-            for i in range(0, g.nThreads):
-                nFrames = math.ceil(len(self.frames)/g.nThreads)
-                frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(drift, frames, len(self.frames), i*nFrames, dx, dy, g.ui.childConn))
+        dx = g.driftP2[0] - g.driftP1[0]
+        dy = g.driftP2[1] - g.driftP1[1]
+        
+        futures = []
+        for i in range(0, g.nThreads):
+            nFrames = math.ceil(len(self.frames)/g.nThreads)
+            frames = self.frames[i*nFrames:(i+1)*nFrames]
+            futures.append(g.pool.submit(drift, frames, len(self.frames), i*nFrames, dx, dy, g.ui.childConn))
 
-            for i in range(0, g.nThreads):
-                futures[i].result()
+        for i in range(0, g.nThreads):
+            futures[i].result()
     
         # Aligning
         futures = []
@@ -101,31 +99,34 @@ def drift(frames, totalFrames, startFrame, dx, dy, conn):
     i = startFrame
     for frame in frames:
         image = cv2.imread(frame,1)
-        fdx = dx*i/totalFrames
-        fdy = dy*i/totalFrames
-        
-        if(dx > 0):
-            fdx = dx - fdx
-        if(dy > 0):
-            fdy = dy - fdy
-        
-        fdx1 = abs(dx - fdx)
-        fdy1 = abs(dy - fdy)
+        if(dx != 0 and dy != 0):
+            fdx = dx*i/totalFrames
+            fdy = dy*i/totalFrames
             
-        fdx = abs(fdx)
-        fdy = abs(fdy)
+            if(dx > 0):
+                fdx = dx - fdx
+            if(dy > 0):
+                fdy = dy - fdy
+            
+            fdx1 = abs(dx - fdx)
+            fdy1 = abs(dy - fdy)
+                
+            fdx = abs(fdx)
+            fdy = abs(fdy)
+            
+            h, w = image.shape[:2]
+            image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
         
-        h, w = image.shape[:2]
-        image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
-        
-        cv2.imwrite(frame, image)
+        cv2.imwrite(frame.replace("frames", "cache"), image)
         i += 1
-        conn.send("Drifting Frames")
-    
+        if(dx != 0 and dy != 0):
+            conn.send("Drifting Frames")
+        else:
+            conn.send("Copying Frames")
         
 # Multiprocess function to calculation the transform matricies of each image 
 def align(frames, reference, transformation, normalize, conn):
-    ref = cv2.imread(g.tmp + "frames/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+    ref = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
@@ -134,7 +135,7 @@ def align(frames, reference, transformation, normalize, conn):
     if(normalize):
         ref = cv2.normalize(ref, ref, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     for frame in frames:
-        mov = cv2.imread(frame, cv2.IMREAD_GRAYSCALE)
+        mov = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
         mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
         if(normalize):
             mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
@@ -150,7 +151,7 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
     i = 0
     for frame in frames:
         M = tmats[i]
-        image = cv2.imread(frame,1).astype(np.float32) / 255
+        image = cv2.imread(frame.replace("frames", "cache"),1).astype(np.float32) / 255
         w, h, _ = image.shape
         image = cv2.warpPerspective(image, M, (h, w))
         h, w = image.shape[:2]

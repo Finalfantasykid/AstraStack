@@ -45,6 +45,8 @@ class UI:
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
         self.frameSlider = self.builder.get_object("frameSlider")
+        self.startFrame = self.builder.get_object("startFrame")
+        self.endFrame = self.builder.get_object("endFrame")
         self.normalize = self.builder.get_object("normalize")
         self.transformation = self.builder.get_object("transformation")
         self.limit = self.builder.get_object("limit")
@@ -179,10 +181,21 @@ class UI:
             self.limit.set_upper(len(self.video.frames))
             self.limit.set_value(int(len(self.video.frames)/2))
             self.limitPercent.set_value(round(self.limit.get_value()/len(self.video.frames)*100))
+            
+            self.startFrame.set_lower(0)
+            self.startFrame.set_upper(len(self.video.frames)-1)
+            self.startFrame.set_value(0)
+            
+            self.endFrame.set_upper(len(self.video.frames)-1)
+            self.endFrame.set_lower(0)
+            self.endFrame.set_value(len(self.video.frames)-1)
+            
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
 
             self.setReference()
+            self.setStartFrame()
+            self.setEndFrame()
             self.setDriftPoint()
             self.setLimit()
             self.setLimitPercent()
@@ -199,11 +212,14 @@ class UI:
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             self.frameSlider.set_value(0)
             self.frameSlider.set_upper(len(self.video.frames)-1)
+            self.setStartFrame()
+            self.setEndFrame()
             frameScale.show()
             self.frame.set_from_file(self.video.frames[int(self.frameSlider.get_value())])
         elif(page_num == UI.STACK_TAB):
+            self.frameSlider.set_lower(0)
+            self.frameSlider.set_upper(len(self.align.similarities)-1)
             self.frameSlider.set_value(0)
-            self.frameSlider.set_upper(len(self.video.frames)-1)
             frameScale.show()
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
         elif(page_num == UI.SHARPEN_TAB):
@@ -238,12 +254,30 @@ class UI:
                 self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
         GLib.idle_add(update)
         
+    # Sets the start frame for trimming
+    def setStartFrame(self, *args):
+        g.startFrame = int(self.startFrame.get_value())
+        self.endFrame.set_lower(g.startFrame+1)
+        self.frameSlider.set_lower(g.startFrame)
+        self.frameSlider.set_value(max(g.startFrame, self.frameSlider.get_value()))
+        g.reference = str(int(self.frameSlider.get_value()))
+        self.builder.get_object("referenceLabel").set_text(g.reference)
+        
+    # Sets the end frame for trimming
+    def setEndFrame(self, *args):
+        g.endFrame = int(self.endFrame.get_value())
+        self.startFrame.set_upper(g.endFrame-1)
+        self.frameSlider.set_upper(g.endFrame)
+        self.frameSlider.set_value(min(g.endFrame, self.frameSlider.get_value()))
+        g.reference = str(int(self.frameSlider.get_value()))
+        self.builder.get_object("referenceLabel").set_text(g.reference)
+        
     # Drift Point 1 Button Clicked
     def clickDriftP1(self, *args):
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
         self.setDriftPoint()
-        self.frameSlider.set_value(0)
+        self.frameSlider.set_value(g.startFrame)
         self.clickedDriftP1 = True
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
         
@@ -252,7 +286,7 @@ class UI:
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
         self.setDriftPoint()
-        self.frameSlider.set_value(len(self.video.frames)-1)
+        self.frameSlider.set_value(g.endFrame)
         self.clickedDriftP2 = True
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
     
@@ -299,7 +333,7 @@ class UI:
             
     # Runs the Alignment step
     def clickAlign(self, *args):
-        self.align = Align(self.video.frames)
+        self.align = Align(self.video.frames[g.startFrame:g.endFrame+1])
         thread = Thread(target=self.align.run, args=())
         thread.start()
         self.disableUI()
@@ -308,9 +342,6 @@ class UI:
     def finishedAlign(self):
         def update():
             self.tabs.next_page()
-            g.driftP1 = (0, 0)
-            g.driftP2 = (0, 0)
-            self.setDriftPoint()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(True)
