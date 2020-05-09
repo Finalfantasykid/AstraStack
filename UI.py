@@ -1,6 +1,9 @@
 from os import cpu_count, rmdir, scandir, unlink, path
 import math
 import cv2
+import webbrowser
+import urllib.request
+import json
 from threading import Thread
 from multiprocessing import Pipe
 from concurrent.futures import ProcessPoolExecutor
@@ -23,9 +26,12 @@ class UI:
     STACK_TAB = 2
     SHARPEN_TAB = 3
     
+    VERSION = "1.0.0"
+    
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
         self.cleanTmp()
+        self.newVersionUrl = ""
         self.video = None
         self.align = None
         self.stack = None
@@ -70,6 +76,7 @@ class UI:
         self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent) 
         
         self.window.show_all()
+        self.checkNewVersion()
         self.builder.get_object("blendGrid").hide() # Not overlly useful, might enable later
         self.setProgress()
         self.setNormalize()
@@ -110,6 +117,27 @@ class UI:
     # Sets the number of threads to use
     def setThreads(self, *args):
         g.nThreads = int(self.cpus.get_value())
+        
+    def checkNewVersion(self):
+        def callUrl():
+            try:
+                contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
+                obj = json.loads(contents)
+                if(obj['name'] > UI.VERSION):
+                    self.newVersionUrl = obj['html_url']
+                    button.show()
+            except e:
+                print(e)
+                return
+        button = self.builder.get_object("newVersion")
+        button.hide()
+        thread = Thread(target=callUrl, args=())
+        thread.start()
+        
+        
+    # Opens the GitHub releases page in a browser
+    def clickNewVersion(self, *args):
+        webbrowser.open(self.newVersionUrl)
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):
