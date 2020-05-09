@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import shutil
 from pystackreg import StackReg
 from Globals import g
 
@@ -24,12 +25,13 @@ class Align:
         
         threads = []
         g.ui.createListener(progress)
-        self.total = len(self.frames)*4
+        self.total = len(self.frames)*3
         
         #Drifting
         dx = g.driftP2[0] - g.driftP1[0]
         dy = g.driftP2[1] - g.driftP1[1]
-        
+        if(dx != 0 and dy != 0):
+            self.total += len(self.frames)
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
@@ -98,8 +100,8 @@ class Align:
 def drift(frames, totalFrames, startFrame, dx, dy, conn):
     i = startFrame
     for frame in frames:
-        image = cv2.imread(frame,1)
         if(dx != 0 and dy != 0):
+            image = cv2.imread(frame,1)
             fdx = dx*i/totalFrames
             fdy = dy*i/totalFrames
             
@@ -117,12 +119,11 @@ def drift(frames, totalFrames, startFrame, dx, dy, conn):
             h, w = image.shape[:2]
             image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
         
-        cv2.imwrite(frame.replace("frames", "cache"), image)
-        i += 1
-        if(dx != 0 and dy != 0):
+            cv2.imwrite(frame.replace("frames", "cache"), image)
+            i += 1
             conn.send("Drifting Frames")
         else:
-            conn.send("Copying Frames")
+            shutil.copyfile(frame, frame.replace("frames", "cache"))           
         
 # Multiprocess function to calculation the transform matricies of each image 
 def align(frames, reference, transformation, normalize, conn):
