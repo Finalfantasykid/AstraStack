@@ -206,10 +206,7 @@ class UI:
     def finishedVideo(self):
         def update():
             self.tabs.next_page()
-            self.limit.set_upper(len(self.video.frames))
-            self.limit.set_value(int(len(self.video.frames)/2))
-            self.limitPercent.set_value(round(self.limit.get_value()/len(self.video.frames)*100))
-            
+           
             self.startFrame.set_lower(0)
             self.startFrame.set_upper(len(self.video.frames)-1)
             self.startFrame.set_value(0)
@@ -220,13 +217,12 @@ class UI:
             
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
+            g.reference = "0"
 
             self.setReference()
             self.setStartFrame()
             self.setEndFrame()
             self.setDriftPoint()
-            self.setLimit()
-            self.setLimitPercent()
             self.setBlendMode()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
@@ -378,19 +374,25 @@ class UI:
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(True)
             self.builder.get_object("processTab").set_sensitive(False)
+            self.limit.set_upper(len(self.align.similarities))
+            self.limit.set_value(int(len(self.align.similarities)/2))
+            self.limitPercent.set_value(round(self.limit.get_value()/len(self.align.similarities)*100))
+            self.setLimit()
+            self.setLimitPercent()
         GLib.idle_add(update)
         
     # Sets the number of frames to use in the Stack
     def setLimit(self, *args):
         self.limitPercent.disconnect(self.limitPercentSignal)
+        self.limit.set_upper(len(self.align.similarities))
         g.limit = int(self.limit.get_value())
-        self.limitPercent.set_value(round(g.limit/len(self.video.frames)*100))
+        self.limitPercent.set_value(round(g.limit/len(self.align.similarities)*100))
         self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent)
         
     # Sets the number of frames to use in the Stack
     def setLimitPercent(self, *args):
         limitPercent = self.limitPercent.get_value()/100
-        self.limit.set_value(round(limitPercent*len(self.video.frames)))
+        self.limit.set_value(round(limitPercent*len(self.align.similarities)))
        
     # Sets the blend mode of the Stack (Average or Median)
     def setBlendMode(self, *args):
