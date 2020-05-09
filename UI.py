@@ -126,8 +126,7 @@ class UI:
                 if(obj['name'] > UI.VERSION):
                     self.newVersionUrl = obj['html_url']
                     button.show()
-            except e:
-                print(e)
+            except:
                 return
         button = self.builder.get_object("newVersion")
         button.hide()
