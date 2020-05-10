@@ -51,6 +51,7 @@ class UI:
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
         self.frameSlider = self.builder.get_object("frameSlider")
+        self.frameScale = self.builder.get_object("frameScale")
         self.startFrame = self.builder.get_object("startFrame")
         self.endFrame = self.builder.get_object("endFrame")
         self.normalize = self.builder.get_object("normalize")
@@ -64,6 +65,7 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
 
+        
         self.cpus.set_upper(cpu_count())
         self.cpus.set_value(math.ceil(cpu_count()/2))
         g.pool = ProcessPoolExecutor(max_workers=cpu_count())
@@ -82,6 +84,7 @@ class UI:
         self.setNormalize()
         self.setTransformation()
         self.setThreads()
+        self.frameScale.set_sensitive(False)
         g.reference = "0"
         
     # Sets up a listener so that processes can communicate with each other
@@ -207,6 +210,8 @@ class UI:
         def update():
             self.tabs.next_page()
            
+            self.frameScale.set_sensitive(True)
+           
             self.startFrame.set_lower(0)
             self.startFrame.set_upper(len(self.video.frames)-1)
             self.startFrame.set_value(0)
@@ -232,22 +237,21 @@ class UI:
         GLib.idle_add(update)
         
     def changeTab(self, notebook, page, page_num, user_data=None):
-        frameScale = self.builder.get_object("frameScale")
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             self.frameSlider.set_value(0)
             self.frameSlider.set_upper(len(self.video.frames)-1)
             self.setStartFrame()
             self.setEndFrame()
-            frameScale.show()
+            self.frameScale.show()
             self.frame.set_from_file(self.video.frames[int(self.frameSlider.get_value())])
         elif(page_num == UI.STACK_TAB):
             self.frameSlider.set_lower(0)
             self.frameSlider.set_upper(len(self.align.similarities)-1)
             self.frameSlider.set_value(0)
-            frameScale.show()
+            self.frameScale.show()
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
         elif(page_num == UI.SHARPEN_TAB):
-            frameScale.hide()
+            self.frameScale.hide()
             self.sharpenImage()
     
     # Changes the image frame to the frameSlider position    
