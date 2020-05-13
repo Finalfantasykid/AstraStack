@@ -32,6 +32,9 @@ class Align:
         dy = g.driftP2[1] - g.driftP1[1]
         if(dx != 0 and dy != 0):
             self.total += len(self.frames)
+        else:
+            self.total += 1
+            g.ui.childConn.send("Copying Frames")
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)

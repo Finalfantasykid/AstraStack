@@ -12,6 +12,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     cp -r share/themes dist/AstraStack/share/
     cp -r share/icons dist/AstraStack/share/
     cp -r ui dist/AstraStack/
+    rm dist/AstraStack/ui/logo.xcf
+    rm dist/AstraStack/ui/logo.ico
     cp scripts/astrastack dist/AstraStack/
     cp scripts/astrastack.desktop dist/AstraStack
     cp scripts/install.sh dist/
@@ -37,6 +39,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
     cp -r share/themes dist/AstraStack/share/
     cp -r share/icons dist/AstraStack/share/
     cp -r ui dist/AstraStack/
+    rm dist/AstraStack/ui/logo.xcf
     C:/'Program Files (x86)'/'Inno Setup 6'/ISCC.exe scripts/inno.iss
 fi
 
