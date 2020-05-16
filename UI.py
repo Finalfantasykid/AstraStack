@@ -110,12 +110,18 @@ class UI:
         response = errorDialog.run()
         errorDialog.hide()
         
-    # Disabled inputs
+    # Disable inputs
     def disableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(False)
         
+    # Enable inputs
     def enableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(True)
+        
+    # The following is needed to forcibly refresh the value spacing of the slider
+    def fixFrameSliderBug(self):
+        self.frameScale.set_value_pos(Gtk.PositionType.RIGHT)
+        self.frameScale.set_value_pos(Gtk.PositionType.LEFT)
         
     # Sets the number of threads to use
     def setThreads(self, *args):
@@ -254,9 +260,7 @@ class UI:
         elif(page_num == UI.SHARPEN_TAB):
             self.frameScale.hide()
             self.sharpenImage()
-        # The following is needed to forcibly refresh the value spacing of the slider
-        self.frameScale.set_value_pos(Gtk.PositionType.RIGHT)
-        self.frameScale.set_value_pos(Gtk.PositionType.LEFT)
+        self.fixFrameSliderBug()
     
     # Changes the image frame to the frameSlider position    
     def updateImage(self, *args):
@@ -296,6 +300,7 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.startFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
+        self.fixFrameSliderBug()
         
     # Sets the end frame for trimming
     def setEndFrame(self, *args):
@@ -307,6 +312,7 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.endFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
+        self.fixFrameSliderBug()
         
     # Drift Point 1 Button Clicked
     def clickDriftP1(self, *args):
