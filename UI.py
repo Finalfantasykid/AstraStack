@@ -236,6 +236,7 @@ class UI:
             self.builder.get_object("alignButton").set_sensitive(False)
         GLib.idle_add(update)
         
+    # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             self.frameSlider.set_value(0)
@@ -253,6 +254,9 @@ class UI:
         elif(page_num == UI.SHARPEN_TAB):
             self.frameScale.hide()
             self.sharpenImage()
+        # The following is needed to forcibly refresh the value spacing of the slider
+        self.frameScale.set_value_pos(Gtk.PositionType.RIGHT)
+        self.frameScale.set_value_pos(Gtk.PositionType.LEFT)
     
     # Changes the image frame to the frameSlider position    
     def updateImage(self, *args):
