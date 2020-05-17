@@ -26,7 +26,7 @@ class UI:
     STACK_TAB = 2
     SHARPEN_TAB = 3
     
-    VERSION = "1.0.0"
+    VERSION = "1.1.0"
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
