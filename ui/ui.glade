@@ -1630,9 +1630,25 @@ filtered frames.</property>
                             <property name="valign">center</property>
                             <signal name="button-press-event" handler="setDriftPoint" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="frame">
+                              <object class="GtkOverlay">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkImage" id="frame">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="index">-1</property>
+                                  </packing>
+                                </child>
+                                <child type="overlay">
+                                  <object class="GtkDrawingArea" id="overlay">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <signal name="draw" handler="drawOverlay" swapped="no"/>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>

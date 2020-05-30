@@ -4,6 +4,7 @@ import cv2
 import webbrowser
 import urllib.request
 import json
+import math
 from threading import Thread
 from multiprocessing import Pipe
 from concurrent.futures import ProcessPoolExecutor
@@ -50,6 +51,7 @@ class UI:
         self.cpus = self.builder.get_object("cpus")
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
+        self.overlay = self.builder.get_object("overlay")
         self.frameSlider = self.builder.get_object("frameSlider")
         self.frameScale = self.builder.get_object("frameScale")
         self.startFrame = self.builder.get_object("startFrame")
@@ -76,6 +78,9 @@ class UI:
         
         # Needed so it can be temporarily removed
         self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent) 
+        
+        g.driftP1 = (0, 0)
+        g.driftP2 = (0, 0)
         
         self.window.show_all()
         self.checkNewVersion()
@@ -271,6 +276,42 @@ class UI:
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
         elif(page_num == UI.SHARPEN_TAB):
             self.frame.set_from_file(g.tmp + "sharpened.png")
+            
+    def drawOverlay(self, widget, cr):
+        def drawPoint(cr, x, y):
+            cr.set_line_width(2)
+            cr.set_source_rgb(1, 1, 1)
+
+            cr.arc(x, y, 2, 0, 2*math.pi)
+            cr.stroke_preserve()
+            
+            cr.set_source_rgb(1, 0, 0)
+            cr.fill()
+            
+        if(self.tabs.get_current_page() == UI.ALIGN_TAB):
+            current = self.frameSlider.get_value()
+            x1 = g.driftP1[0]
+            y1 = g.driftP1[1]
+            
+            x2 = g.driftP2[0]
+            y2 = g.driftP2[1]
+                
+            if(x1 != 0 and y1 != 0 and current == g.startFrame):
+                # Draw point on first frame
+                drawPoint(cr, x1, y1)
+                
+            if(x1 != 0 and y1 != 0 and current != g.startFrame and
+               x2 != 0 and y2 != 0 and current != g.endFrame):
+                # Draw interpolated point
+                dx = x2 - x1
+                dy = y2 - y1
+                 
+                drawPoint(cr, x1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame) , 
+                              y1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
+                
+            if(x2 != 0 and y2 != 0 and current == g.endFrame):
+                # Draw point on last frame
+                drawPoint(cr, x2, y2)
         
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
@@ -347,6 +388,7 @@ class UI:
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
+        self.overlay.queue_draw()
     
     # Called when the mouse moves over the frame
     def updateMousePosition(self, *args):
