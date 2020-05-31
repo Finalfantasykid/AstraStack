@@ -28,8 +28,21 @@ class Align:
         self.total = len(self.frames)*3
         
         #Drifting
-        dx = g.driftP2[0] - g.driftP1[0]
-        dy = g.driftP2[1] - g.driftP1[1]
+        x1 = g.driftP1[0]
+        y1 = g.driftP1[1]
+        
+        x2 = g.driftP2[0]
+        y2 = g.driftP2[1]
+        
+        dx = x2 - x1
+        dy = y2 - y1
+        
+        if((x1 == 0 and y1 == 0) or
+           (x2 == 0 and y2 == 0)):
+            # Cancel drift if only one point was specified
+            dx = 0
+            dy = 0
+        
         if(dx != 0 and dy != 0):
             self.total += len(self.frames)
         else:
@@ -154,13 +167,17 @@ def align(frames, reference, transformation, normalize, conn):
 def transform(frames, tmats, minX, maxX, minY, maxY, conn):
     i = 0
     for frame in frames:
-        M = tmats[i]
-        image = cv2.imread(frame.replace("frames", "cache"),1).astype(np.float32) / 255
-        w, h, _ = image.shape
-        image = cv2.warpPerspective(image, M, (h, w))
-        h, w = image.shape[:2]
-        image = image[maxY:h+minY, maxX:w+minX]
-        cv2.imwrite(frame.replace("frames", "cache"),(image*255).astype(np.uint8))
+        try:
+            M = tmats[i]
+            image = cv2.imread(frame.replace("frames", "cache"),1).astype(np.float32) / 255
+            w, h, _ = image.shape
+            image = cv2.warpPerspective(image, M, (h, w))
+            h, w = image.shape[:2]
+            image = image[maxY:h+minY, maxX:w+minX]
+            cv2.imwrite(frame.replace("frames", "cache"),(image*255).astype(np.uint8))
+        except:
+            # Transformation was invalid (resulted infinitely small image)
+            pass
         i += 1
         conn.send("Transforming Frames")
     
