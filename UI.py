@@ -5,6 +5,7 @@ import webbrowser
 import urllib.request
 import json
 import math
+import psutil
 from threading import Thread
 from multiprocessing import Pipe
 from concurrent.futures import ProcessPoolExecutor
@@ -110,10 +111,19 @@ class UI:
     
     # Shows the error dialog with the given title and message
     def showErrorDialog(self, message):
-        errorDialog = self.builder.get_object("errorDialog")
-        errorDialog.format_secondary_text(message)
-        response = errorDialog.run()
-        errorDialog.hide()
+        dialog = self.builder.get_object("errorDialog")
+        dialog.format_secondary_text(message)
+        response = dialog.run()
+        dialog.hide()
+        return response
+        
+    # Shows the warning dialog with the given title and message
+    def showWarningDialog(self, message):
+        dialog = self.builder.get_object("warningDialog")
+        dialog.format_secondary_text(message)
+        response = dialog.run()
+        dialog.hide()
+        return response
         
     # Disable inputs
     def disableUI(self):
@@ -147,10 +157,18 @@ class UI:
         thread = Thread(target=callUrl, args=())
         thread.start()
         
-        
     # Opens the GitHub releases page in a browser
     def clickNewVersion(self, *args):
         webbrowser.open(self.newVersionUrl)
+    
+    # Checks to see if there will be enough memory to process the image
+    def checkMemory(self, img=None, w=0, h=0):
+        if(img is not None):
+            h, w = img.shape[:2]
+        if(Sharpen.estimateMemoryUsage(w, h) > psutil.virtual_memory().available):
+            response = self.showWarningDialog("Your system may not have enough memory to process this file, are you sure you want to continue?")
+            return (response == Gtk.ResponseType.YES)
+        return True
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):
@@ -160,11 +178,15 @@ class UI:
         response = self.openDialog.run()
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
-            g.file = self.openDialog.get_filename()
-            self.video = Video()
-            thread = Thread(target=self.video.run, args=())
-            thread.start()
-            self.disableUI()
+            try:
+                g.file = self.openDialog.get_filename()
+                self.video = Video()
+                self.video.checkMemory()
+                thread = Thread(target=self.video.run, args=())
+                thread.start()
+                self.disableUI()
+            except MemoryError as error:
+                self.enableUI()
             
     # Opens the file chooser to open load a file
     def openImageSequence(self, *args):
@@ -174,11 +196,15 @@ class UI:
         response = self.openDialog.run()
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
-            g.file = self.openDialog.get_filenames()
-            self.video = Video()
-            thread = Thread(target=self.video.run, args=())
-            thread.start()
-            self.disableUI()
+            try:
+                g.file = self.openDialog.get_filenames()
+                self.video = Video()
+                self.video.checkMemory()
+                thread = Thread(target=self.video.run, args=())
+                thread.start()
+                self.disableUI()
+            except MemoryError as error:
+                self.enableUI()
             
     # Opens the file chooser to open load a file
     def openImage(self, *args):
@@ -193,15 +219,21 @@ class UI:
             try:
                 self.video = Video()
                 self.video.mkdirs()
-                cv2.imwrite(g.tmp + "stacked.png", cv2.imread(g.file))
+                img = cv2.imread(g.file)
+                if(not self.checkMemory(img)):
+                    raise MemoryError()
+                cv2.imwrite(g.tmp + "stacked.png", img)
+                
                 self.sharpen = Sharpen(g.tmp + "stacked.png", True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
                 self.builder.get_object("processTab").set_sensitive(True)
                 self.tabs.set_current_page(UI.SHARPEN_TAB)
                 self.frame.set_from_file(g.tmp + "stacked.png")
+            except MemoryError as error:
+                pass
             except: # Open Failed
-                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
+                self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
             self.enableUI()
             
     # Opens the file chooser to save the final image
@@ -211,7 +243,8 @@ class UI:
         if(response == Gtk.ResponseType.OK):
             fileName = self.saveDialog.get_filename()
             try:
-                cv2.imwrite(fileName, self.sharpen.finalImage)
+                sharpened = cv2.imread(g.tmp + "sharpened.png")
+                cv2.imwrite(fileName, sharpened)
             except: # Save Failed
                 self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
         self.saveDialog.hide()

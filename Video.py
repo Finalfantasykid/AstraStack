@@ -16,6 +16,23 @@ class Video:
             makedirs(g.tmp + "frames")
         if not path.exists(g.tmp + "cache"):
             makedirs(g.tmp + "cache")
+            
+    # Checks to see if there will be enough memory to process the image
+    def checkMemory(self):
+        if(isinstance(g.file, list)):
+            # Image Sequence
+            for file in sorted(g.file):
+                image = cv2.imread(file)
+                if(not g.ui.checkMemory(image)):
+                    raise MemoryError()
+                return
+        else:
+            # Video
+            vidcap = cv2.VideoCapture(g.file)
+            width  = vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)
+            height = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            if(not g.ui.checkMemory(w=width,h=height)):
+                raise MemoryError()
 
     # Returns a list of file paths for the frames of the given video fileName
     def run(self):

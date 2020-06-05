@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import multiprocessing
 from pywt import swt2, iswt2
 
 from Globals import g
@@ -8,39 +9,52 @@ from Globals import g
 class Sharpen:
 
     LEVEL = 5
+    
+    # This is a crude estimate on how much memory will be used by the sharpening
+    # Width * Height * 3Channels * 4bytes * 4coefficients * 5layers * 3processes
+    def estimateMemoryUsage(width, height):
+        return width*height*3*4*4*Sharpen.LEVEL*3
 
     def __init__(self, stackedImage, isFile=False):
         if(isFile):
             # Single image provided
-            self.stackedImage = cv2.imread(stackedImage)
+            stackedImage = cv2.imread(stackedImage)
         else:
             # Use the higher bit depth version from the stacking process
-            self.stackedImage = stackedImage
-        self.finalImage = None
-        self.cR = None
-        self.cG = None
-        self.cB = None
-        self.calculateCoefficients()
+            pass
+        self.h, self.w = stackedImage.shape[:2]
+        mR = multiprocessing.Manager()
+        mG = multiprocessing.Manager()
+        mB = multiprocessing.Manager()
+        self.R = mR.dict()
+        self.G = mG.dict()
+        self.B = mB.dict()
+        self.calculateCoefficients(stackedImage)
         self.processAgain = False
         
     def run(self):
-        self.finalImage = self.stackedImage
         self.processAgain = True
         while(self.processAgain):
             self.processAgain = False
             self.sharpenLayers()
             g.ui.finishedSharpening()
         
-    def calculateCoefficients(self):
-        (imgB, imgG, imgR) = cv2.split(self.stackedImage)
+    def calculateCoefficients(self, stackedImage):
+        (self.B['img'], self.G['img'], self.R['img']) = cv2.split(stackedImage)
         
-        futureR = g.pool.submit(calculateChannelCoefficients, imgR)
-        futureG = g.pool.submit(calculateChannelCoefficients, imgG)
-        futureB = g.pool.submit(calculateChannelCoefficients, imgB)
+        futureR = g.pool.submit(calculateChannelCoefficients, self.R)
+        futureG = g.pool.submit(calculateChannelCoefficients, self.G)
+        futureB = g.pool.submit(calculateChannelCoefficients, self.B)
         
-        self.cR = futureR.result()
-        self.cG = futureG.result()
-        self.cB = futureB.result()
+        futureR.result()
+        futureG.result()
+        futureB.result()
+        
+        # Clean up memory since we don't need this anymore
+        del self.R['img']
+        del self.G['img']
+        del self.B['img']
+        del stackedImage
         
     def sharpenLayers(self):
         gParam = {
@@ -65,41 +79,38 @@ class Sharpen:
                         g.denoise4,
                         g.denoise5]
         }
-                  
-        futureR = g.pool.submit(sharpenChannelLayers, self.cR, gParam)
-        futureG = g.pool.submit(sharpenChannelLayers, self.cG, gParam)
-        futureB = g.pool.submit(sharpenChannelLayers, self.cB, gParam)
+
+        futureR = g.pool.submit(sharpenChannelLayers, self.R, gParam)
+        futureG = g.pool.submit(sharpenChannelLayers, self.G, gParam)
+        futureB = g.pool.submit(sharpenChannelLayers, self.B, gParam)
         
         R = futureR.result()
         G = futureG.result()
         B = futureB.result()
         
+        cv2.imwrite(g.tmp + "sharpened.png", cv2.merge([B, G, R])[:self.h,:self.w])
         
-        h, w = self.finalImage.shape[:2]
-        self.finalImage = cv2.merge([B, G, R])
-        self.finalImage = self.finalImage[:h,:w]
-        cv2.imwrite(g.tmp + "sharpened.png", self.finalImage)
-        
-def calculateChannelCoefficients(img):
+def calculateChannelCoefficients(C):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur
     padding = 2**(Sharpen.LEVEL)
-    img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_REFLECT)
+    C['img'] = cv2.copyMakeBorder(C['img'], padding, padding, padding, padding, cv2.BORDER_REFLECT)
     
     # Pad so that dimensions are multiples of 2**level
-    h, w = img.shape[:2]
+    h, w = C['img'].shape[:2]
     
     hR = (h % 2**Sharpen.LEVEL)
     wR = (w % 2**Sharpen.LEVEL)
 
-    img = cv2.copyMakeBorder(img, 0, (2**Sharpen.LEVEL - hR), 0, (2**Sharpen.LEVEL - wR), cv2.BORDER_REFLECT)
+    C['img'] = cv2.copyMakeBorder(C['img'], 0, (2**Sharpen.LEVEL - hR), 0, (2**Sharpen.LEVEL - wR), cv2.BORDER_REFLECT)
+    
+    C['img'] =  np.float32(C['img'])
+    C['img'] /= 255
 
-    img =  np.float32(img)
-    img /= 255
-    
     # compute coefficients
-    return list(swt2(img, 'haar', level=Sharpen.LEVEL, trim_approx=True))
+    C['c'] = list(swt2(C['img'], 'haar', level=Sharpen.LEVEL, trim_approx=True))
     
-def sharpenChannelLayers(c, g):
+def sharpenChannelLayers(C, g):
+    c = C['c']
     # Go through each wavelet layer and apply sharpening
     for i in range(1, len(c)):
         level = (len(c) - i - 1)
