@@ -162,9 +162,7 @@ class UI:
         webbrowser.open(self.newVersionUrl)
     
     # Checks to see if there will be enough memory to process the image
-    def checkMemory(self, img=None, w=0, h=0):
-        if(img is not None):
-            h, w = img.shape[:2]
+    def checkMemory(self, w=0, h=0):
         if(Sharpen.estimateMemoryUsage(w, h) > psutil.virtual_memory().available):
             response = self.showWarningDialog("Your system may not have enough memory to process this file, are you sure you want to continue?")
             return (response == Gtk.ResponseType.YES)
@@ -220,7 +218,8 @@ class UI:
                 self.video = Video()
                 self.video.mkdirs()
                 img = cv2.imread(g.file)
-                if(not self.checkMemory(img)):
+                h, w = img.shape[:2]
+                if(not self.checkMemory(w, h)):
                     raise MemoryError()
                 cv2.imwrite(g.tmp + "stacked.png", img)
                 

@@ -23,7 +23,8 @@ class Video:
             # Image Sequence
             for file in sorted(g.file):
                 image = cv2.imread(file)
-                if(not g.ui.checkMemory(image)):
+                h, w = image.shape[:2]
+                if(not g.ui.checkMemory(w, h)):
                     raise MemoryError()
                 return
         else:
@@ -31,6 +32,7 @@ class Video:
             vidcap = cv2.VideoCapture(g.file)
             width  = vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)
             height = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            vidcap.release()
             if(not g.ui.checkMemory(w=width,h=height)):
                 raise MemoryError()
 
@@ -74,6 +76,7 @@ class Video:
                 futures.append(g.pool.submit(loadFrames, g.file, t*countPerThread, countPerThread, g.ui.childConn))
             for t in range(0, g.nThreads):
                 self.frames += futures[t].result()
+            vidcap.release()
 
         g.ui.setProgress()
         g.ui.finishedVideo()
