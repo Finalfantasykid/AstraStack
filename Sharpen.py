@@ -14,7 +14,7 @@ class Sharpen:
     LEVEL = 5
     
     # This is a crude estimate on how much memory will be used by the sharpening
-    # Width * Height * 3Channels * 4bytes * 4coefficients * 5layers * 2(while deep copying)
+    # Width * Height * 3Channels * 4bytes * 4coefficients * 5layers * 2(worst case from copying every coefficients layer)
     def estimateMemoryUsage(width, height):
         return width*height*3*4*4*Sharpen.LEVEL*2
 
@@ -110,19 +110,32 @@ def calculateChannelCoefficients(C, channel):
     g.channel = channel
     
 def sharpenChannelLayers(params):
-    c = copy.deepcopy(g.coeffs)
+    c = g.coeffs
     # Go through each wavelet layer and apply sharpening
+    cCopy = []
     for i in range(1, len(c)):
         level = (len(c) - i - 1)
+        # Copy the layer if a change is made to the coefficients
+        if(params['level'][level] and (params['radius'][level] > 0 or 
+                                       params['sharpen'][level] > 0 or 
+                                       params['denoise'][level] > 0)):
+            cCopy.append(copy.deepcopy(c[i]))
+        else:
+            cCopy.append(None)
+            
+        # Process Layers
         if(params['level'][level]):
+            # Apply Unsharp Mask
             if(params['radius'][level] > 0):
                 unsharp(c[i][0], params['radius'][level], 1)
                 unsharp(c[i][1], params['radius'][level], 1)
                 unsharp(c[i][2], params['radius'][level], 1)
+            # Multiply the layer to increase intensity
             if(params['sharpen'][level] > 0):
                 cv2.add(c[i][0], c[i][0]*params['sharpen'][level]*50, c[i][0])
                 cv2.add(c[i][1], c[i][1]*params['sharpen'][level]*50, c[i][1])
                 cv2.add(c[i][2], c[i][2]*params['sharpen'][level]*50, c[i][2])
+            # Denoise
             if(params['denoise'][level] > 0):
                 unsharp(c[i][0], params['denoise'][level]*10, -1)
                 unsharp(c[i][1], params['denoise'][level]*10, -1)
@@ -131,10 +144,18 @@ def sharpenChannelLayers(params):
     # reconstruction
     padding = 2**(Sharpen.LEVEL)
     img=iswt2(c, 'haar')
+    
+    # Reset coefficients
+    for i in range(1, len(c)):
+        if(cCopy[i-1] is not None):
+            c[i] = cCopy[i-1]
+    
+    # Prepare image for saving
     img = img[padding:,padding:]
     img *= 255
     img[img>255] = 255
     img[img<0] = 0
+    
     return (g.channel, np.uint8(img))
     
 def unsharp(image, radius, strength):
