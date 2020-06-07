@@ -69,9 +69,9 @@ class UI:
         self.builder.get_object("processTab").set_sensitive(False)
 
         
-        self.cpus.set_upper(cpu_count())
-        self.cpus.set_value(math.ceil(cpu_count()/2))
-        g.pool = ProcessPoolExecutor(max_workers=cpu_count())
+        self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
+        self.cpus.set_value(min(61, math.ceil(cpu_count()/2)))
+        g.pool = None
 
         self.processThread = None
         
@@ -141,6 +141,9 @@ class UI:
     # Sets the number of threads to use
     def setThreads(self, *args):
         g.nThreads = int(self.cpus.get_value())
+        if(g.pool is not None):
+            g.pool.shutdown()
+        g.pool = ProcessPoolExecutor(g.nThreads)
         
     def checkNewVersion(self):
         def callUrl():
@@ -338,7 +341,7 @@ class UI:
                 dx = x2 - x1
                 dy = y2 - y1
                  
-                drawPoint(cr, x1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame) , 
+                drawPoint(cr, x1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
                               y1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
                 
             if(x2 != 0 and y2 != 0 and current == g.endFrame):
