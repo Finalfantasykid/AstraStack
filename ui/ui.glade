@@ -254,12 +254,6 @@
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="startFrame">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
-  </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AstraStack</property>
@@ -459,6 +453,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">The video can be trimmed so that only frames between 'Start' and 'End' will be aligned.</property>
                                 <property name="label" translatable="yes">Video Trim</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -474,17 +469,28 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">The video can be trimmed so that only frames between 'Start'
-and 'End' will be aligned.</property>
-                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Start</property>
                                 <attributes>
-                                  <attribute name="absolute-size" value="12000"/>
+                                  <attribute name="weight" value="bold"/>
                                 </attributes>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">1</property>
-                                <property name="width">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">End</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -496,7 +502,7 @@ and 'End' will be aligned.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
+                                <property name="top_attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -505,34 +511,6 @@ and 'End' will be aligned.</property>
                                 <property name="can_focus">True</property>
                                 <property name="text" translatable="yes">0</property>
                                 <property name="adjustment">endFrame</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Start</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">End</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -557,6 +535,7 @@ and 'End' will be aligned.</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">The reference frame is  used when aligning and stacking.  It should be a frame that looks sharpest.</property>
                                 <property name="label" translatable="yes">Reference Frame</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -578,7 +557,7 @@ and 'End' will be aligned.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -589,24 +568,7 @@ and 'End' will be aligned.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">The reference frame is  used when aligning and stacking.  
-It should be a frame that looks sharpest.</property>
-                                <property name="xalign">0</property>
-                                <attributes>
-                                  <attribute name="absolute-size" value="12000"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
                                 <property name="top_attach">1</property>
-                                <property name="width">2</property>
                               </packing>
                             </child>
                           </object>
@@ -627,6 +589,7 @@ It should be a frame that looks sharpest.</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">This step is optional.  If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.</property>
                                 <property name="label" translatable="yes">Drift Adjustment</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -639,27 +602,16 @@ It should be a frame that looks sharpest.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="selectDriftPoint2">
-                                <property name="label" translatable="yes">Select Point 2</property>
+                              <object class="GtkButton" id="selectDriftPoint1">
+                                <property name="label" translatable="yes">Select Point 1</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <signal name="clicked" handler="clickDriftP2" swapped="no"/>
+                                <signal name="clicked" handler="clickDriftP1" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="driftPointLabel2">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">(0, 0)</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">3</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -670,39 +622,31 @@ It should be a frame that looks sharpest.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="driftPointLabel2">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">(0, 0)</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
                                 <property name="top_attach">2</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="selectDriftPoint1">
-                                <property name="label" translatable="yes">Select Point 1</property>
+                              <object class="GtkButton" id="selectDriftPoint2">
+                                <property name="label" translatable="yes">Select Point 2</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <signal name="clicked" handler="clickDriftP1" swapped="no"/>
+                                <signal name="clicked" handler="clickDriftP2" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">This step is optional.  If the object drifts accross the frame, 
-then it is best to set these points.  The points don't need to 
-be exact, only an estimate.</property>
-                                <property name="wrap">True</property>
-                                <property name="xalign">0</property>
-                                <attributes>
-                                  <attribute name="absolute-size" value="12000"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                                <property name="width">2</property>
                               </packing>
                             </child>
                           </object>
@@ -723,6 +667,13 @@ be exact, only an estimate.</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">This is a the type of transformation to perform during alignment.  
+The 4 types of transformation are described below:
+
+- Translation
+- Rigid Body (Translation + Rotation)
+- Scaled Rotation (Translation + Rotation + Scaling)
+- Affine (Translation + Rotation + Scaling + Shearing)</property>
                                 <property name="label" translatable="yes">Transformation</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -746,28 +697,6 @@ be exact, only an estimate.</property>
                                   <item id="3" translatable="yes">Affine</item>
                                 </items>
                                 <signal name="changed" handler="setTransformation" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">This is a the type of transformation to perform during alignment.  
-The 4 types of transformation are described below:
-
-- Translation
-- Rigid Body (Translation + Rotation)
-- Scaled Rotation (Translation + Rotation + Scaling)
-- Affine (Translation + Rotation + Scaling + Shearing)</property>
-                                <property name="xalign">0</property>
-                                <attributes>
-                                  <attribute name="absolute-size" value="12000"/>
-                                </attributes>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -875,6 +804,7 @@ The 4 types of transformation are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">The final stack only uses the best frames.  Specify the number or percent of frames to stack.</property>
                                 <property name="label" translatable="yes">Limit</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -890,17 +820,12 @@ The 4 types of transformation are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">The final stack only uses the best frames.  
-Specify the number or percent of frames to stack.</property>
+                                <property name="label" translatable="yes">Best Frames</property>
                                 <property name="xalign">0</property>
-                                <attributes>
-                                  <attribute name="absolute-size" value="12000"/>
-                                </attributes>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">1</property>
-                                <property name="width">2</property>
                               </packing>
                             </child>
                             <child>
@@ -913,19 +838,7 @@ Specify the number or percent of frames to stack.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Best Frames</property>
-                                <property name="xalign">0</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -937,7 +850,7 @@ Specify the number or percent of frames to stack.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
+                                <property name="top_attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -950,7 +863,7 @@ Specify the number or percent of frames to stack.</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
-                                <property name="top_attach">3</property>
+                                <property name="top_attach">2</property>
                               </packing>
                             </child>
                           </object>
@@ -973,21 +886,6 @@ Specify the number or percent of frames to stack.</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <signal name="clicked" handler="clickStack" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Stack</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -1674,6 +1572,12 @@ Specify the number or percent of frames to stack.</property>
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkAdjustment" id="startFrame">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>
