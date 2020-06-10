@@ -85,7 +85,6 @@ class UI:
         
         self.window.show_all()
         self.checkNewVersion()
-        self.builder.get_object("blendGrid").hide() # Not overlly useful, might enable later
         self.setProgress()
         self.setNormalize()
         self.setTransformation()
@@ -274,7 +273,6 @@ class UI:
             self.setStartFrame()
             self.setEndFrame()
             self.setDriftPoint()
-            self.setBlendMode()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
@@ -484,13 +482,6 @@ class UI:
     def setLimitPercent(self, *args):
         limitPercent = self.limitPercent.get_value()/100
         self.limit.set_value(round(limitPercent*len(self.align.similarities)))
-       
-    # Sets the blend mode of the Stack (Average or Median)
-    def setBlendMode(self, *args):
-        if(self.averageRadio.get_active()):
-            g.blendMode = Stack.AVERAGE
-        if(self.medianRadio.get_active()):
-            g.blendMode = Stack.MEDIAN
             
     # Stack Button clicked
     def clickStack(self, *args):
