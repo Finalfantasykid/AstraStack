@@ -41,6 +41,7 @@ class UI:
         self.mousePosition = None
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
+        self.clickedProcessingArea = False
         
         self.builder = Gtk.Builder()
         self.builder.add_from_file("ui/ui.glade")
@@ -82,6 +83,9 @@ class UI:
         
         g.driftP1 = (0, 0)
         g.driftP2 = (0, 0)
+        
+        g.processingAreaP1 = (0, 0)
+        g.processingAreaP2 = (0, 0)
         
         self.window.show_all()
         self.checkNewVersion()
@@ -312,6 +316,7 @@ class UI:
             
     def drawOverlay(self, widget, cr):
         def drawPoint(cr, x, y):
+            cr.new_sub_path()
             cr.set_line_width(2)
             cr.set_source_rgb(1, 1, 1)
 
@@ -321,30 +326,59 @@ class UI:
             cr.set_source_rgb(1, 0, 0)
             cr.fill()
             
+        def drawRect(cr, x1, y1, x2, y2):
+            cr.set_line_width(2)
+            cr.set_source_rgb(1, 0, 0)
+            
+            cr.rectangle(x1, y1, (x2-x1), (y2-y1))
+            cr.stroke()
+            
         if(self.tabs.get_current_page() == UI.ALIGN_TAB):
             current = self.frameSlider.get_value()
-            x1 = g.driftP1[0]
-            y1 = g.driftP1[1]
             
-            x2 = g.driftP2[0]
-            y2 = g.driftP2[1]
+            # Processing Area
+            px1 = g.processingAreaP1[0]
+            py1 = g.processingAreaP1[1]
+            
+            px2 = g.processingAreaP2[0]
+            py2 = g.processingAreaP2[1]
+            
+            # Drift Points
+            dx1 = g.driftP1[0]
+            dy1 = g.driftP1[1]
+            
+            dx2 = g.driftP2[0]
+            dy2 = g.driftP2[1]
+            
+            dx = 0
+            dy = 0
+            
+            if(dx1 != 0 and dy1 != 0 and
+               dx2 != 0 and dy2 != 0):
+                dx = dx2 - dx1
+                dy = dy2 - dy1
+            
+            if(px1 != 0 and py1 != 0 and
+               px2 != 0 and py2 != 0):
+                # Draw Processing Area Rectangle
+                drawRect(cr, px1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             py1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             px2 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             py2 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
                 
-            if(x1 != 0 and y1 != 0 and current == g.startFrame):
+            if(dx1 != 0 and dy1 != 0 and current == g.startFrame):
                 # Draw point on first frame
-                drawPoint(cr, x1, y1)
+                drawPoint(cr, dx1, dy1)
                 
-            if(x1 != 0 and y1 != 0 and current != g.startFrame and
-               x2 != 0 and y2 != 0 and current != g.endFrame):
+            if(dx1 != 0 and dy1 != 0 and current != g.startFrame and
+               dx2 != 0 and dy2 != 0 and current != g.endFrame):
                 # Draw interpolated point
-                dx = x2 - x1
-                dy = y2 - y1
-                 
-                drawPoint(cr, x1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
-                              y1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
+                drawPoint(cr, dx1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
+                              dy1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
                 
-            if(x2 != 0 and y2 != 0 and current == g.endFrame):
+            if(dx2 != 0 and dy2 != 0 and current == g.endFrame):
                 # Draw point on last frame
-                drawPoint(cr, x2, y2)
+                drawPoint(cr, dx2, dy2)
         
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
@@ -392,6 +426,7 @@ class UI:
     def clickDriftP1(self, *args):
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
+        self.clickedProcessingArea = False
         self.setDriftPoint()
         self.frameSlider.set_value(g.startFrame)
         self.clickedDriftP1 = True
@@ -401,36 +436,82 @@ class UI:
     def clickDriftP2(self, *args):
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
+        self.clickedProcessingArea = False
         self.setDriftPoint()
         self.frameSlider.set_value(g.endFrame)
         self.clickedDriftP2 = True
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
+        
+    # Reset Drift Point 1 to (0, 0)
+    def resetDriftP1(self, widget, event):
+        if(event.button == 3): # Right Click
+            g.driftP1 = (0, 0)
+            self.clickedDriftP1 = False
+            self.clickedDriftP2 = False
+            self.clickedProcessingArea = False
+            self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
+            self.overlay.queue_draw()
+            
+    # Reset Drift Point 2 to (0, 0)
+    def resetDriftP2(self, widget, event):
+        if(event.button == 3): # Right Click
+            g.driftP2 = (0, 0)
+            self.clickedDriftP1 = False
+            self.clickedDriftP2 = False
+            self.clickedProcessingArea = False
+            self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
+            self.overlay.queue_draw()
     
     # Updates the drift point
     def setDriftPoint(self, *args):
-        if(self.clickedDriftP1 == False and self.clickedDriftP2 == False):
-            # Just reset the label
-            self.builder.get_object("driftPointLabel1").set_text(str(g.driftP1))
-            self.builder.get_object("driftPointLabel2").set_text(str(g.driftP2))
-        elif(self.clickedDriftP1):
-            g.driftP1 = self.mousePosition
-            self.builder.get_object("driftPointLabel1").set_text(str(g.driftP1))
-        elif(self.clickedDriftP2):
-            g.driftP2 = self.mousePosition
-            self.builder.get_object("driftPointLabel2").set_text(str(g.driftP2))
+        if(self.clickedDriftP1 or self.clickedDriftP2):
+            if(self.clickedDriftP1):
+                g.driftP1 = self.mousePosition
+            elif(self.clickedDriftP2):
+                g.driftP2 = self.mousePosition
+            self.clickedDriftP1 = False
+            self.clickedDriftP2 = False
+            self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
+            self.overlay.queue_draw()
+        
+    def clickProcessingArea(self, *args):
+        g.processingAreaP1 = (0, 0)
+        g.processingAreaP2 = (0, 0)
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
-        self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
-        self.overlay.queue_draw()
+        self.clickedProcessingArea = True
+        self.frameSlider.set_value(g.startFrame)
+        self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
+        
+    # Reset Processing Area to (0, 0)
+    def resetProcessingArea(self, widget, event):
+        if(event.button == 3): # Right Click
+            g.processingAreaP1 = (0, 0)
+            g.processingAreaP2 = (0, 0)
+            self.clickedDriftP1 = False
+            self.clickedDriftP2 = False
+            self.clickedProcessingArea = False
+            self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
+            self.overlay.queue_draw()
+        
+    def dragBegin(self, *args):
+        if(self.clickedProcessingArea):
+            g.processingAreaP1 = self.mousePosition
+        
+    def dragEnd(self, *args):
+        if(self.clickedProcessingArea):
+            g.processingAreaP2 = self.mousePosition
+            self.clickedProcessingArea = False
+            self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
     
     # Called when the mouse moves over the frame
     def updateMousePosition(self, *args):
         pointer = self.frame.get_pointer()
         self.mousePosition = (min(max(0, pointer.x), self.frame.get_allocation().width), min(max(0, pointer.y), self.frame.get_allocation().height))
-        if(self.clickedDriftP1):
-            self.builder.get_object("driftPointLabel1").set_text(str(self.mousePosition))
-        if(self.clickedDriftP2):
-            self.builder.get_object("driftPointLabel2").set_text(str(self.mousePosition))
+        if(self.clickedProcessingArea):
+            if(g.processingAreaP1 != (0, 0)):
+                g.processingAreaP2 = self.mousePosition
+            self.overlay.queue_draw()
     
     # Sets whether or not to normalize the frames during alignment
     def setNormalize(self, *args):

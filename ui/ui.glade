@@ -254,6 +254,12 @@
     <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="startFrame">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
+  </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AstraStack</property>
@@ -584,13 +590,14 @@
                             <property name="can_focus">False</property>
                             <property name="margin_bottom">10</property>
                             <property name="row_spacing">5</property>
+                            <property name="column_spacing">5</property>
                             <property name="column_homogeneous">True</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">This step is optional.  If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.</property>
-                                <property name="label" translatable="yes">Drift Adjustment</property>
+                                <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
+                                <property name="label" translatable="yes">Drift Adjustment (Optional)</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
                                 </attributes>
@@ -607,6 +614,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <signal name="button-press-event" handler="resetDriftP1" swapped="no"/>
                                 <signal name="clicked" handler="clickDriftP1" swapped="no"/>
                               </object>
                               <packing>
@@ -615,38 +623,17 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="driftPointLabel1">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">(0, 0)</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="driftPointLabel2">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">(0, 0)</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkButton" id="selectDriftPoint2">
                                 <property name="label" translatable="yes">Select Point 2</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <signal name="button-press-event" handler="resetDriftP2" swapped="no"/>
                                 <signal name="clicked" handler="clickDriftP2" swapped="no"/>
                               </object>
                               <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                           </object>
@@ -654,6 +641,53 @@
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkGrid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_bottom">10</property>
+                            <property name="row_spacing">5</property>
+                            <property name="column_homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">A rectangle processing area can be dragged on the starting frame.  Only this area will be used during the alignment.  This step does not crop the image however, the full frame is still stacked.  Right click the button to reset the area.</property>
+                                <property name="label" translatable="yes">Processing Area (Optional)</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                                <property name="width">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton">
+                                <property name="label" translatable="yes">Draw Processing Area</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <signal name="button-press-event" handler="resetProcessingArea" swapped="no"/>
+                                <signal name="clicked" handler="clickProcessingArea" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -708,7 +742,7 @@ The 4 types of transformation are described below:
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -765,7 +799,7 @@ The 4 types of transformation are described below:
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                       </object>
@@ -1444,7 +1478,9 @@ The 4 types of transformation are described below:
                             <property name="can_focus">False</property>
                             <property name="halign">center</property>
                             <property name="valign">center</property>
+                            <signal name="button-press-event" handler="dragBegin" swapped="no"/>
                             <signal name="button-press-event" handler="setDriftPoint" swapped="no"/>
+                            <signal name="button-release-event" handler="dragEnd" swapped="no"/>
                             <child>
                               <object class="GtkOverlay">
                                 <property name="visible">True</property>
@@ -1572,12 +1608,6 @@ The 4 types of transformation are described below:
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkAdjustment" id="startFrame">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>

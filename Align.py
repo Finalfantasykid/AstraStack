@@ -28,6 +28,7 @@ class Align:
         self.total = len(self.frames)*3
         
         #Drifting
+        totalFrames = len(self.frames)
         x1 = g.driftP1[0]
         y1 = g.driftP1[1]
         
@@ -36,6 +37,15 @@ class Align:
         
         dx = x2 - x1
         dy = y2 - y1
+        
+        fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, 1, totalFrames)
+        
+        # Processing Area
+        pa1 = g.processingAreaP1
+        pa2 = g.processingAreaP2
+        
+        if(pa1 != (0,0) and pa2 != (0,0)):
+            pa1, pa2 = Align.calcProcessingAreaCoords(pa1, pa2, fdx1, fdy1)
         
         if((x1 == 0 and y1 == 0) or
            (x2 == 0 and y2 == 0)):
@@ -52,7 +62,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(drift, frames, len(self.frames), i*nFrames, dx, dy, g.ui.childConn))
+            futures.append(g.pool.submit(drift, frames, totalFrames, i*nFrames, dx, dy, g.ui.childConn))
 
         for i in range(0, g.nThreads):
             futures[i].result()
@@ -62,7 +72,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, g.ui.childConn))
+            futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, pa1, pa2, g.ui.childConn))
         
         for i in range(0, g.nThreads):
             self.tmats += futures[i].result()
@@ -96,12 +106,17 @@ class Align:
         for i in range(0, g.nThreads):
             futures[i].result()
             
+        if(pa1 != (0,0) and pa2 != (0,0)):
+            # Adjust for transformation cropping
+            pa1 = (max(0, pa1[0] - self.maxX), max(0, pa1[1] - self.maxY))
+            pa2 = (max(0, pa2[0] - self.maxX), max(0, pa2[1] - self.maxY))
+            
         # Filtering
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, g.ui.childConn))
+            futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, pa1, pa2, g.ui.childConn))
         
         for i in range(0, g.nThreads):
             self.similarities += futures[i].result()
@@ -112,25 +127,43 @@ class Align:
         g.ui.finishedAlign()
         g.ui.childConn.send("stop")
         
+    # returns a list of the delta values for the drift points
+    def calcDriftDeltas(dx, dy, i, totalFrames):
+        fdx = dx*i/totalFrames
+        fdy = dy*i/totalFrames
+        
+        if(dx > 0):
+            fdx = dx - fdx
+        if(dy > 0):
+            fdy = dy - fdy
+        
+        fdx1 = abs(dx - fdx)
+        fdy1 = abs(dy - fdy)
+            
+        fdx = abs(fdx)
+        fdy = abs(fdy)
+        
+        return (fdx, fdy, fdx1, fdy1)
+        
+    # returns the processing area coordinates after being drifted
+    def calcProcessingAreaCoords(pa1, pa2, fdx1, fdy1):
+        pac1 = (int(max(0, pa1[0] - fdx1)), int(max(0, pa1[1] - fdy1)))
+        pac2 = (int(max(0, pa2[0] - fdx1)), int(max(0, pa2[1] - fdy1)))
+        
+        # Account for when points are not drawn in top-left, bottom right
+        pa1 = (min(pac1[0], pac2[0]), min(pac1[1], pac2[1]))
+        pa2 = (max(pac1[0], pac2[0]), max(pac1[1], pac2[1]))
+        return (pa1, pa2)
+        
+        
 # Multiprocess function to drift frames
 def drift(frames, totalFrames, startFrame, dx, dy, conn):
     i = startFrame
     for frame in frames:
         if(dx != 0 and dy != 0):
             image = cv2.imread(frame,1)
-            fdx = dx*i/totalFrames
-            fdy = dy*i/totalFrames
             
-            if(dx > 0):
-                fdx = dx - fdx
-            if(dy > 0):
-                fdy = dy - fdy
-            
-            fdx1 = abs(dx - fdx)
-            fdy1 = abs(dy - fdy)
-                
-            fdx = abs(fdx)
-            fdy = abs(fdy)
+            fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)
             
             h, w = image.shape[:2]
             image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
@@ -142,18 +175,25 @@ def drift(frames, totalFrames, startFrame, dx, dy, conn):
             shutil.copyfile(frame, frame.replace("frames", "cache"))           
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, reference, transformation, normalize, conn):
+def align(frames, reference, transformation, normalize, pa1, pa2, conn):
     ref = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+    if(pa1 != (0,0) and pa2 != (0,0)):
+        # Processing Area
+        ref = ref[pa1[1]:pa2[1],pa1[0]:pa2[0]]
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
     scaleFactor = min(1.0, (100/h))
-    ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
+    ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
     if(normalize):
         ref = cv2.normalize(ref, ref, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+    i = 0
     for frame in frames:
         mov = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
-        mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)), interpolation=cv2.INTER_LINEAR)
+        if(pa1 != (0,0) and pa2 != (0,0)):
+            # Processing Area
+            mov = mov[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+        mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
         if(normalize):
             mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         M = sr.register(mov, ref)
@@ -161,6 +201,7 @@ def align(frames, reference, transformation, normalize, conn):
         M[1][2] /= scaleFactor # Y
         tmats.append(M)
         conn.send("Aligning Frames")
+        i += 1
     return tmats
     
 # Multiprocess function to transform and save the images to cache
@@ -182,14 +223,23 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
         conn.send("Transforming Frames")
     
 # Multiprocess function to find the best images (ones closest to the reference frame)
-def filter(frames, reference, normalize, conn):
+def filter(frames, reference, normalize, pa1, pa2, conn):
     similarities = []
-    img1 = cv2.resize(cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE), (64,64))
+    img1 = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
+    if(pa1 != (0,0) and pa2 != (0,0)):
+        # Processing Area
+        img1 = img1[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+    cv2.imwrite("img1.png", img1)
+    img1 = cv2.resize(img1, (64,64))
     if(normalize):
         img1 = cv2.normalize(img1, img1, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     a, a_norm = calculateNorms(img1)
     for frame in frames:
-        img2 = cv2.resize(cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE), (64,64))
+        img2 = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
+        if(pa1 != (0,0) and pa2 != (0,0)):
+            # Processing Area
+            img2 = img2[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+        img2 = cv2.resize(img2, (64,64))
         if(normalize):
             img2 = cv2.normalize(img2, img2, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         b, b_norm = calculateNorms(img2)
