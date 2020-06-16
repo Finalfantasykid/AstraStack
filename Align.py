@@ -229,7 +229,6 @@ def filter(frames, reference, normalize, pa1, pa2, conn):
     if(pa1 != (0,0) and pa2 != (0,0)):
         # Processing Area
         img1 = img1[pa1[1]:pa2[1],pa1[0]:pa2[0]]
-    cv2.imwrite("img1.png", img1)
     img1 = cv2.resize(img1, (64,64))
     if(normalize):
         img1 = cv2.normalize(img1, img1, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)

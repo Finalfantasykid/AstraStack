@@ -271,6 +271,8 @@ class UI:
             
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
+            g.processingAreaP1 = (0, 0)
+            g.processingAreaP2 = (0, 0)
             g.reference = "0"
 
             self.setReference()
