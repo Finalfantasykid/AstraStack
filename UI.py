@@ -499,6 +499,7 @@ class UI:
         self.clickedProcessingArea = True
         self.frameSlider.set_value(g.startFrame)
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
+        self.overlay.queue_draw()
         
     # Reset Processing Area to (0, 0)
     def resetProcessingArea(self, widget, event):
