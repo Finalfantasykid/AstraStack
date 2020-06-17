@@ -90,6 +90,11 @@ class Align:
             else:
                 self.maxY = max(self.maxY, M[1][2])
             
+            if(pa1 != (0,0) and pa2 != (0,0)):
+                t1 = np.array([1, 0, -pa1[0], 0, 1, -pa1[1], 0, 0, 1]).reshape((3,3))
+                t2 = np.array([1, 0,  pa1[0], 0, 1,  pa1[1], 0, 0, 1]).reshape((3,3))
+                self.tmats[i] = t2.dot(M.dot(t1))
+            
         self.minX = math.floor(self.minX)
         self.minY = math.floor(self.minY)
         self.maxX = math.ceil(self.maxX)
