@@ -317,6 +317,9 @@ class UI:
             self.frame.set_from_file(g.tmp + "sharpened.png")
             
     def drawOverlay(self, widget, cr):
+        width = widget.get_allocated_width()
+        height = widget.get_allocated_height()
+        
         def drawPoint(cr, x, y):
             cr.new_sub_path()
             cr.set_line_width(2)
@@ -329,7 +332,19 @@ class UI:
             cr.fill()
             
         def drawRect(cr, x1, y1, x2, y2):
-            cr.set_line_width(2)
+            cr.rectangle(0, 0, x1, y1)
+            cr.rectangle(0, y1, x1, (y2-y1))
+            cr.rectangle(0, y1, x1, height*2)
+            cr.rectangle(x1, y2, (x2-x1), height*2)
+            cr.rectangle(x2, y2, width*2, height*2)
+            cr.rectangle(x2, y1, width*2, (y2-y1))
+            cr.rectangle(x2, 0, width*2, y1)
+            cr.rectangle(x1, 0, (x2-x1), y1)
+            
+            cr.set_source_rgba(0, 0, 0, 0.25)
+            cr.fill()
+            
+            cr.set_line_width(1)
             cr.set_source_rgb(1, 0, 0)
             
             cr.rectangle(x1, y1, (x2-x1), (y2-y1))
@@ -339,11 +354,11 @@ class UI:
             current = self.frameSlider.get_value()
             
             # Processing Area
-            px1 = g.processingAreaP1[0]
-            py1 = g.processingAreaP1[1]
+            px1 = min(g.processingAreaP1[0], g.processingAreaP2[0])
+            py1 = min(g.processingAreaP1[1], g.processingAreaP2[1])
             
-            px2 = g.processingAreaP2[0]
-            py2 = g.processingAreaP2[1]
+            px2 = max(g.processingAreaP1[0], g.processingAreaP2[0])
+            py2 = max(g.processingAreaP1[1], g.processingAreaP2[1])
             
             # Drift Points
             dx1 = g.driftP1[0]
