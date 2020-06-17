@@ -91,6 +91,7 @@ class Align:
                 self.maxY = max(self.maxY, M[1][2])
             
             if(pa1 != (0,0) and pa2 != (0,0)):
+                # Shift the matrix origin to the processing area, and then shift back
                 t1 = np.array([1, 0, -pa1[0], 0, 1, -pa1[1], 0, 0, 1]).reshape((3,3))
                 t2 = np.array([1, 0,  pa1[0], 0, 1,  pa1[1], 0, 0, 1]).reshape((3,3))
                 self.tmats[i] = t2.dot(M.dot(t1))
