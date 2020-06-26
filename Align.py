@@ -17,6 +17,7 @@ class Align:
         self.tmats = []
         self.count = 0
         self.total = 0
+        self.height, self.width = cv2.imread(self.frames[0]).shape[:2]
         
     def run(self):
         def progress(msg):
@@ -25,6 +26,8 @@ class Align:
         
         threads = []
         g.ui.createListener(progress)
+        
+        
         self.total = len(self.frames)*3
         
         #Drifting
@@ -46,6 +49,14 @@ class Align:
         
         if(pa1 != (0,0) and pa2 != (0,0)):
             pa1, pa2 = Align.calcProcessingAreaCoords(pa1, pa2, fdx1, fdy1)
+            
+        if(abs(pa1[0] - pa2[0]) < 10 or
+           abs(pa1[1] - pa2[0]) < 10 or
+           pa1[0] > self.width - abs(dx) - 10 or
+           pa1[1] > self.height - abs(dy) - 10):
+            # If the processing area is too small, just skip it
+            pa1 = (0,0)
+            pa2 = (0,0)
         
         if((x1 == 0 and y1 == 0) or
            (x2 == 0 and y2 == 0)):
@@ -95,7 +106,7 @@ class Align:
                 t1 = np.array([1, 0, -pa1[0], 0, 1, -pa1[1], 0, 0, 1]).reshape((3,3))
                 t2 = np.array([1, 0,  pa1[0], 0, 1,  pa1[1], 0, 0, 1]).reshape((3,3))
                 self.tmats[i] = t2.dot(M.dot(t1))
-            
+        
         self.minX = math.floor(self.minX)
         self.minY = math.floor(self.minY)
         self.maxX = math.ceil(self.maxX)
