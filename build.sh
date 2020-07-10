@@ -7,10 +7,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm -fr dist
     pyinstaller --add-binary "$LIBXCB:." \
                 AstraStack.py
-    rm -fr dist/AstraStack/share/icons/
-    rm -fr dist/AstraStack/share/themes/
-    cp -r share/themes dist/AstraStack/share/
-    cp -r share/icons dist/AstraStack/share/
+    rm -fr dist/AstraStack/share/
     cp -r ui dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
     rm dist/AstraStack/ui/logo.ico

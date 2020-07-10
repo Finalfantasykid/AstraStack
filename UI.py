@@ -669,8 +669,8 @@ class UI:
 def run():
     g.ui = UI()
     
-    Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
-    Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
+    #Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
+    #Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
 
     Gtk.main()
 
