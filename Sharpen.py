@@ -2,9 +2,10 @@ import cv2
 import numpy as np
 import math
 import copy
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait
+from multiprocessing import Manager, Lock
 from pywt import swt2, iswt2
-
+from time import sleep
 from Globals import g
 
 pool = ProcessPoolExecutor(3)
@@ -38,14 +39,17 @@ class Sharpen:
         
     def calculateCoefficients(self, stackedImage):
         (B, G, R) = cv2.split(stackedImage)
-        
-        futureR = pool.submit(calculateChannelCoefficients, R, 'R')
-        futureG = pool.submit(calculateChannelCoefficients, G, 'G')
-        futureB = pool.submit(calculateChannelCoefficients, B, 'B')
-        
-        futureR.result()
-        futureG.result()
-        futureB.result()
+
+        with Manager() as manager:
+            num = manager.Value('i', 0)
+            lock = manager.Lock()
+                
+            futures = []
+            futures.append(pool.submit(calculateChannelCoefficients, R, 'R', num, lock))
+            futures.append(pool.submit(calculateChannelCoefficients, G, 'G', num, lock))
+            futures.append(pool.submit(calculateChannelCoefficients, B, 'B', num, lock))
+            
+            wait(futures)
         
     def sharpenLayers(self):
         gParam = {
@@ -88,9 +92,8 @@ class Sharpen:
         
         cv2.imwrite(g.tmp + "sharpened.png", cv2.merge([B, G, R])[:self.h,:self.w])
         
-def calculateChannelCoefficients(C, channel):
+def calculateChannelCoefficients(C, channel, num, lock):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur
-    
     padding = 2**(Sharpen.LEVEL)
     C = cv2.copyMakeBorder(C, padding, padding, padding, padding, cv2.BORDER_REFLECT)
     
@@ -108,6 +111,12 @@ def calculateChannelCoefficients(C, channel):
     # compute coefficients
     g.coeffs = list(swt2(C, 'haar', level=Sharpen.LEVEL, trim_approx=True))
     g.channel = channel
+    
+    # Make sure that the other processes have completed as well
+    with lock:
+        num.value += 1
+    while(num.value < 3):
+        sleep(0.1)
     
 def sharpenChannelLayers(params):
     c = g.coeffs
@@ -161,3 +170,4 @@ def sharpenChannelLayers(params):
 def unsharp(image, radius, strength):
     blur = cv2.GaussianBlur(image, (0,0), radius)
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
+
