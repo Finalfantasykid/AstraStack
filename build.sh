@@ -30,14 +30,9 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --exclude-module "tkinter" \
                 --exclude-module "Tkinter" \
                 AstraStack.py
-    rm -fr dist/AstraStack/share/icons/
-    rm -fr dist/AstraStack/share/themes/
     rm -fr dist/AstraStack/share/locale/
-    cp -r share/themes dist/AstraStack/share/
-    cp -r share/icons dist/AstraStack/share/
     cp -r ui dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
     rm dist/AstraStack/ui/logo.ico
     C:/'Program Files (x86)'/'Inno Setup 6'/ISCC.exe scripts/inno.iss
 fi
-
