@@ -667,10 +667,11 @@ class UI:
         self.cleanTmp()
 
 def run():
+    # Newer versions of Adwaita scalable icons don't work well with older librsvg.
+    # This can be removed when no longer being built with an older librsvg
+    Gtk.IconTheme.get_default().prepend_search_path('share_override/icons')
+
     g.ui = UI()
-    
-    #Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita")
-    #Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
 
     Gtk.main()
 
