@@ -1395,7 +1395,7 @@ The 4 types of transformation are described below:
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="height_request">32</property>
+                    <property name="height_request">35</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_top">5</property>
@@ -1517,7 +1517,7 @@ The 4 types of transformation are described below:
                 </child>
                 <child>
                   <object class="GtkScale" id="frameScale">
-                    <property name="height_request">32</property>
+                    <property name="height_request">35</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_right">15</property>
