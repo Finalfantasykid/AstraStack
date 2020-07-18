@@ -116,7 +116,7 @@ def calculateChannelCoefficients(C, channel, num, lock):
     with lock:
         num.value += 1
     while(num.value < 3):
-        sleep(0.1)
+        sleep(0.01)
     
 def sharpenChannelLayers(params):
     c = g.coeffs
