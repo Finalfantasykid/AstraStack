@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkAdjustment" id="cpus">
@@ -66,7 +66,7 @@
     <property name="action">save</property>
     <property name="do_overwrite_confirmation">True</property>
     <property name="filter">imageFilter</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -139,7 +139,7 @@
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -267,7 +267,7 @@
     <property name="default_height">720</property>
     <property name="icon">logo.png</property>
     <signal name="destroy" handler="close" swapped="no"/>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child>
@@ -1395,6 +1395,7 @@ The 4 types of transformation are described below:
                 </child>
                 <child>
                   <object class="GtkBox">
+                    <property name="height_request">32</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_top">5</property>
@@ -1516,6 +1517,7 @@ The 4 types of transformation are described below:
                 </child>
                 <child>
                   <object class="GtkScale" id="frameScale">
+                    <property name="height_request">32</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_right">15</property>
@@ -1568,7 +1570,7 @@ The 4 types of transformation are described below:
     <property name="attached_to">mainWindow</property>
     <property name="message_type">error</property>
     <property name="text" translatable="yes">An error occured</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -1624,7 +1626,7 @@ The 4 types of transformation are described below:
     <property name="message_type">warning</property>
     <property name="buttons">yes-no</property>
     <property name="text" translatable="yes">Warning</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
