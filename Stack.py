@@ -25,7 +25,7 @@ class Stack:
         similarities = self.similarities[0:g.limit]
         self.total = g.limit
         if(g.alignChannels):
-            self.total += 2
+            self.total += 4
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(g.limit/g.nThreads)
@@ -45,7 +45,6 @@ class Stack:
         if(g.alignChannels):
             g.ui.childConn.send("Aligning RGB")
             self.alignChannels()
-            g.ui.childConn.send("Aligning RGB")
         
         cv2.imwrite(g.tmp + "stacked.png",self.stackedImage.astype(np.uint8))
         g.ui.setProgress()
@@ -74,6 +73,7 @@ class Stack:
                 minY = min(minY, M[1][2])
             else:
                 maxY = max(maxY, M[1][2])
+            g.ui.childConn.send("Aligning RGB")
                 
         minX = math.floor(minX)
         minY = math.floor(minY)
