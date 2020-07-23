@@ -228,9 +228,8 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
         try:
             M = tmats[i]
             image = cv2.imread(frame.replace("frames", "cache"),1).astype(np.float32) / 255
-            w, h, _ = image.shape
-            image = cv2.warpPerspective(image, M, (h, w))
             h, w = image.shape[:2]
+            image = cv2.warpPerspective(image, M, (w, h))
             image = image[maxY:h+minY, maxX:w+minX]
             cv2.imwrite(frame.replace("frames", "cache"),(image*255).astype(np.uint8))
         except:

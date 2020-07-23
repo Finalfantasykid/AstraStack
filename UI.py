@@ -59,6 +59,7 @@ class UI:
         self.startFrame = self.builder.get_object("startFrame")
         self.endFrame = self.builder.get_object("endFrame")
         self.normalize = self.builder.get_object("normalize")
+        self.alignChannels = self.builder.get_object("alignChannels")
         self.transformation = self.builder.get_object("transformation")
         self.limit = self.builder.get_object("limit")
         self.limitPercent = self.builder.get_object("limitPercent")
@@ -91,6 +92,7 @@ class UI:
         self.checkNewVersion()
         self.setProgress()
         self.setNormalize()
+        self.setAlignChannels()
         self.setTransformation()
         self.setThreads()
         self.frameScale.set_sensitive(False)
@@ -534,6 +536,10 @@ class UI:
     # Sets whether or not to normalize the frames during alignment
     def setNormalize(self, *args):
         g.normalize = self.normalize.get_active()
+        
+    # Sets whether or not to align channels separately
+    def setAlignChannels(self, *args):
+        g.alignChannels = self.alignChannels.get_active()
     
     # Sets the type of transformation
     def setTransformation(self, *args):

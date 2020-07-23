@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+from pystackreg import StackReg
 from Globals import g
 
 class Stack:
@@ -23,6 +24,8 @@ class Stack:
         # Average Blend Mode
         similarities = self.similarities[0:g.limit]
         self.total = g.limit
+        if(g.alignChannels):
+            self.total += 2
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(g.limit/g.nThreads)
@@ -39,10 +42,45 @@ class Stack:
 
         self.stackedImage /= g.limit
         
+        if(g.alignChannels):
+            g.ui.childConn.send("Aligning RGB")
+            self.alignChannels()
+            g.ui.childConn.send("Aligning RGB")
+        
         cv2.imwrite(g.tmp + "stacked.png",self.stackedImage.astype(np.uint8))
         g.ui.setProgress()
         g.ui.finishedStack()
         g.ui.childConn.send("stop")
+        
+    # Aligns the RGB channels to help reduce chromatic aberrations
+    def alignChannels(self):
+        h, w = self.stackedImage.shape[:2]
+        gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_BGR2GRAY)
+        sr = StackReg(StackReg.TRANSLATION)
+        
+        minX = 0
+        minY = 0
+        maxX = 0
+        maxY = 0
+        for i, C in enumerate(cv2.split(self.stackedImage)):
+            M = sr.register(C, gray)
+            self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h))
+            
+            if(M[0][2] < 0):
+                minX = min(minX, M[0][2])
+            else:
+                maxX = max(maxX, M[0][2])
+            if(M[1][2] < 0):
+                minY = min(minY, M[1][2])
+            else:
+                maxY = max(maxY, M[1][2])
+                
+        minX = math.floor(minX)
+        minY = math.floor(minY)
+        maxX = math.ceil(maxX)
+        maxY = math.ceil(maxY)
+                
+        self.stackedImage = self.stackedImage[maxY:h+minY, maxX:w+minX]
         
 # Multiprocess function which sums the given images
 def blendAverage(similarities, conn):
