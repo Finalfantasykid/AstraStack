@@ -57,10 +57,6 @@ class Stack:
         gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_BGR2GRAY)
         sr = StackReg(StackReg.TRANSLATION)
         
-        minX = 0
-        minY = 0
-        maxX = 0
-        maxY = 0
         for i, C in enumerate(cv2.split(self.stackedImage)):
             M = sr.register(C, gray)
             self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h), borderMode=cv2.BORDER_REPLICATE)
