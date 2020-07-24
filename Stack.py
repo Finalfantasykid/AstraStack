@@ -63,24 +63,8 @@ class Stack:
         maxY = 0
         for i, C in enumerate(cv2.split(self.stackedImage)):
             M = sr.register(C, gray)
-            self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h))
-            
-            if(M[0][2] < 0):
-                minX = min(minX, M[0][2])
-            else:
-                maxX = max(maxX, M[0][2])
-            if(M[1][2] < 0):
-                minY = min(minY, M[1][2])
-            else:
-                maxY = max(maxY, M[1][2])
+            self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h), borderMode=cv2.BORDER_REPLICATE)
             g.ui.childConn.send("Aligning RGB")
-                
-        minX = math.floor(minX)
-        minY = math.floor(minY)
-        maxX = math.ceil(maxX)
-        maxY = math.ceil(maxY)
-                
-        self.stackedImage = self.stackedImage[maxY:h+minY, maxX:w+minX]
         
 # Multiprocess function which sums the given images
 def blendAverage(similarities, conn):
