@@ -231,6 +231,7 @@ class UI:
                     raise MemoryError()
                 cv2.imwrite(g.tmp + "stacked.png", img)
                 
+                self.window.set_title(path.split(g.file)[1] + " - AstraStack")
                 self.sharpen = Sharpen(g.tmp + "stacked.png", True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
@@ -282,6 +283,11 @@ class UI:
             self.setEndFrame()
             self.setDriftPoint()
             self.enableUI()
+            if(isinstance(g.file, list)):
+                sList = sorted(g.file)
+                self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - AstraStack")
+            else:
+                self.window.set_title(path.split(g.file)[1] + " - AstraStack")
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)
