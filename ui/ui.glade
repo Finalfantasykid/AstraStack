@@ -135,131 +135,6 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkFileChooserDialog" id="openDialog">
-    <property name="can_focus">False</property>
-    <property name="modal">True</property>
-    <property name="type_hint">dialog</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label" translatable="yes">Open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">button1</action-widget>
-      <action-widget response="-5">button2</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkAdjustment" id="radius1">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius2">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius3">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius4">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius5">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen1">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen2">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen3">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen4">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen5">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="startFrame">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
-  </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AstraStack</property>
@@ -439,369 +314,382 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="alignTab">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">10</property>
-                        <property name="margin_right">10</property>
-                        <property name="margin_top">10</property>
-                        <property name="margin_bottom">10</property>
-                        <property name="orientation">vertical</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">never</property>
                         <child>
-                          <object class="GtkGrid">
+                          <object class="GtkViewport">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkBox" id="alignTab">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">The video can be trimmed so that only frames between 'Start' and 'End' will be aligned.</property>
-                                <property name="label" translatable="yes">Video Trim</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Start</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">End</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0</property>
-                                <property name="adjustment">startFrame</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0</property>
-                                <property name="adjustment">endFrame</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">The reference frame is  used when aligning and stacking.  It should be a frame that looks sharpest.</property>
-                                <property name="label" translatable="yes">Reference Frame</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton">
-                                <property name="label" translatable="yes">Set to current frame</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <signal name="clicked" handler="setReference" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="referenceLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">0</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
-                                <property name="label" translatable="yes">Drift Adjustment (Optional)</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="selectDriftPoint1">
-                                <property name="label" translatable="yes">Select Point 1</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <signal name="button-press-event" handler="resetDriftP1" swapped="no"/>
-                                <signal name="clicked" handler="clickDriftP1" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="selectDriftPoint2">
-                                <property name="label" translatable="yes">Select Point 2</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <signal name="button-press-event" handler="resetDriftP2" swapped="no"/>
-                                <signal name="clicked" handler="clickDriftP2" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">A rectangle processing area can be dragged on the starting frame.  Only this area will be used during the alignment.  This step does not crop the image however, the full frame is still stacked.  Right click the button to reset the area.</property>
-                                <property name="label" translatable="yes">Processing Area (Optional)</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton">
-                                <property name="label" translatable="yes">Draw Processing Area</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <signal name="button-press-event" handler="resetProcessingArea" swapped="no"/>
-                                <signal name="clicked" handler="clickProcessingArea" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">This is a the type of transformation to perform during alignment.  
+                                <property name="margin_left">10</property>
+                                <property name="margin_right">10</property>
+                                <property name="margin_top">10</property>
+                                <property name="margin_bottom">10</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">The video can be trimmed so that only frames between 'Start' and 'End' will be aligned.</property>
+                                        <property name="label" translatable="yes">Video Trim</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Start</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">End</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0</property>
+                                        <property name="adjustment">startFrame</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0</property>
+                                        <property name="adjustment">endFrame</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">The reference frame is  used when aligning and stacking.  It should be a frame that looks sharpest.</property>
+                                        <property name="label" translatable="yes">Reference Frame</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">Set to current frame</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="setReference" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="referenceLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
+                                        <property name="label" translatable="yes">Drift Adjustment (Optional)</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="selectDriftPoint1">
+                                        <property name="label" translatable="yes">Select Point 1</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="button-press-event" handler="resetDriftP1" swapped="no"/>
+                                        <signal name="clicked" handler="clickDriftP1" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="selectDriftPoint2">
+                                        <property name="label" translatable="yes">Select Point 2</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="button-press-event" handler="resetDriftP2" swapped="no"/>
+                                        <signal name="clicked" handler="clickDriftP2" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">A rectangle processing area can be dragged on the starting frame.  Only this area will be used during the alignment.  This step does not crop the image however, the full frame is still stacked.  Right click the button to reset the area.</property>
+                                        <property name="label" translatable="yes">Processing Area (Optional)</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">Draw Processing Area</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="button-press-event" handler="resetProcessingArea" swapped="no"/>
+                                        <signal name="clicked" handler="clickProcessingArea" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">This is a the type of transformation to perform during alignment.  
 The 4 types of transformation are described below:
 
 - Translation
 - Rigid Body (Translation + Rotation)
 - Scaled Rotation (Translation + Rotation + Scaling)
 - Affine (Translation + Rotation + Scaling + Shearing)</property>
-                                <property name="label" translatable="yes">Transformation</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
+                                        <property name="label" translatable="yes">Transformation</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="transformation">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="active">1</property>
+                                        <items>
+                                          <item id="0" translatable="yes">Translation</item>
+                                          <item id="1" translatable="yes">Rigid Body</item>
+                                          <item id="2" translatable="yes">Scaled Rotation</item>
+                                          <item id="3" translatable="yes">Affine</item>
+                                        </items>
+                                        <signal name="changed" handler="setTransformation" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Alignment</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="normalize">
+                                        <property name="label" translatable="yes">Normalize frames during alignment</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="tooltip_text" translatable="yes">Frame brightness will be normalized during alignment and during frame similarity.</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="setNormalize" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="alignButton">
+                                        <property name="label" translatable="yes">Align</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="clickAlign" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">2</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">5</property>
+                                  </packing>
+                                </child>
                               </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBoxText" id="transformation">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="active">1</property>
-                                <items>
-                                  <item id="0" translatable="yes">Translation</item>
-                                  <item id="1" translatable="yes">Rigid Body</item>
-                                  <item id="2" translatable="yes">Scaled Rotation</item>
-                                  <item id="3" translatable="yes">Affine</item>
-                                </items>
-                                <signal name="changed" handler="setTransformation" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                                <property name="width">2</property>
-                              </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="row_spacing">5</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Alignment</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="normalize">
-                                <property name="label" translatable="yes">Normalize frames during alignment</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Frame brightness will be normalized during alignment and during frame similarity.</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="setNormalize" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="alignButton">
-                                <property name="label" translatable="yes">Align</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <signal name="clicked" handler="clickAlign" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                                <property name="width">2</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">5</property>
-                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -968,427 +856,436 @@ The 4 types of transformation are described below:
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="processTab">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">10</property>
-                        <property name="margin_right">10</property>
-                        <property name="margin_top">10</property>
-                        <property name="margin_bottom">10</property>
-                        <property name="orientation">vertical</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">never</property>
                         <child>
-                          <object class="GtkGrid">
+                          <object class="GtkViewport">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="row_spacing">5</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkBox" id="processTab">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Wavelets</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                                <property name="width">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">The wavelet level</property>
-                                <property name="label" translatable="yes">Level</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScale">
-                                <property name="width_request">365</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="adjustment">sharpen3</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <property name="value_pos">right</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">7</property>
-                                <property name="width">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScale">
-                                <property name="width_request">365</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="adjustment">sharpen2</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <property name="value_pos">right</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">5</property>
-                                <property name="width">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScale">
-                                <property name="width_request">365</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="adjustment">sharpen1</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <property name="value_pos">right</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
-                                <property name="width">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">denoise3</property>
-                                <property name="digits">2</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="margin_left">5</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">radius3</property>
-                                <property name="digits">1</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">denoise2</property>
-                                <property name="digits">2</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="margin_left">5</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">radius2</property>
-                                <property name="digits">1</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">denoise1</property>
-                                <property name="digits">2</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="margin_left">5</property>
-                                <property name="adjustment">radius1</property>
-                                <property name="digits">1</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Gaussian blur radius</property>
-                                <property name="label" translatable="yes">Denoise</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Unsharpen mask radius</property>
-                                <property name="label" translatable="yes">Sharpen</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="level1">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                <property name="margin_left">10</property>
+                                <property name="margin_right">10</property>
+                                <property name="margin_top">10</property>
+                                <property name="margin_bottom">10</property>
+                                <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkGrid">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Smallest Details (1px)</property>
-                                    <property name="label" translatable="yes">1:</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="row_spacing">5</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Wavelets</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">The wavelet level</property>
+                                        <property name="label" translatable="yes">Level</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">365</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">sharpen3</property>
+                                        <property name="round_digits">2</property>
+                                        <property name="digits">2</property>
+                                        <property name="value_pos">right</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">7</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">365</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">sharpen2</property>
+                                        <property name="round_digits">2</property>
+                                        <property name="digits">2</property>
+                                        <property name="value_pos">right</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">5</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">365</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">sharpen1</property>
+                                        <property name="round_digits">2</property>
+                                        <property name="digits">2</property>
+                                        <property name="value_pos">right</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">3</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.00</property>
+                                        <property name="adjustment">denoise3</property>
+                                        <property name="digits">2</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">6</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.0</property>
+                                        <property name="adjustment">radius3</property>
+                                        <property name="digits">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">6</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.00</property>
+                                        <property name="adjustment">denoise2</property>
+                                        <property name="digits">2</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.0</property>
+                                        <property name="adjustment">radius2</property>
+                                        <property name="digits">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.00</property>
+                                        <property name="adjustment">denoise1</property>
+                                        <property name="digits">2</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.0</property>
+                                        <property name="adjustment">radius1</property>
+                                        <property name="digits">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Gaussian blur radius</property>
+                                        <property name="label" translatable="yes">Denoise</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Unsharpen mask radius</property>
+                                        <property name="label" translatable="yes">Sharpen</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="level1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Smallest Details (1px)</property>
+                                            <property name="label" translatable="yes">1:</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="level2">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Small Details (2px)</property>
+                                            <property name="label" translatable="yes">2:</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="level3">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Medium Details (4px)</property>
+                                            <property name="label" translatable="yes">3:</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">6</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="level4">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Large Details (8px)</property>
+                                            <property name="label" translatable="yes">4:</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">8</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.00</property>
+                                        <property name="adjustment">denoise4</property>
+                                        <property name="digits">2</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">8</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.0</property>
+                                        <property name="adjustment">radius4</property>
+                                        <property name="digits">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">8</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">365</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">sharpen4</property>
+                                        <property name="round_digits">2</property>
+                                        <property name="digits">2</property>
+                                        <property name="value_pos">right</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">9</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="level5">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Largest Details (16px)</property>
+                                            <property name="label" translatable="yes">5:</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">10</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.00</property>
+                                        <property name="adjustment">denoise5</property>
+                                        <property name="digits">2</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">10</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="text" translatable="yes">0.0</property>
+                                        <property name="adjustment">radius5</property>
+                                        <property name="digits">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">2</property>
+                                        <property name="top_attach">10</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">365</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">sharpen5</property>
+                                        <property name="round_digits">2</property>
+                                        <property name="digits">2</property>
+                                        <property name="value_pos">right</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">11</property>
+                                        <property name="width">3</property>
+                                      </packing>
+                                    </child>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
                                 </child>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="level2">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
                                 <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Small Details (2px)</property>
-                                    <property name="label" translatable="yes">2:</property>
-                                  </object>
+                                  <placeholder/>
                                 </child>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="level3">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkButton">
+                                    <property name="label" translatable="yes">Save Image</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Medium Details (4px)</property>
-                                    <property name="label" translatable="yes">3:</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <signal name="clicked" handler="saveFileDialog" swapped="no"/>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
+                                  </packing>
                                 </child>
                               </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="level4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Large Details (8px)</property>
-                                    <property name="label" translatable="yes">4:</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0.0</property>
-                                <property name="adjustment">denoise4</property>
-                                <property name="digits">2</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="margin_left">5</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">radius4</property>
-                                <property name="digits">1</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScale">
-                                <property name="width_request">365</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="adjustment">sharpen4</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <property name="value_pos">right</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">9</property>
-                                <property name="width">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="level5">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="sharpenImage" swapped="no"/>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Largest Details (16px)</property>
-                                    <property name="label" translatable="yes">5:</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">10</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text" translatable="yes">0.0</property>
-                                <property name="adjustment">denoise5</property>
-                                <property name="digits">2</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">10</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="margin_left">5</property>
-                                <property name="text" translatable="yes">0.5</property>
-                                <property name="adjustment">radius5</property>
-                                <property name="digits">1</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">10</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScale">
-                                <property name="width_request">365</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="adjustment">sharpen5</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <property name="value_pos">right</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">11</property>
-                                <property name="width">3</property>
-                              </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <object class="GtkButton">
-                            <property name="label" translatable="yes">Save Image</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <signal name="clicked" handler="saveFileDialog" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1630,6 +1527,131 @@ The 4 types of transformation are described below:
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="openDialog">
+    <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="type_hint">dialog</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label" translatable="yes">Open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button1</action-widget>
+      <action-widget response="-5">button2</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkAdjustment" id="radius1">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius2">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius3">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius4">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius5">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen1">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen2">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen3">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen4">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen5">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="startFrame">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>
