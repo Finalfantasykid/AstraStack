@@ -89,8 +89,24 @@ class Sharpen:
                 G = result[1]
             elif(result[0] == 'B'):
                 B = result[1]
+                
+        img = cv2.merge([B, G, R])[:self.h,:self.w]
         
-        cv2.imwrite(g.tmp + "sharpened.png", cv2.merge([B, G, R])[:self.h,:self.w])
+        # Black Level
+        img = (img - (g.blackLevel/255))*(1 + (g.blackLevel / 255))
+        
+        # White Level
+        #img = (img + (1 - g.whiteLevel/255))*((g.whiteLevel / 255))
+        img = img/(max(0.1, g.whiteLevel) / 255)
+        
+        # Gamma
+        img = pow(img, 1/g.gamma)
+        
+        img *= 255
+        img[img>255] = 255
+        img[img<0] = 0
+        
+        cv2.imwrite(g.tmp + "sharpened.png", img)
         
 def calculateChannelCoefficients(C, channel, num, lock):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur
@@ -161,11 +177,8 @@ def sharpenChannelLayers(params):
     
     # Prepare image for saving
     img = img[padding:,padding:]
-    img *= 255
-    img[img>255] = 255
-    img[img<0] = 0
     
-    return (g.channel, np.uint8(img))
+    return (g.channel, img)
     
 def unsharp(image, radius, strength):
     blur = cv2.GaussianBlur(image, (0,0), radius)

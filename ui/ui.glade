@@ -2,6 +2,12 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="blackLevel">
+    <property name="upper">255</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="cpus">
     <property name="lower">1</property>
     <property name="upper">4</property>
@@ -52,6 +58,14 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="updateImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="gamma">
+    <property name="lower">0.10000000000000001</property>
+    <property name="upper">2</property>
+    <property name="value">1</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="imageFilter">
     <mime-types>
@@ -134,6 +148,181 @@
     <property name="value">50</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+  </object>
+  <object class="GtkFileChooserDialog" id="openDialog">
+    <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="type_hint">dialog</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label" translatable="yes">Open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button1</action-widget>
+      <action-widget response="-5">button2</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkAdjustment" id="radius1">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius2">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius3">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius4">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="radius5">
+    <property name="upper">100</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen1">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen2">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen3">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen4">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="sharpen5">
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="startFrame">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
+  </object>
+  <object class="GtkFileFilter" id="videoFilter">
+    <mime-types>
+      <mime-type>video/*</mime-type>
+      <mime-type>video/quicktime</mime-type>
+      <mime-type>video/x-msvideo</mime-type>
+      <mime-type>video/mp4</mime-type>
+      <mime-type>video/x-ms-wmv</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkMessageDialog" id="warningDialog">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">yes-no</property>
+    <property name="text" translatable="yes">Warning</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAdjustment" id="whiteLevel">
+    <property name="upper">255</property>
+    <property name="value">255</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
@@ -795,7 +984,7 @@ The 4 types of transformation are described below:
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Each colour channel will be aligned after stacking.  Can help reduce chromatic aberrations.</property>
+                                <property name="tooltip_text" translatable="yes">Each color channel will be aligned after stacking.  Can help reduce chromatic aberrations.</property>
                                 <property name="draw_indicator">True</property>
                                 <signal name="toggled" handler="setAlignChannels" swapped="no"/>
                               </object>
@@ -1267,7 +1456,113 @@ The 4 types of transformation are described below:
                                   </packing>
                                 </child>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkGrid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="column_spacing">5</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Colors &amp; Brightness</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Controls the mid-tones of the image.</property>
+                                        <property name="label" translatable="yes">Gamma:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Controls the where the black level is.  Increasing this value darkens the overall image.</property>
+                                        <property name="label" translatable="yes">Black Level:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Controls the where the white level is.  Decreasing this value brightens the overall image.</property>
+                                        <property name="label" translatable="yes">White Level:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="width_request">285</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">gamma</property>
+                                        <property name="round_digits">1</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">blackLevel</property>
+                                        <property name="round_digits">0</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">whiteLevel</property>
+                                        <property name="round_digits">0</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton">
@@ -1527,173 +1822,5 @@ The 4 types of transformation are described below:
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkFileChooserDialog" id="openDialog">
-    <property name="can_focus">False</property>
-    <property name="modal">True</property>
-    <property name="type_hint">dialog</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label" translatable="yes">Open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">button1</action-widget>
-      <action-widget response="-5">button2</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkAdjustment" id="radius1">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius2">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius3">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius4">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="radius5">
-    <property name="upper">100</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen1">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen2">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen3">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen4">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="sharpen5">
-    <property name="upper">1</property>
-    <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="startFrame">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="setStartFrame" swapped="no"/>
-  </object>
-  <object class="GtkFileFilter" id="videoFilter">
-    <mime-types>
-      <mime-type>video/*</mime-type>
-      <mime-type>video/quicktime</mime-type>
-      <mime-type>video/x-msvideo</mime-type>
-      <mime-type>video/mp4</mime-type>
-      <mime-type>video/x-ms-wmv</mime-type>
-    </mime-types>
-  </object>
-  <object class="GtkMessageDialog" id="warningDialog">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <property name="message_type">warning</property>
-    <property name="buttons">yes-no</property>
-    <property name="text" translatable="yes">Warning</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
   </object>
 </interface>

@@ -639,6 +639,10 @@ class UI:
         g.level4 = self.builder.get_object("level4").get_active()
         g.level5 = self.builder.get_object("level5").get_active()
         
+        g.gamma = self.builder.get_object("gamma").get_value()
+        g.blackLevel = self.builder.get_object("blackLevel").get_value()
+        g.whiteLevel = self.builder.get_object("whiteLevel").get_value()
+        
         if(self.sharpen is None):
             if(self.stack is not None):
                 self.sharpen = Sharpen(self.stack.stackedImage)
