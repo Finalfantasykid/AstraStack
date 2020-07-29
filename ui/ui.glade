@@ -1001,6 +1001,7 @@ The 4 types of transformation are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">The wavelet level</property>
                                 <property name="label" translatable="yes">Level</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -1143,6 +1144,7 @@ The 4 types of transformation are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Gaussian blur radius</property>
                                 <property name="label" translatable="yes">Denoise</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -1157,6 +1159,7 @@ The 4 types of transformation are described below:
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Unsharpen mask radius</property>
                                 <property name="label" translatable="yes">Sharpen</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
