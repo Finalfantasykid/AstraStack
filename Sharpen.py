@@ -105,7 +105,7 @@ class Sharpen:
         img = cv2.merge([B, G, R])[:self.h,:self.w]
         
         # Black Level
-        img = (img - (g.blackLevel/255))*(1 + (g.blackLevel / 255))
+        img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
         
         # White Level
         img = img/(max(0.1, g.whiteLevel) / 255)
