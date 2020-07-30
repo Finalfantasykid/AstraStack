@@ -116,6 +116,7 @@ class Sharpen:
         # Gamma
         img = pow(img, 1/g.gamma)
         
+        # Decompose
         (B, G, R) = cv2.split(img)
         
         # Red Adjust
@@ -127,6 +128,7 @@ class Sharpen:
         # Blue Adjust
         B *= g.blueAdjust/255
         
+        # Recompose
         img = cv2.merge([B, G, R])
 
         img *= 255
@@ -151,7 +153,7 @@ def calculateChannelCoefficients(C, channel, num, lock):
     C =  np.float32(C)
     C /= 255
 
-    # compute coefficients
+    # Compute coefficients
     g.coeffs = list(swt2(C, 'haar', level=Sharpen.LEVEL, trim_approx=True))
     g.channel = channel
     
@@ -193,7 +195,7 @@ def sharpenChannelLayers(params):
                 unsharp(c[i][1], params['denoise'][level]*10, -1)
                 unsharp(c[i][2], params['denoise'][level]*10, -1)
     
-    # reconstruction
+    # Reconstruction
     padding = 2**(Sharpen.LEVEL)
     img=iswt2(c, 'haar')
     

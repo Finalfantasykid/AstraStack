@@ -653,7 +653,7 @@ class UI:
                               self.builder.get_object("redAdjust") == args[0] or
                               self.builder.get_object("greenAdjust") == args[0] or
                               self.builder.get_object("blueAdjust") == args[0])):
-            processAgain = False
+            processAgain = self.sharpen.processAgain
             processColor = True
         else:
             processAgain = True
@@ -670,7 +670,6 @@ class UI:
         else:
             self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processColor))
             self.processThread.start()
-            self.frame.set_from_file(g.tmp + "sharpened.png")
     
     # Called when sharpening is complete
     def finishedSharpening(self):
