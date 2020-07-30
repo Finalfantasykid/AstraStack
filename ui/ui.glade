@@ -8,6 +8,13 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="blueAdjust">
+    <property name="upper">255</property>
+    <property name="value">255</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="cpus">
     <property name="lower">1</property>
     <property name="upper">4</property>
@@ -64,6 +71,13 @@
     <property name="upper">2</property>
     <property name="value">1</property>
     <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">0.20000000000000001</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="greenAdjust">
+    <property name="upper">255</property>
+    <property name="value">255</property>
+    <property name="step_increment">1</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -235,6 +249,13 @@
   <object class="GtkAdjustment" id="radius5">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="redAdjust">
+    <property name="upper">255</property>
+    <property name="value">255</property>
+    <property name="step_increment">1</property>
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -1517,7 +1538,6 @@ The 4 types of transformation are described below:
                                     </child>
                                     <child>
                                       <object class="GtkScale">
-                                        <property name="width_request">285</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">gamma</property>
@@ -1531,6 +1551,7 @@ The 4 types of transformation are described below:
                                     </child>
                                     <child>
                                       <object class="GtkScale">
+                                        <property name="width_request">269</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">blackLevel</property>
@@ -1555,6 +1576,89 @@ The 4 types of transformation are described below:
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the red gamma.</property>
+                                        <property name="margin_top">10</property>
+                                        <property name="label" translatable="yes">Red Adjust:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the green gamma.</property>
+                                        <property name="label" translatable="yes">Green Adjust:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">5</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the blue gamma.</property>
+                                        <property name="label" translatable="yes">Blue Adjust:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">6</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="margin_top">10</property>
+                                        <property name="adjustment">redAdjust</property>
+                                        <property name="round_digits">1</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">greenAdjust</property>
+                                        <property name="round_digits">1</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">5</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">blueAdjust</property>
+                                        <property name="round_digits">1</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">6</property>
                                       </packing>
                                     </child>
                                   </object>

@@ -643,6 +643,10 @@ class UI:
         g.blackLevel = self.builder.get_object("blackLevel").get_value()
         g.whiteLevel = self.builder.get_object("whiteLevel").get_value()
         
+        g.redAdjust = self.builder.get_object("redAdjust").get_value()
+        g.greenAdjust = self.builder.get_object("greenAdjust").get_value()
+        g.blueAdjust = self.builder.get_object("blueAdjust").get_value()
+        
         if(self.sharpen is None):
             if(self.stack is not None):
                 self.sharpen = Sharpen(self.stack.stackedImage)

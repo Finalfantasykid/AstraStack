@@ -90,18 +90,29 @@ class Sharpen:
             elif(result[0] == 'B'):
                 B = result[1]
                 
+        self.processColor(R, G, B)
+    
+    def processColor(self, R, G, B):
+        # Red Adjust
+        R *= g.redAdjust/255
+        
+        # Green Adjust
+        G *= g.greenAdjust/255
+        
+        # Blue Adjust
+        B *= g.blueAdjust/255
+        
         img = cv2.merge([B, G, R])[:self.h,:self.w]
         
         # Black Level
         img = (img - (g.blackLevel/255))*(1 + (g.blackLevel / 255))
         
         # White Level
-        #img = (img + (1 - g.whiteLevel/255))*((g.whiteLevel / 255))
         img = img/(max(0.1, g.whiteLevel) / 255)
         
         # Gamma
         img = pow(img, 1/g.gamma)
-        
+
         img *= 255
         img[img>255] = 255
         img[img<0] = 0
