@@ -647,15 +647,28 @@ class UI:
         g.greenAdjust = self.builder.get_object("greenAdjust").get_value()
         g.blueAdjust = self.builder.get_object("blueAdjust").get_value()
         
+        if(len(args) > 0 and (self.builder.get_object("gamma") == args[0] or
+                              self.builder.get_object("blackLevel") == args[0] or
+                              self.builder.get_object("whiteLevel") == args[0] or
+                              self.builder.get_object("redAdjust") == args[0] or
+                              self.builder.get_object("greenAdjust") == args[0] or
+                              self.builder.get_object("blueAdjust") == args[0])):
+            processAgain = False
+            processColor = True
+        else:
+            processAgain = True
+            processColor = False
+        
         if(self.sharpen is None):
             if(self.stack is not None):
                 self.sharpen = Sharpen(self.stack.stackedImage)
             else:
                 self.sharpen = Sharpen(g.tmp + "stacked.png", True)
         if(self.processThread != None and self.processThread.is_alive()):
-            self.sharpen.processAgain = True
+            self.sharpen.processAgain = processAgain
+            self.sharpen.processColorAgain = processColor
         else:
-            self.processThread = Thread(target=self.sharpen.run, args=())
+            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processColor))
             self.processThread.start()
             self.frame.set_from_file(g.tmp + "sharpened.png")
     

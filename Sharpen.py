@@ -27,14 +27,26 @@ class Sharpen:
             # Use the higher bit depth version from the stacking process
             pass
         self.h, self.w = stackedImage.shape[:2]
+        self.sharpenedImage = stackedImage
         self.calculateCoefficients(stackedImage)
         self.processAgain = False
+        self.processColorAgain = False
         
-    def run(self):
-        self.processAgain = True
-        while(self.processAgain):
-            self.processAgain = False
-            self.sharpenLayers()
+    def run(self, processAgain=True, processColorAgain=False):
+        self.processAgain = processAgain
+        self.processColorAgain = processColorAgain
+        while(self.processAgain or self.processColorAgain):
+            if(self.processAgain):
+                # Process sharpening and color
+                self.processAgain = False
+                self.processColorAgain = False
+                self.sharpenLayers()
+                self.processColor()
+            else:
+                # Only process color
+                self.processAgain = False
+                self.processColorAgain = False
+                self.processColor()
             g.ui.finishedSharpening()
         
     def calculateCoefficients(self, stackedImage):
@@ -90,19 +102,10 @@ class Sharpen:
             elif(result[0] == 'B'):
                 B = result[1]
                 
-        self.processColor(R, G, B)
+        self.sharpenedImage = cv2.merge([B, G, R])[:self.h,:self.w]
     
-    def processColor(self, R, G, B):
-        # Red Adjust
-        R *= g.redAdjust/255
-        
-        # Green Adjust
-        G *= g.greenAdjust/255
-        
-        # Blue Adjust
-        B *= g.blueAdjust/255
-        
-        img = cv2.merge([B, G, R])[:self.h,:self.w]
+    def processColor(self):
+        img = self.sharpenedImage.copy()
         
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
@@ -112,6 +115,19 @@ class Sharpen:
         
         # Gamma
         img = pow(img, 1/g.gamma)
+        
+        (B, G, R) = cv2.split(img)
+        
+        # Red Adjust
+        R *= g.redAdjust/255
+        
+        # Green Adjust
+        G *= g.greenAdjust/255
+        
+        # Blue Adjust
+        B *= g.blueAdjust/255
+        
+        img = cv2.merge([B, G, R])
 
         img *= 255
         img[img>255] = 255
