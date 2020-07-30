@@ -1171,6 +1171,7 @@ The 4 types of transformation are described below:
                                       <object class="GtkSpinButton">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise3</property>
                                         <property name="digits">2</property>
@@ -1197,6 +1198,7 @@ The 4 types of transformation are described below:
                                       <object class="GtkSpinButton">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise2</property>
                                         <property name="digits">2</property>
@@ -1223,6 +1225,7 @@ The 4 types of transformation are described below:
                                       <object class="GtkSpinButton">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise1</property>
                                         <property name="digits">2</property>
@@ -1367,6 +1370,7 @@ The 4 types of transformation are described below:
                                       <object class="GtkSpinButton">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise4</property>
                                         <property name="digits">2</property>
@@ -1431,6 +1435,7 @@ The 4 types of transformation are described below:
                                       <object class="GtkSpinButton">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise5</property>
                                         <property name="digits">2</property>
