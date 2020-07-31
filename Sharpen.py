@@ -105,7 +105,7 @@ class Sharpen:
         self.sharpenedImage = cv2.merge([B, G, R])[:self.h,:self.w]
     
     def processColor(self):
-        img = self.sharpenedImage.copy()
+        img = self.sharpenedImage
         
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
@@ -114,6 +114,7 @@ class Sharpen:
         img = img/(max(0.1, g.whiteLevel) / 255)
         
         # Gamma
+        img[img<0] = 0
         img = pow(img, 1/g.gamma)
         
         # Decompose
@@ -131,6 +132,7 @@ class Sharpen:
         # Recompose
         img = cv2.merge([B, G, R])
 
+        # Clip at 0 and 255
         img *= 255
         img[img>255] = 255
         img[img<0] = 0
