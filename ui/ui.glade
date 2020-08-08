@@ -5,14 +5,12 @@
   <object class="GtkAdjustment" id="blackLevel">
     <property name="upper">255</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="blueAdjust">
     <property name="upper">255</property>
     <property name="value">255</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="cpus">
@@ -25,39 +23,33 @@
     <signal name="value-changed" handler="setThreads" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise1">
-    <property name="upper">1</property>
-    <property name="step_increment">0.049999999776482583</property>
-    <property name="page_increment">10</property>
+    <property name="upper">10</property>
+    <property name="step_increment">0.5</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise2">
-    <property name="upper">1</property>
-    <property name="step_increment">0.049999999776482583</property>
-    <property name="page_increment">10</property>
+    <property name="upper">10</property>
+    <property name="step_increment">0.5</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise3">
-    <property name="upper">1</property>
-    <property name="step_increment">0.049999999776482583</property>
-    <property name="page_increment">10</property>
+    <property name="upper">10</property>
+    <property name="step_increment">0.5</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise4">
-    <property name="upper">1</property>
-    <property name="step_increment">0.049999999776482583</property>
-    <property name="page_increment">10</property>
+    <property name="upper">10</property>
+    <property name="step_increment">0.5</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise5">
-    <property name="upper">1</property>
-    <property name="step_increment">0.050000000000000003</property>
-    <property name="page_increment">10</property>
+    <property name="upper">10</property>
+    <property name="step_increment">0.5</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="endFrame">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="setEndFrame" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="frameSlider">
@@ -71,14 +63,12 @@
     <property name="upper">2</property>
     <property name="value">1</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">0.20000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="greenAdjust">
     <property name="upper">255</property>
     <property name="value">255</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="imageFilter">
@@ -225,74 +215,62 @@
   <object class="GtkAdjustment" id="radius1">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius2">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius3">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius4">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius5">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="redAdjust">
     <property name="upper">255</property>
     <property name="value">255</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen1">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen2">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen3">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen4">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen5">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
-    <property name="page_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="startFrame">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
@@ -594,11 +572,12 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="startFrameWidget">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">startFrame</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -606,11 +585,12 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="endFrameWidget">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">endFrame</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -825,6 +805,7 @@ The 4 types of transformation are described below:
                                           <item id="3" translatable="yes">Affine</item>
                                         </items>
                                         <signal name="changed" handler="setTransformation" swapped="no"/>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1120,7 +1101,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="sharpenWidget3">
                                         <property name="width_request">365</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1128,6 +1109,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">2</property>
                                         <property name="digits">2</property>
                                         <property name="value_pos">right</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1136,7 +1118,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="sharpenWidget2">
                                         <property name="width_request">365</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1144,6 +1126,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">2</property>
                                         <property name="digits">2</property>
                                         <property name="value_pos">right</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1152,7 +1135,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="sharpenWidget1">
                                         <property name="width_request">365</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1160,6 +1143,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">2</property>
                                         <property name="digits">2</property>
                                         <property name="value_pos">right</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1168,13 +1152,14 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="denoiseWidget3">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise3</property>
-                                        <property name="digits">2</property>
+                                        <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1182,12 +1167,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="radiusWidget3">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0.0</property>
                                         <property name="adjustment">radius3</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1195,13 +1181,14 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="denoiseWidget2">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise2</property>
-                                        <property name="digits">2</property>
+                                        <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1209,12 +1196,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="radiusWidget2">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0.0</property>
                                         <property name="adjustment">radius2</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1222,13 +1210,14 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="denoiseWidget1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise1</property>
-                                        <property name="digits">2</property>
+                                        <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1236,12 +1225,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="radiusWidget1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0.0</property>
                                         <property name="adjustment">radius1</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1367,13 +1357,14 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="denoiseWidget4">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise4</property>
-                                        <property name="digits">2</property>
+                                        <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1381,12 +1372,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="radiusWidget4">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0.0</property>
                                         <property name="adjustment">radius4</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1394,7 +1386,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="sharpenWidget4">
                                         <property name="width_request">365</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1402,6 +1394,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">2</property>
                                         <property name="digits">2</property>
                                         <property name="value_pos">right</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1432,13 +1425,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="denoiseWidget5">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_right">5</property>
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise5</property>
-                                        <property name="digits">2</property>
+                                        <property name="digits">1</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1446,12 +1439,13 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton">
+                                      <object class="GtkSpinButton" id="radiusWidget5">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="text" translatable="yes">0.0</property>
                                         <property name="adjustment">radius5</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1459,7 +1453,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="sharpenWidget5">
                                         <property name="width_request">365</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1467,6 +1461,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">2</property>
                                         <property name="digits">2</property>
                                         <property name="value_pos">right</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1548,6 +1543,7 @@ The 4 types of transformation are described below:
                                         <property name="adjustment">gamma</property>
                                         <property name="round_digits">1</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1563,6 +1559,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">0</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1577,6 +1574,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">0</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>

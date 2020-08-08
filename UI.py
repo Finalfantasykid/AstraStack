@@ -70,7 +70,6 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
 
-        
         self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
         self.cpus.set_value(min(61, math.ceil(cpu_count()/2)))
         g.pool = None
@@ -98,6 +97,9 @@ class UI:
         self.frameScale.set_sensitive(False)
         g.reference = "0"
         
+    def propagateScroll(self, widget, event):
+        Gtk.propagate_event(widget.get_parent(), event)
+    
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
         def listener(function):

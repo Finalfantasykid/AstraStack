@@ -188,14 +188,15 @@ def sharpenChannelLayers(params):
                 unsharp(c[i][2], params['radius'][level], 1)
             # Multiply the layer to increase intensity
             if(params['sharpen'][level] > 0):
-                cv2.add(c[i][0], c[i][0]*params['sharpen'][level]*50, c[i][0])
-                cv2.add(c[i][1], c[i][1]*params['sharpen'][level]*50, c[i][1])
-                cv2.add(c[i][2], c[i][2]*params['sharpen'][level]*50, c[i][2])
+                factor = (100 - 10*level)
+                cv2.add(c[i][0], c[i][0]*params['sharpen'][level]*factor, c[i][0])
+                cv2.add(c[i][1], c[i][1]*params['sharpen'][level]*factor, c[i][1])
+                cv2.add(c[i][2], c[i][2]*params['sharpen'][level]*factor, c[i][2])
             # Denoise
             if(params['denoise'][level] > 0):
-                unsharp(c[i][0], params['denoise'][level]*10, -1)
-                unsharp(c[i][1], params['denoise'][level]*10, -1)
-                unsharp(c[i][2], params['denoise'][level]*10, -1)
+                unsharp(c[i][0], params['denoise'][level], -1)
+                unsharp(c[i][1], params['denoise'][level], -1)
+                unsharp(c[i][2], params['denoise'][level], -1)
     
     # Reconstruction
     padding = 2**(Sharpen.LEVEL)
