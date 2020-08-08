@@ -26,8 +26,10 @@ class Sharpen:
         else:
             # Use the higher bit depth version from the stacking process
             pass
+        stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
         self.h, self.w = stackedImage.shape[:2]
         self.sharpenedImage = stackedImage
+        self.finalImage = stackedImage
         self.calculateCoefficients(stackedImage)
         self.processAgain = False
         self.processColorAgain = False
@@ -50,7 +52,7 @@ class Sharpen:
             g.ui.finishedSharpening()
         
     def calculateCoefficients(self, stackedImage):
-        (B, G, R) = cv2.split(stackedImage)
+        (R, G, B) = cv2.split(stackedImage)
 
         with Manager() as manager:
             num = manager.Value('i', 0)
@@ -102,7 +104,7 @@ class Sharpen:
             elif(result[0] == 'B'):
                 B = result[1]
                 
-        self.sharpenedImage = cv2.merge([B, G, R])[:self.h,:self.w]
+        self.sharpenedImage = cv2.merge([R, G, B])[:self.h,:self.w]
     
     def processColor(self):
         img = self.sharpenedImage
@@ -118,7 +120,7 @@ class Sharpen:
         img = pow(img, 1/g.gamma)
         
         # Decompose
-        (B, G, R) = cv2.split(img)
+        (R, G, B) = cv2.split(img)
         
         # Red Adjust
         R *= g.redAdjust/255
@@ -130,14 +132,14 @@ class Sharpen:
         B *= g.blueAdjust/255
         
         # Recompose
-        img = cv2.merge([B, G, R])
-
+        img = cv2.merge([R, G, B])
+        
         # Clip at 0 and 255
         img *= 255
         img[img>255] = 255
         img[img<0] = 0
         
-        cv2.imwrite(g.tmp + "sharpened.png", img)
+        self.finalImage = img
         
 def calculateChannelCoefficients(C, channel, num, lock):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur

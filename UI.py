@@ -19,7 +19,7 @@ from Globals import g
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 class UI:
     
@@ -253,8 +253,7 @@ class UI:
         if(response == Gtk.ResponseType.OK):
             fileName = self.saveDialog.get_filename()
             try:
-                sharpened = cv2.imread(g.tmp + "sharpened.png")
-                cv2.imwrite(fileName, sharpened)
+                cv2.imwrite(fileName, cv2.cvtColor(self.sharpen.finalImage.astype('uint8'), cv2.COLOR_RGB2BGR))
             except: # Save Failed
                 self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
         self.saveDialog.hide()
@@ -323,8 +322,6 @@ class UI:
             self.frame.set_from_file(self.video.frames[int(self.frameSlider.get_value())])
         elif(page_num == UI.STACK_TAB):
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
-        elif(page_num == UI.SHARPEN_TAB):
-            self.frame.set_from_file(g.tmp + "sharpened.png")
             
     def drawOverlay(self, widget, cr):
         width = widget.get_allocated_width()
@@ -676,7 +673,10 @@ class UI:
     # Called when sharpening is complete
     def finishedSharpening(self):
         def update():
-            self.frame.set_from_file(g.tmp + "sharpened.png")
+            z = self.sharpen.finalImage.astype('uint8').tobytes()
+            Z = GLib.Bytes.new(z)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, self.sharpen.w, self.sharpen.h, self.sharpen.w*3)
+            self.frame.set_from_pixbuf(pixbuf)
         GLib.idle_add(update)
 
     # Cleans the tmp directory
