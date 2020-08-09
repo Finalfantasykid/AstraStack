@@ -69,6 +69,14 @@ class UI:
         self.builder.get_object("alignTab").set_sensitive(False)
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
+        
+        self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
+        self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
+        self.builder.get_object("red").add_mark(255, Gtk.PositionType.TOP, None)
+        self.builder.get_object("green").add_mark(255, Gtk.PositionType.TOP, None)
+        self.builder.get_object("blue").add_mark(255, Gtk.PositionType.TOP, None)
+        self.builder.get_object("saturation").add_mark(100, Gtk.PositionType.TOP, None)
 
         self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
         self.cpus.set_value(min(61, math.ceil(cpu_count()/2)))
@@ -638,20 +646,22 @@ class UI:
         g.level4 = self.builder.get_object("level4").get_active()
         g.level5 = self.builder.get_object("level5").get_active()
         
-        g.gamma = self.builder.get_object("gamma").get_value()
-        g.blackLevel = self.builder.get_object("blackLevel").get_value()
-        g.whiteLevel = self.builder.get_object("whiteLevel").get_value()
+        g.gamma = self.builder.get_object("gammaAdjust").get_value()
+        g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
+        g.value = self.builder.get_object("valueAdjust").get_value()
         
         g.redAdjust = self.builder.get_object("redAdjust").get_value()
         g.greenAdjust = self.builder.get_object("greenAdjust").get_value()
         g.blueAdjust = self.builder.get_object("blueAdjust").get_value()
+        g.saturation = self.builder.get_object("saturationAdjust").get_value()
         
-        if(len(args) > 0 and (self.builder.get_object("gamma") == args[0] or
-                              self.builder.get_object("blackLevel") == args[0] or
-                              self.builder.get_object("whiteLevel") == args[0] or
+        if(len(args) > 0 and (self.builder.get_object("gammaAdjust") == args[0] or
+                              self.builder.get_object("blackLevelAdjust") == args[0] or
                               self.builder.get_object("redAdjust") == args[0] or
                               self.builder.get_object("greenAdjust") == args[0] or
-                              self.builder.get_object("blueAdjust") == args[0])):
+                              self.builder.get_object("blueAdjust") == args[0] or
+                              self.builder.get_object("saturationAdjust") == args[0] or
+                              self.builder.get_object("valueAdjust") == args[0])):
             processAgain = self.sharpen.processAgain
             processColor = True
         else:

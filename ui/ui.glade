@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkAdjustment" id="blackLevel">
+  <object class="GtkAdjustment" id="blackLevelAdjust">
     <property name="upper">255</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
@@ -58,11 +58,10 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="updateImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="gamma">
-    <property name="lower">0.10000000000000001</property>
-    <property name="upper">2</property>
-    <property name="value">1</property>
-    <property name="step_increment">0.10000000000000001</property>
+  <object class="GtkAdjustment" id="gammaAdjust">
+    <property name="upper">200</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="greenAdjust">
@@ -243,6 +242,12 @@
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="saturationAdjust">
+    <property name="upper">200</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="sharpen1">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
@@ -273,54 +278,10 @@
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
-  <object class="GtkFileFilter" id="videoFilter">
-    <mime-types>
-      <mime-type>video/*</mime-type>
-      <mime-type>video/quicktime</mime-type>
-      <mime-type>video/x-msvideo</mime-type>
-      <mime-type>video/mp4</mime-type>
-      <mime-type>video/x-ms-wmv</mime-type>
-    </mime-types>
-  </object>
-  <object class="GtkMessageDialog" id="warningDialog">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <property name="message_type">warning</property>
-    <property name="buttons">yes-no</property>
-    <property name="text" translatable="yes">Warning</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="whiteLevel">
-    <property name="upper">255</property>
-    <property name="value">255</property>
+  <object class="GtkAdjustment" id="valueAdjust">
+    <property name="upper">400</property>
+    <property name="value">100</property>
     <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkWindow" id="mainWindow">
@@ -1507,7 +1468,7 @@ The 4 types of transformation are described below:
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">3</property>
+                                        <property name="top_attach">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -1524,38 +1485,26 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Controls the where the white level is.  Decreasing this value brightens the overall image.</property>
-                                        <property name="label" translatable="yes">White Level:</property>
-                                        <property name="xalign">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="gamma">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="adjustment">gamma</property>
+                                        <property name="adjustment">gammaAdjust</property>
                                         <property name="round_digits">1</property>
+                                        <property name="digits">0</property>
                                         <property name="value_pos">left</property>
                                         <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
-                                        <property name="top_attach">3</property>
+                                        <property name="top_attach">2</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="blackLevel">
                                         <property name="width_request">269</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="adjustment">blackLevel</property>
+                                        <property name="adjustment">blackLevelAdjust</property>
                                         <property name="round_digits">0</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
@@ -1567,27 +1516,12 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="adjustment">whiteLevel</property>
-                                        <property name="round_digits">0</property>
-                                        <property name="digits">0</property>
-                                        <property name="value_pos">left</property>
-                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Adjusts the red gamma.</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the red intensity.</property>
                                         <property name="margin_top">10</property>
-                                        <property name="label" translatable="yes">Red Adjust:</property>
+                                        <property name="label" translatable="yes">Red:</property>
                                         <property name="xalign">1</property>
                                       </object>
                                       <packing>
@@ -1599,8 +1533,8 @@ The 4 types of transformation are described below:
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Adjusts the green gamma.</property>
-                                        <property name="label" translatable="yes">Green Adjust:</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the green intensity.</property>
+                                        <property name="label" translatable="yes">Green:</property>
                                         <property name="xalign">1</property>
                                       </object>
                                       <packing>
@@ -1612,8 +1546,8 @@ The 4 types of transformation are described below:
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Adjusts the blue gamma.</property>
-                                        <property name="label" translatable="yes">Blue Adjust:</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the blue intensity.</property>
+                                        <property name="label" translatable="yes">Blue:</property>
                                         <property name="xalign">1</property>
                                       </object>
                                       <packing>
@@ -1622,7 +1556,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="red">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="margin_top">10</property>
@@ -1637,7 +1571,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="green">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">greenAdjust</property>
@@ -1651,7 +1585,7 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScale">
+                                      <object class="GtkScale" id="blue">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">blueAdjust</property>
@@ -1662,6 +1596,62 @@ The 4 types of transformation are described below:
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="top_attach">6</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the color intensity.</property>
+                                        <property name="label" translatable="yes">Saturation:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">7</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale" id="saturation">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">saturationAdjust</property>
+                                        <property name="round_digits">0</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">7</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjusts the value (brightness) of the image in the HSV color space</property>
+                                        <property name="label" translatable="yes">Value:</property>
+                                        <property name="xalign">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale" id="value">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">valueAdjust</property>
+                                        <property name="round_digits">0</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">3</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -1929,5 +1919,48 @@ The 4 types of transformation are described below:
     <action-widgets>
       <action-widget response="-5">button5</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkFileFilter" id="videoFilter">
+    <mime-types>
+      <mime-type>video/*</mime-type>
+      <mime-type>video/quicktime</mime-type>
+      <mime-type>video/x-msvideo</mime-type>
+      <mime-type>video/mp4</mime-type>
+      <mime-type>video/x-ms-wmv</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkMessageDialog" id="warningDialog">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">yes-no</property>
+    <property name="text" translatable="yes">Warning</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
   </object>
 </interface>

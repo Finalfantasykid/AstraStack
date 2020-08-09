@@ -112,12 +112,9 @@ class Sharpen:
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
         
-        # White Level
-        img = img/(max(0.1, g.whiteLevel) / 255)
-        
         # Gamma
         img[img<0] = 0
-        img = pow(img, 1/g.gamma)
+        img = pow(img, 1/(max(1, g.gamma)/100))
         
         # Decompose
         (R, G, B) = cv2.split(img)
@@ -133,6 +130,15 @@ class Sharpen:
         
         # Recompose
         img = cv2.merge([R, G, B])
+        
+        # Saturation
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        (H, S, V) = cv2.split(img)
+        S = S*g.saturation/100
+        V = V*g.value/100
+        img = cv2.merge([H, S, V])
+        
+        img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
         
         # Clip at 0 and 255
         img *= 255
