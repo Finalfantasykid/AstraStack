@@ -3,6 +3,7 @@ import math
 import cv2
 import webbrowser
 import urllib.request
+import ssl
 import json
 import math
 import psutil
@@ -21,6 +22,8 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
+ssl._create_default_https_context = ssl._create_unverified_context
+
 class UI:
     
     LOAD_TAB = 0
@@ -28,7 +31,7 @@ class UI:
     STACK_TAB = 2
     SHARPEN_TAB = 3
     
-    VERSION = "1.3.0"
+    VERSION = "1.3.1"
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
