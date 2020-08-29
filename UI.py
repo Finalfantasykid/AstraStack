@@ -288,7 +288,8 @@ class UI:
             g.driftP2 = (0, 0)
             g.processingAreaP1 = (0, 0)
             g.processingAreaP2 = (0, 0)
-            g.reference = "0"
+            g.reference = self.video.sharpest
+            self.frameSlider.set_value(self.video.sharpest)
 
             self.setReference()
             self.setStartFrame()
@@ -303,7 +304,6 @@ class UI:
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)
-            self.builder.get_object("alignButton").set_sensitive(False)
         GLib.idle_add(update)
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
