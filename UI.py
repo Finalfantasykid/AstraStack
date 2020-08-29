@@ -31,6 +31,7 @@ class UI:
     STACK_TAB = 2
     SHARPEN_TAB = 3
     
+    TITLE = "AstraStack"
     VERSION = "1.3.1"
     
     def __init__(self):
@@ -143,13 +144,23 @@ class UI:
         dialog.hide()
         return response
         
+    # Opens the About dialog
+    def showAbout(self, *args):
+        dialog = self.builder.get_object("about")
+        dialog.set_program_name(UI.TITLE)
+        dialog.set_version(UI.VERSION)
+        response = dialog.run()
+        dialog.hide()
+        
     # Disable inputs
     def disableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(False)
+        self.builder.get_object("toolbar").set_sensitive(False)
         
     # Enable inputs
     def enableUI(self):
         self.builder.get_object("sidePanel").set_sensitive(True)
+        self.builder.get_object("toolbar").set_sensitive(True)
         
     # The following is needed to forcibly refresh the value spacing of the slider
     def fixFrameSliderBug(self):
@@ -244,7 +255,7 @@ class UI:
                     raise MemoryError()
                 cv2.imwrite(g.tmp + "stacked.png", img)
                 
-                self.window.set_title(path.split(g.file)[1] + " - AstraStack")
+                self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
                 self.sharpen = Sharpen(g.tmp + "stacked.png", True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
@@ -298,9 +309,9 @@ class UI:
             self.enableUI()
             if(isinstance(g.file, list)):
                 sList = sorted(g.file)
-                self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - AstraStack")
+                self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - " + UI.TITLE)
             else:
-                self.window.set_title(path.split(g.file)[1] + " - AstraStack")
+                self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)

@@ -2,6 +2,40 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAboutDialog" id="about">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="type_hint">dialog</property>
+    <property name="program_name">AstraStack</property>
+    <property name="website">https://github.com/Finalfantasykid/AstraStack</property>
+    <property name="authors">David Turner</property>
+    <property name="logo">logo_small.png</property>
+    <property name="license_type">lgpl-3-0</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkAdjustment" id="blackLevelAdjust">
     <property name="upper">255</property>
     <property name="step_increment">1</property>
@@ -454,9 +488,11 @@
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
+                        <property name="height_request">31</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Load</property>
+                        <property name="width_chars">7</property>
                       </object>
                       <packing>
                         <property name="tab_fill">False</property>
@@ -850,9 +886,11 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
+                        <property name="height_request">31</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Align</property>
+                        <property name="width_chars">7</property>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -998,9 +1036,11 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
+                        <property name="height_request">31</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Stack</property>
+                        <property name="width_chars">7</property>
                       </object>
                       <packing>
                         <property name="position">2</property>
@@ -1686,9 +1726,11 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
+                        <property name="height_request">31</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Process</property>
+                        <property name="width_chars">7</property>
                       </object>
                       <packing>
                         <property name="position">3</property>
@@ -1702,13 +1744,26 @@ The 4 types of transformation are described below:
                     <property name="position">0</property>
                   </packing>
                 </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="toolbar">
                     <property name="height_request">35</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
+                    <property name="margin_right">2</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">2</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="width_request">50</property>
@@ -1726,7 +1781,9 @@ The 4 types of transformation are described below:
                       <object class="GtkSpinButton">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="text" translatable="yes">1</property>
                         <property name="adjustment">cpus</property>
+                        <property name="value">1</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1735,43 +1792,58 @@ The 4 types of transformation are described below:
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="newVersion">
-                        <property name="label" translatable="yes">New Version Available</property>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="margin_right">5</property>
-                        <signal name="clicked" handler="clickNewVersion" swapped="no"/>
-                        <style>
-                          <class name="suggested-action"/>
-                        </style>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkButton" id="newVersion">
+                            <property name="label" translatable="yes">New Version Available</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="clickNewVersion" swapped="no"/>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="label" translatable="yes">About</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="showAbout" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
