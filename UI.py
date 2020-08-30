@@ -109,6 +109,7 @@ class UI:
         self.frameScale.set_sensitive(False)
         g.reference = "0"
         
+    # Cancels scroll event for widget
     def propagateScroll(self, widget, event):
         Gtk.propagate_event(widget.get_parent(), event)
     
@@ -174,6 +175,7 @@ class UI:
             g.pool.shutdown()
         g.pool = ProcessPoolExecutor(g.nThreads)
         
+    # Checks github to see if there is a new version available
     def checkNewVersion(self):
         def callUrl():
             try:
@@ -345,6 +347,7 @@ class UI:
         elif(page_num == UI.STACK_TAB):
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
             
+    # Draws a rectangle where the processing area is
     def drawOverlay(self, widget, cr):
         width = widget.get_allocated_width()
         height = widget.get_allocated_height()
@@ -520,6 +523,7 @@ class UI:
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
         
+    # Processing area button clicked
     def clickProcessingArea(self, *args):
         g.processingAreaP1 = (0, 0)
         g.processingAreaP2 = (0, 0)
@@ -541,10 +545,12 @@ class UI:
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
         
+    # First point int the processing area clicked, drag started
     def dragBegin(self, *args):
         if(self.clickedProcessingArea):
             g.processingAreaP1 = self.mousePosition
         
+    # Mouse released after dragging processing area
     def dragEnd(self, *args):
         if(self.clickedProcessingArea):
             g.processingAreaP2 = self.mousePosition
@@ -732,4 +738,3 @@ def run():
     g.ui = UI()
 
     Gtk.main()
-

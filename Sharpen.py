@@ -51,6 +51,7 @@ class Sharpen:
                 self.processColor()
             g.ui.finishedSharpening()
         
+    # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self, stackedImage):
         (R, G, B) = cv2.split(stackedImage)
 
@@ -65,6 +66,7 @@ class Sharpen:
             
             wait(futures)
         
+    # Sharpens each channel
     def sharpenLayers(self):
         gParam = {
             'level' : [g.level1, 
@@ -106,6 +108,7 @@ class Sharpen:
                 
         self.sharpenedImage = cv2.merge([R, G, B])[:self.h,:self.w]
     
+    # Apply brightness & color sliders
     def processColor(self):
         img = self.sharpenedImage
         
@@ -147,6 +150,7 @@ class Sharpen:
         
         self.finalImage = img
         
+# Calculates the wavelet coefficents for the specified channel
 def calculateChannelCoefficients(C, channel, num, lock):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur
     padding = 2**(Sharpen.LEVEL)
@@ -173,6 +177,9 @@ def calculateChannelCoefficients(C, channel, num, lock):
     while(num.value < 3):
         sleep(0.01)
     
+# Reconstructs the wavelet using varying intensities of coefficients, 
+# as well as unsharp mask for additional sharpening
+# and gaussian denoise
 def sharpenChannelLayers(params):
     c = g.coeffs
     # Go through each wavelet layer and apply sharpening
@@ -220,7 +227,7 @@ def sharpenChannelLayers(params):
     
     return (g.channel, img)
     
+# Applies an unsharp mask to the specified image
 def unsharp(image, radius, strength):
     blur = cv2.GaussianBlur(image, (0,0), radius)
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
-

@@ -92,7 +92,8 @@ class Video:
         g.ui.setProgress()
         g.ui.finishedVideo()
         g.ui.childConn.send("stop")
-        
+       
+# Returns a number based on how sharp the image is (higher = sharper) 
 def calculateSharpness(image):
     h, w = image.shape[:2]
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
