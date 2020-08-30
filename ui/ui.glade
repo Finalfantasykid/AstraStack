@@ -488,7 +488,7 @@
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
-                        <property name="height_request">31</property>
+                        <property name="height_request">33</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Load</property>
@@ -886,7 +886,7 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
-                        <property name="height_request">31</property>
+                        <property name="height_request">30</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Align</property>
@@ -1036,7 +1036,7 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
-                        <property name="height_request">31</property>
+                        <property name="height_request">30</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Stack</property>
@@ -1726,7 +1726,7 @@ The 4 types of transformation are described below:
                     </child>
                     <child type="tab">
                       <object class="GtkLabel">
-                        <property name="height_request">31</property>
+                        <property name="height_request">38</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Process</property>
@@ -1761,9 +1761,9 @@ The 4 types of transformation are described below:
                     <property name="height_request">35</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_right">2</property>
-                    <property name="margin_top">2</property>
-                    <property name="margin_bottom">2</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="width_request">50</property>
@@ -1792,12 +1792,11 @@ The 4 types of transformation are described below:
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkButton" id="newVersion">
                             <property name="label" translatable="yes">New Version Available</property>
