@@ -1,4 +1,5 @@
 from os import cpu_count, rmdir, scandir, unlink, path
+from pathlib import Path
 import math
 import cv2
 import webbrowser
@@ -273,6 +274,7 @@ class UI:
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
         self.saveDialog.set_current_folder(path.expanduser("~"))
+        self.saveDialog.set_current_name(Path(g.file).stem + ".png")
         response = self.saveDialog.run()
         if(response == Gtk.ResponseType.OK):
             fileName = self.saveDialog.get_filename()
