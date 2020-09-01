@@ -259,6 +259,7 @@ class UI:
                 cv2.imwrite(g.tmp + "stacked.png", img)
                 
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
+                self.saveDialog.set_current_name("")
                 self.sharpen = Sharpen(g.tmp + "stacked.png", True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
@@ -274,7 +275,13 @@ class UI:
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
         self.saveDialog.set_current_folder(path.expanduser("~"))
-        self.saveDialog.set_current_name(Path(g.file).stem + ".png")
+        if(self.saveDialog.get_current_name() == ""):
+            # Set default file to save if empty
+            if(isinstance(g.file, list)):
+                sList = sorted(g.file)
+                self.saveDialog.set_current_name(Path(sList[0]).stem + "_" + Path(sList[-1]).stem + ".png")
+            else:
+                self.saveDialog.set_current_name(Path(g.file).stem + ".png")
         response = self.saveDialog.run()
         if(response == Gtk.ResponseType.OK):
             fileName = self.saveDialog.get_filename()
@@ -316,6 +323,7 @@ class UI:
                 self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - " + UI.TITLE)
             else:
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
+            self.saveDialog.set_current_name("")
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)
