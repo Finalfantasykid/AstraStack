@@ -5,6 +5,7 @@
   <object class="GtkAboutDialog" id="about">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
+    <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">AstraStack</property>
     <property name="website">https://github.com/Finalfantasykid/AstraStack</property>
