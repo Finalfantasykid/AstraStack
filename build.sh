@@ -6,6 +6,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 
     rm -fr dist
     pyinstaller --add-binary "$LIBXCB:." \
+                --hidden-import "cairo" \
                 AstraStack.py
     rm -fr dist/AstraStack/share/
     mkdir -p dist/AstraStack/share_override/icons/Adwaita/
@@ -24,6 +25,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --icon "ui/logo.ico" \
                 --hidden-import "packaging.requirements" \
                 --hidden-import "pkg_resources.py2_warn" \
+                --hidden-import "cairo" \
                 --add-binary "/mingw64/bin/opencv_videoio_ffmpeg420_64.dll:." \
                 --exclude-module "FixTk" \
                 --exclude-module "tcl" \

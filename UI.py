@@ -33,7 +33,7 @@ class UI:
     SHARPEN_TAB = 3
     
     TITLE = "AstraStack"
-    VERSION = "1.4.0"
+    VERSION = "1.4.1"
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
