@@ -1435,6 +1435,7 @@ The 4 types of transformation are described below:
                                         <property name="text" translatable="yes">0.00</property>
                                         <property name="adjustment">denoise5</property>
                                         <property name="digits">1</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1606,6 +1607,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">1</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1620,6 +1622,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">1</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1634,6 +1637,7 @@ The 4 types of transformation are described below:
                                         <property name="round_digits">1</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">left</property>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1951,6 +1955,7 @@ The 4 types of transformation are described below:
     <property name="type_hint">dialog</property>
     <property name="attached_to">mainWindow</property>
     <property name="message_type">error</property>
+    <property name="buttons">ok</property>
     <property name="text" translatable="yes">An error occured</property>
     <child type="titlebar">
       <placeholder/>
@@ -1968,17 +1973,7 @@ The 4 types of transformation are described below:
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="button5">
-                <property name="label" translatable="yes">Ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -1989,9 +1984,6 @@ The 4 types of transformation are described below:
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-5">button5</action-widget>
-    </action-widgets>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>

@@ -83,6 +83,8 @@ class UI:
         self.builder.get_object("blue").add_mark(255, Gtk.PositionType.TOP, None)
         self.builder.get_object("saturation").add_mark(100, Gtk.PositionType.TOP, None)
 
+        self.disableScroll()
+
         self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
         self.cpus.set_value(min(61, math.ceil(cpu_count()/2)))
         g.pool = None
@@ -113,6 +115,21 @@ class UI:
     # Cancels scroll event for widget
     def propagateScroll(self, widget, event):
         Gtk.propagate_event(widget.get_parent(), event)
+        
+    # Disables the scroll event from some fields
+    def disableScroll(self):
+        mask = Gdk.EventMask.BUTTON_MOTION_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.KEY_RELEASE_MASK | Gdk.EventMask.TOUCH_MASK
+        self.builder.get_object("denoiseWidget1").set_events(mask)
+        self.builder.get_object("denoiseWidget2").set_events(mask)
+        self.builder.get_object("denoiseWidget3").set_events(mask)
+        self.builder.get_object("denoiseWidget4").set_events(mask)
+        self.builder.get_object("denoiseWidget5").set_events(mask)
+        
+        self.builder.get_object("radiusWidget1").set_events(mask)
+        self.builder.get_object("radiusWidget2").set_events(mask)
+        self.builder.get_object("radiusWidget3").set_events(mask)
+        self.builder.get_object("radiusWidget4").set_events(mask)
+        self.builder.get_object("radiusWidget5").set_events(mask)
     
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
