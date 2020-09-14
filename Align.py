@@ -244,7 +244,7 @@ def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInter
                 M[0][2] *= drizzleFactor # X
                 M[1][2] *= drizzleFactor # Y
                 image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
-            image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)))
+            image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
             image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
                           int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
             cv2.imwrite(frame.replace("frames", "cache"),(image))

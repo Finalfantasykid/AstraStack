@@ -768,6 +768,7 @@
                                     <property name="can_focus">False</property>
                                     <property name="margin_bottom">10</property>
                                     <property name="row_spacing">5</property>
+                                    <property name="column_spacing">5</property>
                                     <property name="column_homogeneous">True</property>
                                     <child>
                                       <object class="GtkLabel">
@@ -811,35 +812,36 @@ The 4 types of transformation are described below:
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">4</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkGrid">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="margin_bottom">10</property>
-                                    <property name="row_spacing">5</property>
-                                    <property name="column_spacing">5</property>
-                                    <property name="column_homogeneous">True</property>
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Takes advantage of undersampled data by upscaling each frame during transformation.  This can result in slightly more detailed images, though results will vary depending on whether the frames are sufficiently undersampled.</property>
-                                        <property name="label" translatable="yes">Drizzle</property>
+                                        <property name="tooltip_text" translatable="yes">How much to upscale the frames.</property>
+                                        <property name="label" translatable="yes">Scaling Factor</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
                                         </attributes>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                        <property name="width">2</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Interpolation algorithm used for the transformation and upscaling.
+
+Linear is the fastest, but will have a slightly smoother result.  Bicubic and Lanczos are slower and can have artifacts, but will have a slightly sharper result.</property>
+                                        <property name="label" translatable="yes">Interpolation</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -859,37 +861,7 @@ The 4 types of transformation are described below:
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">How much to upscale the frames.  At 1.0X drizzling is skipped.</property>
-                                        <property name="label" translatable="yes">Factor</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Linear is the fastest, but will have a slightly smoother result.  Bicubic and Lanczos are slower and can have artifacts, but will have a slightly sharper result.</property>
-                                        <property name="label" translatable="yes">Interpolation</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">1</property>
+                                        <property name="top_attach">3</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -907,14 +879,14 @@ The 4 types of transformation are described below:
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
-                                        <property name="top_attach">2</property>
+                                        <property name="top_attach">3</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">5</property>
+                                    <property name="position">4</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -972,7 +944,7 @@ The 4 types of transformation are described below:
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">6</property>
+                                    <property name="position">5</property>
                                   </packing>
                                 </child>
                               </object>
