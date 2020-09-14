@@ -66,6 +66,8 @@ class UI:
         self.normalize = self.builder.get_object("normalize")
         self.alignChannels = self.builder.get_object("alignChannels")
         self.transformation = self.builder.get_object("transformation")
+        self.drizzleFactor = self.builder.get_object("drizzleFactor")
+        self.drizzleInterpolation = self.builder.get_object("drizzleInterpolation")
         self.limit = self.builder.get_object("limit")
         self.limitPercent = self.builder.get_object("limitPercent")
         self.averageRadio = self.builder.get_object("averageRadio")
@@ -108,6 +110,8 @@ class UI:
         self.setNormalize()
         self.setAlignChannels()
         self.setTransformation()
+        self.setDrizzleFactor()
+        self.setDrizzleInterpolation()
         self.setThreads()
         self.frameScale.set_sensitive(False)
         g.reference = "0"
@@ -613,12 +617,40 @@ class UI:
         elif(text == "Affine"):
             g.transformation = StackReg.AFFINE
             
+    # Sets the drizzle scaling factor
+    def setDrizzleFactor(self, *args):
+        text = self.drizzleFactor.get_active_text()
+        if(text == "1.0X"):
+            g.drizzleFactor = 1.0
+        elif(text == "1.5X"):
+            g.drizzleFactor = 1.5
+        elif(text == "2.0X"):
+            g.drizzleFactor = 2.0
+        elif(text == "2.5X"):
+            g.drizzleFactor = 2.5
+        elif(text == "3.0X"):
+            g.drizzleFactor = 3.0
+            
+    # Sets the drizzle scaling factor
+    def setDrizzleInterpolation(self, *args):
+        text = self.drizzleInterpolation.get_active_text()
+        if(text == "Linear"):
+            g.drizzleInterpolation = cv2.INTER_LINEAR
+        elif(text == "Bicubic"):
+            g.drizzleInterpolation = cv2.INTER_CUBIC
+        elif(text == "Lanczos"):
+            g.drizzleInterpolation = cv2.INTER_LANCZOS4
+            
     # Runs the Alignment step
     def clickAlign(self, *args):
         self.align = Align(self.video.frames[g.startFrame:g.endFrame+1])
-        thread = Thread(target=self.align.run, args=())
-        thread.start()
-        self.disableUI()
+        try:
+            self.align.checkMemory()
+            thread = Thread(target=self.align.run, args=())
+            thread.start()
+            self.disableUI()
+        except MemoryError as error:
+            self.enableUI()
         
     # Called when the Alignment is complete
     def finishedAlign(self):

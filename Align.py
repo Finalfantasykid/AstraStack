@@ -19,6 +19,11 @@ class Align:
         self.total = 0
         self.height, self.width = cv2.imread(self.frames[0]).shape[:2]
         
+    # Checks to see if there will be enough memory to process the image
+    def checkMemory(self):
+        if(not g.ui.checkMemory(w=self.width*g.drizzleFactor,h=self.height*g.drizzleFactor)):
+            raise MemoryError()
+        
     def run(self):
         def progress(msg):
             self.count += 1
@@ -118,7 +123,10 @@ class Align:
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
             tmats = self.tmats[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(transform, frames, tmats, self.minX, self.maxX, self.minY, self.maxY, g.ui.childConn))
+            futures.append(g.pool.submit(transform, frames, tmats, 
+                                         self.minX, self.maxX, self.minY, self.maxY, 
+                                         g.drizzleFactor, g.drizzleInterpolation, 
+                                         g.ui.childConn))
         
         for i in range(0, g.nThreads):
             futures[i].result()
@@ -133,7 +141,10 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, pa1, pa2, g.ui.childConn))
+            futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, 
+                                         pa1, pa2, 
+                                         g.drizzleFactor, 
+                                         g.ui.childConn))
         
         for i in range(0, g.nThreads):
             self.similarities += futures[i].result()
@@ -222,16 +233,21 @@ def align(frames, reference, transformation, normalize, pa1, pa2, conn):
     return tmats
     
 # Multiprocess function to transform and save the images to cache
-def transform(frames, tmats, minX, maxX, minY, maxY, conn):
+def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
     i = 0
     for frame in frames:
         try:
             M = tmats[i]
-            image = cv2.imread(frame.replace("frames", "cache"),1).astype(np.float32) / 255
+            image = cv2.imread(frame.replace("frames", "cache"),1)
             h, w = image.shape[:2]
-            image = cv2.warpPerspective(image, M, (w, h))
-            image = image[maxY:h+minY, maxX:w+minX]
-            cv2.imwrite(frame.replace("frames", "cache"),(image*255).astype(np.uint8))
+            if(drizzleFactor != 1.0):
+                M[0][2] *= drizzleFactor # X
+                M[1][2] *= drizzleFactor # Y
+                image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
+            image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)))
+            image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
+                          int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+            cv2.imwrite(frame.replace("frames", "cache"),(image))
         except:
             # Transformation was invalid (resulted infinitely small image)
             pass
@@ -239,12 +255,13 @@ def transform(frames, tmats, minX, maxX, minY, maxY, conn):
         conn.send("Transforming Frames")
     
 # Multiprocess function to find the best images (ones closest to the reference frame)
-def filter(frames, reference, normalize, pa1, pa2, conn):
+def filter(frames, reference, normalize, pa1, pa2, drizzleFactor, conn):
     similarities = []
     img1 = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
     if(pa1 != (0,0) and pa2 != (0,0)):
         # Processing Area
-        img1 = img1[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+        img1 = img1[int(pa1[1]*drizzleFactor):int(pa2[1]*drizzleFactor),
+                    int(pa1[0]*drizzleFactor):int(pa2[0]*drizzleFactor)]
     img1 = cv2.resize(img1, (64,64))
     if(normalize):
         img1 = cv2.normalize(img1, img1, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
@@ -253,7 +270,8 @@ def filter(frames, reference, normalize, pa1, pa2, conn):
         img2 = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
         if(pa1 != (0,0) and pa2 != (0,0)):
             # Processing Area
-            img2 = img2[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+            img2 = img2[int(pa1[1]*drizzleFactor):int(pa2[1]*drizzleFactor),
+                        int(pa1[0]*drizzleFactor):int(pa2[0]*drizzleFactor)]
         img2 = cv2.resize(img2, (64,64))
         if(normalize):
             img2 = cv2.normalize(img2, img2, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
