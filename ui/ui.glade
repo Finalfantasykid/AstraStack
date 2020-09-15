@@ -780,7 +780,9 @@ The 4 types of transformation are described below:
 - Translation
 - Rigid Body (Translation + Rotation)
 - Scaled Rotation (Translation + Rotation + Scaling)
-- Affine (Translation + Rotation + Scaling + Shearing)</property>
+- Affine (Translation + Rotation + Scaling + Shearing)
+
+'None' will skip the alignment entirely.   Useful for already aligned videos/sequences.</property>
                                         <property name="label" translatable="yes">Transformation</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
@@ -796,12 +798,13 @@ The 4 types of transformation are described below:
                                       <object class="GtkComboBoxText" id="transformation">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="active">1</property>
+                                        <property name="active">2</property>
                                         <items>
-                                          <item id="0" translatable="yes">Translation</item>
-                                          <item id="1" translatable="yes">Rigid Body</item>
-                                          <item id="2" translatable="yes">Scaled Rotation</item>
-                                          <item id="3" translatable="yes">Affine</item>
+                                          <item id="0" translatable="yes">None</item>
+                                          <item id="1" translatable="yes">Translation</item>
+                                          <item id="2" translatable="yes">Rigid Body</item>
+                                          <item id="3" translatable="yes">Scaled Rotation</item>
+                                          <item id="4" translatable="yes">Affine</item>
                                         </items>
                                         <signal name="changed" handler="setTransformation" swapped="no"/>
                                         <signal name="scroll-event" handler="propagateScroll" swapped="no"/>

@@ -608,6 +608,8 @@ class UI:
     # Sets the type of transformation
     def setTransformation(self, *args):
         text = self.transformation.get_active_text()
+        if(text == "None"):
+            g.transformation = -1
         if(text == "Translation"):
             g.transformation = StackReg.TRANSLATION
         elif(text == "Rigid Body"):

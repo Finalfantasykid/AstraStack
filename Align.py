@@ -32,8 +32,11 @@ class Align:
         threads = []
         g.ui.createListener(progress)
         
-        
         self.total = len(self.frames)*3
+        if(g.transformation == -1):
+            self.total -= len(self.frames)
+        if(g.transformation == -1 and g.drizzleFactor == 1.0):
+            self.total -= len(self.frames)
         
         #Drifting
         totalFrames = len(self.frames)
@@ -83,16 +86,21 @@ class Align:
         for i in range(0, g.nThreads):
             futures[i].result()
     
-        # Aligning
-        futures = []
-        for i in range(0, g.nThreads):
-            nFrames = math.ceil(len(self.frames)/g.nThreads)
-            frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, pa1, pa2, g.ui.childConn))
-        
-        for i in range(0, g.nThreads):
-            self.tmats += futures[i].result()
-        
+        if(g.transformation != -1):
+            # Aligning
+            futures = []
+            for i in range(0, g.nThreads):
+                nFrames = math.ceil(len(self.frames)/g.nThreads)
+                frames = self.frames[i*nFrames:(i+1)*nFrames]
+                futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, pa1, pa2, g.ui.childConn))
+            
+            for i in range(0, g.nThreads):
+                self.tmats += futures[i].result()
+        else:
+            # No Align
+            for i, frame in enumerate(self.frames):
+                self.tmats.append(np.identity(3))
+
         # Check how much we need to crop the frames by getting the max and min translations
         for i, frame in enumerate(self.frames):
             M = self.tmats[i]
@@ -117,19 +125,20 @@ class Align:
         self.maxX = math.ceil(self.maxX)
         self.maxY = math.ceil(self.maxY)
         
-        # Transforming
-        futures = []
-        for i in range(0, g.nThreads):
-            nFrames = math.ceil(len(self.frames)/g.nThreads)
-            frames = self.frames[i*nFrames:(i+1)*nFrames]
-            tmats = self.tmats[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(transform, frames, tmats, 
-                                         self.minX, self.maxX, self.minY, self.maxY, 
-                                         g.drizzleFactor, g.drizzleInterpolation, 
-                                         g.ui.childConn))
-        
-        for i in range(0, g.nThreads):
-            futures[i].result()
+        if(g.transformation != -1 or g.drizzleFactor != 1.0):
+            # Transforming
+            futures = []
+            for i in range(0, g.nThreads):
+                nFrames = math.ceil(len(self.frames)/g.nThreads)
+                frames = self.frames[i*nFrames:(i+1)*nFrames]
+                tmats = self.tmats[i*nFrames:(i+1)*nFrames]
+                futures.append(g.pool.submit(transform, frames, tmats, 
+                                             self.minX, self.maxX, self.minY, self.maxY, 
+                                             g.drizzleFactor, g.drizzleInterpolation, 
+                                             g.ui.childConn))
+            
+            for i in range(0, g.nThreads):
+                futures[i].result()
             
         if(pa1 != (0,0) and pa2 != (0,0)):
             # Adjust for transformation cropping
@@ -235,6 +244,7 @@ def align(frames, reference, transformation, normalize, pa1, pa2, conn):
 # Multiprocess function to transform and save the images to cache
 def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
     i = 0
+    I = np.identity(3)
     for frame in frames:
         try:
             M = tmats[i]
@@ -244,9 +254,10 @@ def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInter
                 M[0][2] *= drizzleFactor # X
                 M[1][2] *= drizzleFactor # Y
                 image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
-            image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
-            image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
-                          int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+            if(not np.array_equal(M, I)):
+                image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
+                image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
+                              int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
             cv2.imwrite(frame.replace("frames", "cache"),(image))
         except:
             # Transformation was invalid (resulted infinitely small image)
