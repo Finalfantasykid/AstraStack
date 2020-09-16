@@ -246,25 +246,25 @@ def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInter
     i = 0
     I = np.identity(3)
     for frame in frames:
-        #try:
-        M = tmats[i]
-        image = cv2.imread(frame.replace("frames", "cache"),1)
-        h, w = image.shape[:2]
-        if(drizzleFactor != 1.0):
-            M[0][2] *= drizzleFactor # X
-            M[1][2] *= drizzleFactor # Y
-            T = np.identity(3) # Scale Matrix
-            T[0][0] = drizzleFactor
-            T[1][1] = drizzleFactor
-            M = M.dot(T) # Apply scale to Transformation
-        if(not np.array_equal(M, I)):
-            image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
-            image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
-                          int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
-        cv2.imwrite(frame.replace("frames", "cache"),(image))
-        #except:
+        try:
+            M = tmats[i]
+            image = cv2.imread(frame.replace("frames", "cache"),1)
+            h, w = image.shape[:2]
+            if(drizzleFactor != 1.0):
+                M[0][2] *= drizzleFactor # X
+                M[1][2] *= drizzleFactor # Y
+                T = np.identity(3) # Scale Matrix
+                T[0][0] = drizzleFactor
+                T[1][1] = drizzleFactor
+                M = M.dot(T) # Apply scale to Transformation
+            if(not np.array_equal(M, I)):
+                image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
+                image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
+                              int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+            cv2.imwrite(frame.replace("frames", "cache"),(image))
+        except:
             # Transformation was invalid (resulted infinitely small image)
-        #    pass
+            pass
         i += 1
         conn.send("Transforming Frames")
     
