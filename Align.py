@@ -51,20 +51,20 @@ class Align:
         
         fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, 1, totalFrames)
         
-        # Processing Area
-        pa1 = g.processingAreaP1
-        pa2 = g.processingAreaP2
+        # Area of Interest
+        aoi1 = g.areaOfInterestP1
+        aoi2 = g.areaOfInterestP2
         
-        if(pa1 != (0,0) and pa2 != (0,0)):
-            pa1, pa2 = Align.calcProcessingAreaCoords(pa1, pa2, fdx1, fdy1)
+        if(aoi1 != (0,0) and aoi2 != (0,0)):
+            aoi1, aoi2 = Align.calcAreaOfInterestCoords(aoi1, aoi2, fdx1, fdy1)
             
-        if(abs(pa1[0] - pa2[0]) < 10 or
-           abs(pa1[1] - pa2[0]) < 10 or
-           pa1[0] > self.width - abs(dx) - 10 or
-           pa1[1] > self.height - abs(dy) - 10):
-            # If the processing area is too small, just skip it
-            pa1 = (0,0)
-            pa2 = (0,0)
+        if(abs(aoi1[0] - aoi2[0]) < 10 or
+           abs(aoi1[1] - aoi2[0]) < 10 or
+           aoi1[0] > self.width - abs(dx) - 10 or
+           aoi1[1] > self.height - abs(dy) - 10):
+            # If the Area of Interest is too small, just skip it
+            aoi1 = (0,0)
+            aoi2 = (0,0)
         
         if((x1 == 0 and y1 == 0) or
            (x2 == 0 and y2 == 0)):
@@ -92,7 +92,7 @@ class Align:
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, pa1, pa2, g.ui.childConn))
+                futures.append(g.pool.submit(align, frames, g.reference, g.transformation, g.normalize, aoi1, aoi2, g.ui.childConn))
             
             for i in range(0, g.nThreads):
                 self.tmats += futures[i].result()
@@ -114,10 +114,10 @@ class Align:
             else:
                 self.maxY = max(self.maxY, M[1][2])
             
-            if(pa1 != (0,0) and pa2 != (0,0)):
-                # Shift the matrix origin to the processing area, and then shift back
-                t1 = np.array([1, 0, -pa1[0], 0, 1, -pa1[1], 0, 0, 1]).reshape((3,3))
-                t2 = np.array([1, 0,  pa1[0], 0, 1,  pa1[1], 0, 0, 1]).reshape((3,3))
+            if(aoi1 != (0,0) and aoi2 != (0,0)):
+                # Shift the matrix origin to the Area of Interest, and then shift back
+                t1 = np.array([1, 0, -aoi1[0], 0, 1, -aoi1[1], 0, 0, 1]).reshape((3,3))
+                t2 = np.array([1, 0,  aoi1[0], 0, 1,  aoi1[1], 0, 0, 1]).reshape((3,3))
                 self.tmats[i] = t2.dot(M.dot(t1))
         
         self.minX = math.floor(self.minX)
@@ -140,10 +140,10 @@ class Align:
             for i in range(0, g.nThreads):
                 futures[i].result()
             
-        if(pa1 != (0,0) and pa2 != (0,0)):
+        if(aoi1 != (0,0) and aoi2 != (0,0)):
             # Adjust for transformation cropping
-            pa1 = (max(0, pa1[0] - self.maxX), max(0, pa1[1] - self.maxY))
-            pa2 = (max(0, pa2[0] - self.maxX), max(0, pa2[1] - self.maxY))
+            aoi1 = (max(0, aoi1[0] - self.maxX), max(0, aoi1[1] - self.maxY))
+            aoi2 = (max(0, aoi2[0] - self.maxX), max(0, aoi2[1] - self.maxY))
             
         # Filtering
         futures = []
@@ -151,7 +151,7 @@ class Align:
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
             futures.append(g.pool.submit(filter, frames, g.reference, g.normalize, 
-                                         pa1, pa2, 
+                                         aoi1, aoi2, 
                                          g.drizzleFactor, 
                                          g.ui.childConn))
         
@@ -182,15 +182,15 @@ class Align:
         
         return (fdx, fdy, fdx1, fdy1)
         
-    # returns the processing area coordinates after being drifted
-    def calcProcessingAreaCoords(pa1, pa2, fdx1, fdy1):
-        pac1 = (int(max(0, pa1[0] - fdx1)), int(max(0, pa1[1] - fdy1)))
-        pac2 = (int(max(0, pa2[0] - fdx1)), int(max(0, pa2[1] - fdy1)))
+    # returns the Area of Interest coordinates after being drifted
+    def calcAreaOfInterestCoords(aoi1, aoi2, fdx1, fdy1):
+        aoic1 = (int(max(0, aoi1[0] - fdx1)), int(max(0, aoi1[1] - fdy1)))
+        aoic2 = (int(max(0, aoi2[0] - fdx1)), int(max(0, aoi2[1] - fdy1)))
         
         # Account for when points are not drawn in top-left, bottom right
-        pa1 = (min(pac1[0], pac2[0]), min(pac1[1], pac2[1]))
-        pa2 = (max(pac1[0], pac2[0]), max(pac1[1], pac2[1]))
-        return (pa1, pa2)
+        aoi1 = (min(aoic1[0], aoic2[0]), min(aoic1[1], aoic2[1]))
+        aoi2 = (max(aoic1[0], aoic2[0]), max(aoic1[1], aoic2[1]))
+        return (aoi1, aoi2)
         
         
 # Multiprocess function to drift frames
@@ -212,11 +212,11 @@ def drift(frames, totalFrames, startFrame, dx, dy, conn):
             shutil.copyfile(frame, frame.replace("frames", "cache"))           
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, reference, transformation, normalize, pa1, pa2, conn):
+def align(frames, reference, transformation, normalize, aoi1, aoi2, conn):
     ref = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
-    if(pa1 != (0,0) and pa2 != (0,0)):
-        # Processing Area
-        ref = ref[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+    if(aoi1 != (0,0) and aoi2 != (0,0)):
+        # Area of Interest
+        ref = ref[aoi1[1]:aoi2[1],aoi1[0]:aoi2[0]]
     sr = StackReg(transformation)
     tmats = []
     h, w = ref.shape[:2]
@@ -227,9 +227,9 @@ def align(frames, reference, transformation, normalize, pa1, pa2, conn):
     i = 0
     for frame in frames:
         mov = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
-        if(pa1 != (0,0) and pa2 != (0,0)):
-            # Processing Area
-            mov = mov[pa1[1]:pa2[1],pa1[0]:pa2[0]]
+        if(aoi1 != (0,0) and aoi2 != (0,0)):
+            # Area of Interest
+            mov = mov[aoi1[1]:aoi2[1],aoi1[0]:aoi2[0]]
         mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
         if(normalize):
             mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
@@ -269,23 +269,23 @@ def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInter
         conn.send("Transforming Frames")
     
 # Multiprocess function to find the best images (ones closest to the reference frame)
-def filter(frames, reference, normalize, pa1, pa2, drizzleFactor, conn):
+def filter(frames, reference, normalize, aoi1, aoi2, drizzleFactor, conn):
     similarities = []
     img1 = cv2.imread(g.tmp + "cache/" + reference + ".png", cv2.IMREAD_GRAYSCALE)
-    if(pa1 != (0,0) and pa2 != (0,0)):
-        # Processing Area
-        img1 = img1[int(pa1[1]*drizzleFactor):int(pa2[1]*drizzleFactor),
-                    int(pa1[0]*drizzleFactor):int(pa2[0]*drizzleFactor)]
+    if(aoi1 != (0,0) and aoi2 != (0,0)):
+        # Area of Interest
+        img1 = img1[int(aoi1[1]*drizzleFactor):int(aoi2[1]*drizzleFactor),
+                    int(aoi1[0]*drizzleFactor):int(aoi2[0]*drizzleFactor)]
     img1 = cv2.resize(img1, (64,64))
     if(normalize):
         img1 = cv2.normalize(img1, img1, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     a, a_norm = calculateNorms(img1)
     for frame in frames:
         img2 = cv2.imread(frame.replace("frames", "cache"), cv2.IMREAD_GRAYSCALE)
-        if(pa1 != (0,0) and pa2 != (0,0)):
-            # Processing Area
-            img2 = img2[int(pa1[1]*drizzleFactor):int(pa2[1]*drizzleFactor),
-                        int(pa1[0]*drizzleFactor):int(pa2[0]*drizzleFactor)]
+        if(aoi1 != (0,0) and aoi2 != (0,0)):
+            # Area of Interest
+            img2 = img2[int(aoi1[1]*drizzleFactor):int(aoi2[1]*drizzleFactor),
+                        int(aoi1[0]*drizzleFactor):int(aoi2[0]*drizzleFactor)]
         img2 = cv2.resize(img2, (64,64))
         if(normalize):
             img2 = cv2.normalize(img2, img2, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)

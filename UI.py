@@ -46,7 +46,7 @@ class UI:
         self.mousePosition = None
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
-        self.clickedProcessingArea = False
+        self.clickedAreaOfInterest = False
         
         self.builder = Gtk.Builder()
         self.builder.add_from_file("ui/ui.glade")
@@ -101,8 +101,8 @@ class UI:
         g.driftP1 = (0, 0)
         g.driftP2 = (0, 0)
         
-        g.processingAreaP1 = (0, 0)
-        g.processingAreaP2 = (0, 0)
+        g.areaOfInterestP1 = (0, 0)
+        g.areaOfInterestP2 = (0, 0)
         
         self.window.show_all()
         self.checkNewVersion()
@@ -329,8 +329,8 @@ class UI:
             
             g.driftP1 = (0, 0)
             g.driftP2 = (0, 0)
-            g.processingAreaP1 = (0, 0)
-            g.processingAreaP2 = (0, 0)
+            g.areaOfInterestP1 = (0, 0)
+            g.areaOfInterestP2 = (0, 0)
             g.reference = self.video.sharpest
             self.frameSlider.set_value(self.video.sharpest)
 
@@ -378,7 +378,7 @@ class UI:
         elif(page_num == UI.STACK_TAB):
             self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
             
-    # Draws a rectangle where the processing area is
+    # Draws a rectangle where the area of interest is
     def drawOverlay(self, widget, cr):
         width = widget.get_allocated_width()
         height = widget.get_allocated_height()
@@ -416,12 +416,12 @@ class UI:
         if(self.tabs.get_current_page() == UI.ALIGN_TAB):
             current = self.frameSlider.get_value()
             
-            # Processing Area
-            px1 = min(g.processingAreaP1[0], g.processingAreaP2[0])
-            py1 = min(g.processingAreaP1[1], g.processingAreaP2[1])
+            # Area of Interest
+            px1 = min(g.areaOfInterestP1[0], g.areaOfInterestP2[0])
+            py1 = min(g.areaOfInterestP1[1], g.areaOfInterestP2[1])
             
-            px2 = max(g.processingAreaP1[0], g.processingAreaP2[0])
-            py2 = max(g.processingAreaP1[1], g.processingAreaP2[1])
+            px2 = max(g.areaOfInterestP1[0], g.areaOfInterestP2[0])
+            py2 = max(g.areaOfInterestP1[1], g.areaOfInterestP2[1])
             
             # Drift Points
             dx1 = g.driftP1[0]
@@ -440,7 +440,7 @@ class UI:
             
             if(px1 != 0 and py1 != 0 and
                px2 != 0 and py2 != 0):
-                # Draw Processing Area Rectangle
+                # Draw Area of Interest Rectangle
                 drawRect(cr, px1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
                              py1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame), 
                              px2 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
@@ -506,7 +506,7 @@ class UI:
     def clickDriftP1(self, *args):
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
-        self.clickedProcessingArea = False
+        self.clickedAreaOfInterest = False
         self.setDriftPoint()
         self.frameSlider.set_value(g.startFrame)
         self.clickedDriftP1 = True
@@ -516,7 +516,7 @@ class UI:
     def clickDriftP2(self, *args):
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
-        self.clickedProcessingArea = False
+        self.clickedAreaOfInterest = False
         self.setDriftPoint()
         self.frameSlider.set_value(g.endFrame)
         self.clickedDriftP2 = True
@@ -528,7 +528,7 @@ class UI:
             g.driftP1 = (0, 0)
             self.clickedDriftP1 = False
             self.clickedDriftP2 = False
-            self.clickedProcessingArea = False
+            self.clickedAreaOfInterest = False
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
             
@@ -538,7 +538,7 @@ class UI:
             g.driftP2 = (0, 0)
             self.clickedDriftP1 = False
             self.clickedDriftP2 = False
-            self.clickedProcessingArea = False
+            self.clickedAreaOfInterest = False
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
     
@@ -554,47 +554,47 @@ class UI:
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
         
-    # Processing area button clicked
-    def clickProcessingArea(self, *args):
-        g.processingAreaP1 = (0, 0)
-        g.processingAreaP2 = (0, 0)
+    # Area of Interest button clicked
+    def clickAreaOfInterest(self, *args):
+        g.areaOfInterestP1 = (0, 0)
+        g.areaOfInterestP2 = (0, 0)
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
-        self.clickedProcessingArea = True
+        self.clickedAreaOfInterest = True
         self.frameSlider.set_value(g.startFrame)
         self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.CROSSHAIR))
         self.overlay.queue_draw()
         
-    # Reset Processing Area to (0, 0)
-    def resetProcessingArea(self, widget, event):
+    # Reset Area of Interest to (0, 0)
+    def resetAreaOfInterest(self, widget, event):
         if(event.button == 3): # Right Click
-            g.processingAreaP1 = (0, 0)
-            g.processingAreaP2 = (0, 0)
+            g.areaOfInterestP1 = (0, 0)
+            g.areaOfInterestP2 = (0, 0)
             self.clickedDriftP1 = False
             self.clickedDriftP2 = False
-            self.clickedProcessingArea = False
+            self.clickedAreaOfInterest = False
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
             self.overlay.queue_draw()
         
-    # First point int the processing area clicked, drag started
+    # First point int the Area of Interest clicked, drag started
     def dragBegin(self, *args):
-        if(self.clickedProcessingArea):
-            g.processingAreaP1 = self.mousePosition
+        if(self.clickedAreaOfInterest):
+            g.areaOfInterestP1 = self.mousePosition
         
-    # Mouse released after dragging processing area
+    # Mouse released after dragging Area of Interest
     def dragEnd(self, *args):
-        if(self.clickedProcessingArea):
-            g.processingAreaP2 = self.mousePosition
-            self.clickedProcessingArea = False
+        if(self.clickedAreaOfInterest):
+            g.areaOfInterestP2 = self.mousePosition
+            self.clickedAreaOfInterest = False
             self.window.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.LEFT_PTR))
     
     # Called when the mouse moves over the frame
     def updateMousePosition(self, *args):
         pointer = self.frame.get_pointer()
         self.mousePosition = (min(max(0, pointer.x), self.frame.get_allocation().width), min(max(0, pointer.y), self.frame.get_allocation().height))
-        if(self.clickedProcessingArea):
-            if(g.processingAreaP1 != (0, 0)):
-                g.processingAreaP2 = self.mousePosition
+        if(self.clickedAreaOfInterest):
+            if(g.areaOfInterestP1 != (0, 0)):
+                g.areaOfInterestP2 = self.mousePosition
             self.overlay.queue_draw()
     
     # Sets whether or not to normalize the frames during alignment
