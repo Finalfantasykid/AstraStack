@@ -636,7 +636,9 @@ class UI:
     # Sets the drizzle scaling factor
     def setDrizzleInterpolation(self, *args):
         text = self.drizzleInterpolation.get_active_text()
-        if(text == "Linear"):
+        if(text == "Nearest Neighbor"):
+            g.drizzleInterpolation = cv2.INTER_NEAREST
+        elif(text == "Linear"):
             g.drizzleInterpolation = cv2.INTER_LINEAR
         elif(text == "Bicubic"):
             g.drizzleInterpolation = cv2.INTER_CUBIC

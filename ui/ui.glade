@@ -783,7 +783,7 @@ The 4 types of transformation are described below:
 - Affine (Translation + Rotation + Scaling + Shearing)
 
 'None' will skip the alignment entirely.   Useful for already aligned videos/sequences.</property>
-                                        <property name="label" translatable="yes">Transformation</property>
+                                        <property name="label" translatable="yes">Alignment</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
                                         </attributes>
@@ -836,7 +836,10 @@ The 4 types of transformation are described below:
                                         <property name="can_focus">False</property>
                                         <property name="tooltip_text" translatable="yes">Interpolation algorithm used for the transformation and upscaling.
 
-Linear is the fastest, but will have a slightly smoother result.  Bicubic and Lanczos are slower and can have artifacts, but will have a slightly sharper result.</property>
+- Nearest Neighbor: Fastest, but pixelated.
+- Linear: Fast, but will have a slightly smoother quality.
+- Bicubic: Slow, but sharper than Linear.  May introduce ringing artifacts.
+- Lanczos: Slowest, but sharper than Bicubic. May introduce ringing artifacts.</property>
                                         <property name="label" translatable="yes">Interpolation</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
@@ -871,11 +874,12 @@ Linear is the fastest, but will have a slightly smoother result.  Bicubic and La
                                       <object class="GtkComboBoxText" id="drizzleInterpolation">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="active">0</property>
+                                        <property name="active">1</property>
                                         <items>
-                                          <item id="0" translatable="yes">Linear</item>
-                                          <item id="1" translatable="yes">Bicubic</item>
-                                          <item id="2" translatable="yes">Lanczos</item>
+                                          <item id="0" translatable="yes">Nearest Neighbor</item>
+                                          <item id="1" translatable="yes">Linear</item>
+                                          <item id="2" translatable="yes">Bicubic</item>
+                                          <item id="3" translatable="yes">Lanczos</item>
                                         </items>
                                         <signal name="changed" handler="setDrizzleInterpolation" swapped="no"/>
                                         <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
@@ -883,34 +887,6 @@ Linear is the fastest, but will have a slightly smoother result.  Bicubic and La
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">4</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkGrid">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="row_spacing">5</property>
-                                    <property name="column_homogeneous">True</property>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Alignment</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                        <property name="width">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -925,7 +901,7 @@ Linear is the fastest, but will have a slightly smoother result.  Bicubic and La
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
+                                        <property name="top_attach">4</property>
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
@@ -939,7 +915,7 @@ Linear is the fastest, but will have a slightly smoother result.  Bicubic and La
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">2</property>
+                                        <property name="top_attach">5</property>
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
@@ -947,7 +923,7 @@ Linear is the fastest, but will have a slightly smoother result.  Bicubic and La
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">5</property>
+                                    <property name="position">4</property>
                                   </packing>
                                 </child>
                               </object>
