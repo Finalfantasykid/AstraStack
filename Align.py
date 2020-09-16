@@ -253,7 +253,10 @@ def transform(frames, tmats, minX, maxX, minY, maxY, drizzleFactor, drizzleInter
             if(drizzleFactor != 1.0):
                 M[0][2] *= drizzleFactor # X
                 M[1][2] *= drizzleFactor # Y
-                image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
+                T = np.identity(3) # Scale Matrix
+                T[0][0] = drizzleFactor
+                T[1][1] = drizzleFactor
+                M = M.dot(T) # Apply scale to Transformation
             if(not np.array_equal(M, I)):
                 image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
                 image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
