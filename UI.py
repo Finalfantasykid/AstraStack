@@ -80,9 +80,9 @@ class UI:
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
-        self.builder.get_object("red").add_mark(255, Gtk.PositionType.TOP, None)
-        self.builder.get_object("green").add_mark(255, Gtk.PositionType.TOP, None)
-        self.builder.get_object("blue").add_mark(255, Gtk.PositionType.TOP, None)
+        self.builder.get_object("red").add_mark(100, Gtk.PositionType.TOP, None)
+        self.builder.get_object("green").add_mark(100, Gtk.PositionType.TOP, None)
+        self.builder.get_object("blue").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("saturation").add_mark(100, Gtk.PositionType.TOP, None)
 
         self.disableScroll()
@@ -638,7 +638,7 @@ class UI:
         text = self.drizzleInterpolation.get_active_text()
         if(text == "Nearest Neighbor"):
             g.drizzleInterpolation = cv2.INTER_NEAREST
-        elif(text == "Linear"):
+        elif(text == "Bilinear"):
             g.drizzleInterpolation = cv2.INTER_LINEAR
         elif(text == "Bicubic"):
             g.drizzleInterpolation = cv2.INTER_CUBIC

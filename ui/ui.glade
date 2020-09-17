@@ -43,8 +43,8 @@
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="blueAdjust">
-    <property name="upper">255</property>
-    <property name="value">255</property>
+    <property name="upper">200</property>
+    <property name="value">100</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -100,8 +100,8 @@
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="greenAdjust">
-    <property name="upper">255</property>
-    <property name="value">255</property>
+    <property name="upper">200</property>
+    <property name="value">100</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -272,8 +272,8 @@
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="redAdjust">
-    <property name="upper">255</property>
-    <property name="value">255</property>
+    <property name="upper">200</property>
+    <property name="value">100</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -837,9 +837,9 @@ The 4 types of transformation are described below:
                                         <property name="tooltip_text" translatable="yes">Interpolation algorithm used for the transformation and upscaling.
 
 - Nearest Neighbor: Fastest, but pixelated.
-- Linear: Fast, but will have a slightly smoother quality.
+- Bilinear: Fast, but may blur the image slighly.
 - Bicubic: Slow, but sharper than Linear.  May introduce ringing artifacts.
-- Lanczos: Slowest, but sharper than Bicubic. May introduce ringing artifacts.</property>
+- Lanczos: Slowest, but can be sharper than Bicubic. May introduce ripple artifacts.</property>
                                         <property name="label" translatable="yes">Interpolation</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
@@ -877,7 +877,7 @@ The 4 types of transformation are described below:
                                         <property name="active">1</property>
                                         <items>
                                           <item id="0" translatable="yes">Nearest Neighbor</item>
-                                          <item id="1" translatable="yes">Linear</item>
+                                          <item id="1" translatable="yes">Bilinear</item>
                                           <item id="2" translatable="yes">Bicubic</item>
                                           <item id="3" translatable="yes">Lanczos</item>
                                         </items>

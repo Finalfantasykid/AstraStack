@@ -119,29 +119,29 @@ class Sharpen:
         img[img<0] = 0
         img = pow(img, 1/(max(1, g.gamma)/100))
         
+        # Saturation
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        (H, S, V) = cv2.split(img)
+        S *= g.saturation/100
+        V *= g.value/100
+        img = cv2.merge([H, S, V])
+        
+        img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
+        
         # Decompose
         (R, G, B) = cv2.split(img)
         
         # Red Adjust
-        R *= g.redAdjust/255
+        R *= g.redAdjust/100
         
         # Green Adjust
-        G *= g.greenAdjust/255
+        G *= g.greenAdjust/100
         
         # Blue Adjust
-        B *= g.blueAdjust/255
+        B *= g.blueAdjust/100
         
         # Recompose
         img = cv2.merge([R, G, B])
-        
-        # Saturation
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        (H, S, V) = cv2.split(img)
-        S = S*g.saturation/100
-        V = V*g.value/100
-        img = cv2.merge([H, S, V])
-        
-        img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
         
         # Clip at 0 and 255
         img *= 255
