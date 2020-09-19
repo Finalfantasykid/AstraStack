@@ -740,7 +740,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton">
-                                        <property name="label" translatable="yes">Draw Processing Area</property>
+                                        <property name="label" translatable="yes">Draw Area</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
