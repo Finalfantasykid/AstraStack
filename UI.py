@@ -15,7 +15,7 @@ from pystackreg import StackReg
 
 from Video import Video
 from Align import Align
-from Stack import Stack
+from Stack import Stack, transform
 from Sharpen import Sharpen
 from Globals import g
 
@@ -37,7 +37,6 @@ class UI:
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
-        self.cleanTmp()
         self.newVersionUrl = ""
         self.video = None
         self.align = None
@@ -144,6 +143,7 @@ class UI:
                 except:
                     return False
                 if(msg == "stop"):
+                    g.ui.setProgress()
                     return False
                 function(msg)
                 
@@ -277,16 +277,15 @@ class UI:
                 h, w = img.shape[:2]
                 if(not self.checkMemory(w, h)):
                     raise MemoryError()
-                cv2.imwrite(g.tmp + "stacked.png", img)
                 
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
                 self.saveDialog.set_current_name("")
-                self.sharpen = Sharpen(g.tmp + "stacked.png", True)
+                self.sharpen = Sharpen(g.file, True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
                 self.builder.get_object("processTab").set_sensitive(True)
                 self.tabs.set_current_page(UI.SHARPEN_TAB)
-                self.frame.set_from_file(g.tmp + "stacked.png")
+                self.frame.set_from_file(g.file)
             except MemoryError as error:
                 pass
             except: # Open Failed
@@ -358,25 +357,52 @@ class UI:
             self.setStartFrame()
             self.setEndFrame()
             self.frameScale.show()
-            self.frame.set_from_file(self.video.frames[int(self.frameSlider.get_value())])
+            self.updateImage(None, page_num)
         elif(page_num == UI.STACK_TAB):
             self.frameSlider.set_lower(0)
-            self.frameSlider.set_upper(len(self.align.similarities)-1)
+            self.frameSlider.set_upper(len(self.align.tmats)-1)
             self.frameSlider.set_value(0)
             self.frameScale.show()
-            self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
+            self.updateImage(None, page_num)
         elif(page_num == UI.SHARPEN_TAB):
             self.frameScale.hide()
             self.sharpenImage()
         self.fixFrameSliderBug()
     
     # Changes the image frame to the frameSlider position    
-    def updateImage(self, *args):
-        page_num = self.tabs.get_current_page()
+    def updateImage(self, adjustment=None, page_num=None):
+        if(self.video is None):
+            return
+        if(page_num is None):
+            page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
-            self.frame.set_from_file(self.video.frames[int(self.frameSlider.get_value())])
+            videoIndex = int(self.frameSlider.get_value())
+            img = cv2.cvtColor(self.video.getFrame(g.file, videoIndex), cv2.COLOR_BGR2RGB)
+            height, width = img.shape[:2]
+            
+            z = img.tobytes()
+            Z = GLib.Bytes.new(z)
+            
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+            self.frame.set_from_pixbuf(pixbuf)
         elif(page_num == UI.STACK_TAB):
-            self.frame.set_from_file(self.align.similarities[int(self.frameSlider.get_value())][0])
+            tmat = self.stack.tmats[int(self.frameSlider.get_value())]
+            videoIndex = tmat[0]
+            M = tmat[1]
+            fd = tmat[3]
+            img = self.video.getFrame(g.file, videoIndex)
+            img = transform(img, M, 
+                            self.stack.minX, self.stack.maxX, self.stack.minY, self.stack.maxY, 
+                            fd[0], fd[1], fd[2], fd[3], 
+                            g.drizzleFactor, g.drizzleInterpolation)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            height, width = img.shape[:2]
+            
+            z = img.tobytes()
+            Z = GLib.Bytes.new(z)
+            
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+            self.frame.set_from_pixbuf(pixbuf)
             
     # Draws a rectangle where the area of interest is
     def drawOverlay(self, widget, cr):
@@ -632,6 +658,7 @@ class UI:
             g.drizzleFactor = 2.5
         elif(text == "3.0X"):
             g.drizzleFactor = 3.0
+        self.updateImage()
             
     # Sets the drizzle scaling factor
     def setDrizzleInterpolation(self, *args):
@@ -644,29 +671,27 @@ class UI:
             g.drizzleInterpolation = cv2.INTER_CUBIC
         elif(text == "Lanczos"):
             g.drizzleInterpolation = cv2.INTER_LANCZOS4
+        self.updateImage()
             
     # Runs the Alignment step
     def clickAlign(self, *args):
         self.align = Align(self.video.frames[g.startFrame:g.endFrame+1])
-        try:
-            self.align.checkMemory()
-            thread = Thread(target=self.align.run, args=())
-            thread.start()
-            self.disableUI()
-        except MemoryError as error:
-            self.enableUI()
+        thread = Thread(target=self.align.run, args=())
+        thread.start()
+        self.disableUI()
         
     # Called when the Alignment is complete
     def finishedAlign(self):
         def update():
+            self.stack = Stack(self.align.tmats)
             self.tabs.next_page()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(True)
             self.builder.get_object("processTab").set_sensitive(False)
-            self.limit.set_upper(len(self.align.similarities))
-            self.limit.set_value(int(len(self.align.similarities)/2))
-            self.limitPercent.set_value(round(self.limit.get_value()/len(self.align.similarities)*100))
+            self.limit.set_upper(len(self.align.tmats))
+            self.limit.set_value(int(len(self.align.tmats)/2))
+            self.limitPercent.set_value(round(self.limit.get_value()/len(self.align.tmats)*100))
             self.setLimit()
             self.setLimitPercent()
         GLib.idle_add(update)
@@ -674,29 +699,31 @@ class UI:
     # Sets the number of frames to use in the Stack
     def setLimit(self, *args):
         self.limitPercent.disconnect(self.limitPercentSignal)
-        self.limit.set_upper(len(self.align.similarities))
+        self.limit.set_upper(len(self.align.tmats))
         g.limit = int(self.limit.get_value())
-        self.limitPercent.set_value(round(g.limit/len(self.align.similarities)*100))
+        self.limitPercent.set_value(round(g.limit/len(self.align.tmats)*100))
         self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent)
         
     # Sets the number of frames to use in the Stack
     def setLimitPercent(self, *args):
         limitPercent = self.limitPercent.get_value()/100
-        self.limit.set_value(round(limitPercent*len(self.align.similarities)))
+        self.limit.set_value(round(limitPercent*len(self.align.tmats)))
             
     # Stack Button clicked
     def clickStack(self, *args):
-        self.stack = Stack(self.align.similarities)
-        thread = Thread(target=self.stack.run, args=())
-        thread.start()
-        self.disableUI()
+        try:
+            self.stack.checkMemory()
+            thread = Thread(target=self.stack.run, args=())
+            thread.start()
+            self.disableUI()
+        except MemoryError as error:
+            self.enableUI()
         
     # Called when the stack is complete
     def finishedStack(self):
         def update():
             self.sharpen = Sharpen(self.stack.stackedImage)
             self.tabs.next_page()
-            self.frame.set_from_file(g.tmp + "stacked.png")
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(True)
@@ -755,7 +782,7 @@ class UI:
             if(self.stack is not None):
                 self.sharpen = Sharpen(self.stack.stackedImage)
             else:
-                self.sharpen = Sharpen(g.tmp + "stacked.png", True)
+                self.sharpen = Sharpen(g.file, True)
         if(self.processThread != None and self.processThread.is_alive()):
             self.sharpen.processAgain = processAgain
             self.sharpen.processColorAgain = processColor
@@ -772,26 +799,9 @@ class UI:
             self.frame.set_from_pixbuf(pixbuf)
         GLib.idle_add(update)
 
-    # Cleans the tmp directory
-    def cleanTmp(self):
-        if(path.exists(g.tmp)):
-            if(path.exists(g.tmp + "frames")):
-                for file in scandir(g.tmp + "frames"):
-                    unlink(file.path)
-            if(path.exists(g.tmp + "cache")):
-                for file in scandir(g.tmp + "cache"):
-                    unlink(file.path)
-            for file in scandir(g.tmp):
-                if(path.isdir(file)):
-                    rmdir(file.path)
-                else:
-                    unlink(file.path)
-            rmdir(g.tmp)
-
     # Closes the application
     def close(self, *args):
         Gtk.main_quit()
-        self.cleanTmp()
 
 def run():
     # Newer versions of Adwaita scalable icons don't work well with older librsvg.

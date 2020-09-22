@@ -1,7 +1,6 @@
 import cv2
 import glob
 from math import ceil
-from os import path, makedirs
 from Globals import g
 
 class Video:
@@ -11,12 +10,7 @@ class Video:
         self.total = 0
         self.frames = []
         self.sharpest = 0
-
-    def mkdirs(self):
-        if not path.exists(g.tmp + "frames"):
-            makedirs(g.tmp + "frames")
-        if not path.exists(g.tmp + "cache"):
-            makedirs(g.tmp + "cache")
+        self.vidcap = None
             
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
@@ -43,8 +37,7 @@ class Video:
             self.count += 1
             g.ui.setProgress(self.count, self.total, msg)
         g.ui.createListener(progress)
-        
-        self.mkdirs()
+
         sharps = []
         if(isinstance(g.file, list)):
             # Image Sequence
@@ -61,9 +54,7 @@ class Video:
                     w = width
                 if(w == width and h == height):
                     # Only add if dimensions match
-                    fileName = g.tmp + "frames/%d.png" % i
-                    cv2.imwrite(fileName, image)
-                    self.frames.append(fileName)
+                    self.frames.append(file)
                     # Calculate sharpness
                     sharps.append(calculateSharpness(image))
                     i += 1
@@ -89,9 +80,25 @@ class Video:
         else:
             self.sharpest = 0
 
-        g.ui.setProgress()
         g.ui.finishedVideo()
         g.ui.childConn.send("stop")
+        
+    def getFrame(self, file, frame, next=False):
+        if(isinstance(frame, str)):
+            # Specific file
+             image = cv2.imread(frame)
+        elif(isinstance(file, list)):
+            # Image Sequence
+            files = sorted(file)
+            image = cv2.imread(files[frame])
+        else:
+            # Video
+            if(self.vidcap is None):
+                self.vidcap = cv2.VideoCapture(file)
+            if(not next):
+                self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+            success,image = self.vidcap.read()
+        return image
        
 # Returns a number based on how sharp the image is (higher = sharper) 
 def calculateSharpness(image):
@@ -107,10 +114,9 @@ def loadFrames(file, start, count, conn):
     for i in range(0, count):
         success,image = vidcap.read()
         if(success):
-            fileName = g.tmp + "frames/%d.png" % (start + i)
-            cv2.imwrite(fileName, image)
             conn.send("Loading Frames")
-            frames.append(fileName)
+            frames.append(start + i)
             # Calculate sharpness
             sharps.append(calculateSharpness(image))
+    vidcap.release()
     return (frames, sharps)

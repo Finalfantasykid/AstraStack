@@ -816,80 +816,6 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">How much to upscale the frames.</property>
-                                        <property name="label" translatable="yes">Scaling Factor</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Interpolation algorithm used for the transformation and upscaling.
-
-- Nearest Neighbor: Fastest, but pixelated.
-- Bilinear: Fast, but may blur the image slighly.
-- Bicubic: Slow, but sharper than Linear.  May introduce ringing artifacts.
-- Lanczos: Slowest, but can be sharper than Bicubic. May introduce ripple artifacts.</property>
-                                        <property name="label" translatable="yes">Interpolation</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="drizzleFactor">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active">0</property>
-                                        <items>
-                                          <item id="0" translatable="yes">1.0X</item>
-                                          <item id="1" translatable="yes">1.5X</item>
-                                          <item id="2" translatable="yes">2.0X</item>
-                                          <item id="3" translatable="yes">2.5X</item>
-                                          <item id="5" translatable="yes">3.0X</item>
-                                        </items>
-                                        <signal name="changed" handler="setDrizzleFactor" swapped="no"/>
-                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="drizzleInterpolation">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active">1</property>
-                                        <items>
-                                          <item id="0" translatable="yes">Nearest Neighbor</item>
-                                          <item id="1" translatable="yes">Bilinear</item>
-                                          <item id="2" translatable="yes">Bicubic</item>
-                                          <item id="3" translatable="yes">Lanczos</item>
-                                        </items>
-                                        <signal name="changed" handler="setDrizzleInterpolation" swapped="no"/>
-                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
                                       <object class="GtkCheckButton" id="normalize">
                                         <property name="label" translatable="yes">Normalize frames during alignment</property>
                                         <property name="visible">True</property>
@@ -901,7 +827,7 @@ The 4 types of transformation are described below:
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">4</property>
+                                        <property name="top_attach">2</property>
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
@@ -915,7 +841,7 @@ The 4 types of transformation are described below:
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">5</property>
+                                        <property name="top_attach">3</property>
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
@@ -957,6 +883,95 @@ The 4 types of transformation are described below:
                         <property name="margin_top">10</property>
                         <property name="margin_bottom">10</property>
                         <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkGrid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_bottom">10</property>
+                            <property name="row_spacing">5</property>
+                            <property name="column_spacing">5</property>
+                            <property name="column_homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">How much to upscale the frames.</property>
+                                <property name="label" translatable="yes">Scaling Factor</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Interpolation algorithm used for the transformation and upscaling.
+
+- Nearest Neighbor: Fastest, but pixelated.
+- Bilinear: Fast, but may blur the image slighly.
+- Bicubic: Slow, but sharper than Linear.  May introduce ringing artifacts.
+- Lanczos: Slowest, but can be sharper than Bicubic. May introduce ripple artifacts.</property>
+                                <property name="label" translatable="yes">Interpolation</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="drizzleFactor">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">0</property>
+                                <items>
+                                  <item id="0" translatable="yes">1.0X</item>
+                                  <item id="1" translatable="yes">1.5X</item>
+                                  <item id="2" translatable="yes">2.0X</item>
+                                  <item id="3" translatable="yes">2.5X</item>
+                                  <item id="5" translatable="yes">3.0X</item>
+                                </items>
+                                <signal name="changed" handler="setDrizzleFactor" swapped="no"/>
+                                <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="drizzleInterpolation">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">1</property>
+                                <items>
+                                  <item id="0" translatable="yes">Nearest Neighbor</item>
+                                  <item id="1" translatable="yes">Bilinear</item>
+                                  <item id="2" translatable="yes">Bicubic</item>
+                                  <item id="3" translatable="yes">Lanczos</item>
+                                </items>
+                                <signal name="changed" handler="setDrizzleInterpolation" swapped="no"/>
+                                <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                         <child>
                           <object class="GtkGrid">
                             <property name="visible">True</property>
@@ -1050,7 +1065,7 @@ The 4 types of transformation are described below:
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1077,7 +1092,7 @@ The 4 types of transformation are described below:
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
