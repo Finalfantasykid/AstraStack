@@ -1057,6 +1057,25 @@ The 4 types of transformation are described below:
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
+                                <property name="top_attach">4</property>
+                                <property name="width">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="autoCrop">
+                                <property name="label" translatable="yes">Auto Crop</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Auto crops the image based on the transformations.  If unchecked, the reference frame will be used to fill in any missing portions.
+
+Note: Drift adjustment will still crop the image.</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="setAutoCrop" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
                                 <property name="top_attach">3</property>
                                 <property name="width">2</property>
                               </packing>

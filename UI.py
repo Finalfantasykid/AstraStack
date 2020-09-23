@@ -2,6 +2,7 @@ from os import cpu_count, rmdir, scandir, unlink, path
 from pathlib import Path
 import math
 import cv2
+import numpy as np
 import webbrowser
 import urllib.request
 import ssl
@@ -64,6 +65,7 @@ class UI:
         self.endFrame = self.builder.get_object("endFrame")
         self.normalize = self.builder.get_object("normalize")
         self.alignChannels = self.builder.get_object("alignChannels")
+        self.autoCrop = self.builder.get_object("autoCrop")
         self.transformation = self.builder.get_object("transformation")
         self.drizzleFactor = self.builder.get_object("drizzleFactor")
         self.drizzleInterpolation = self.builder.get_object("drizzleInterpolation")
@@ -111,6 +113,7 @@ class UI:
         self.setTransformation()
         self.setDrizzleFactor()
         self.setDrizzleInterpolation()
+        self.setAutoCrop()
         self.setThreads()
         self.frameScale.set_sensitive(False)
         g.reference = "0"
@@ -347,6 +350,7 @@ class UI:
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)
+            self.stack = None
         GLib.idle_add(update)
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
@@ -391,7 +395,11 @@ class UI:
             M = tmat[1]
             fd = tmat[3]
             img = self.video.getFrame(g.file, videoIndex)
-            img = transform(img, M, 
+            if(g.autoCrop):
+                ref = self.stack.refBG.astype(np.uint8)
+            else:
+                ref = None
+            img = transform(img, ref, M,
                             self.stack.minX, self.stack.maxX, self.stack.minY, self.stack.maxY, 
                             fd[0], fd[1], fd[2], fd[3], 
                             g.drizzleFactor, g.drizzleInterpolation)
@@ -658,6 +666,8 @@ class UI:
             g.drizzleFactor = 2.5
         elif(text == "3.0X"):
             g.drizzleFactor = 3.0
+        if(self.stack is not None):
+            self.stack.generateRefBG()
         self.updateImage()
             
     # Sets the drizzle scaling factor
@@ -671,6 +681,13 @@ class UI:
             g.drizzleInterpolation = cv2.INTER_CUBIC
         elif(text == "Lanczos"):
             g.drizzleInterpolation = cv2.INTER_LANCZOS4
+        if(self.stack is not None):
+            self.stack.generateRefBG()
+        self.updateImage()
+        
+    # Sets whether or not to auto crop
+    def setAutoCrop(self, *args):
+        g.autoCrop = not self.autoCrop.get_active()
         self.updateImage()
             
     # Runs the Alignment step

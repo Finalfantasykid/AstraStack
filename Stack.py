@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+import copy
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
@@ -16,6 +17,8 @@ class Stack:
         self.maxX = 0
         self.maxY = 0
         self.stackedImage = None
+        self.refBG = None
+        self.generateRefBG()
         
         # Check how much we need to crop the frames by getting the max and min translations
         for i, tmat in enumerate(self.tmats):
@@ -57,11 +60,18 @@ class Stack:
         self.total = g.limit
         if(g.alignChannels):
             self.total += 4
+            
+        self.generateRefBG()
+            
         futures = []
         for i in range(0, g.nThreads):
             nFrames = math.ceil(g.limit/g.nThreads)
             frames = tmats[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(blendAverage, frames, g.file,
+            if(g.autoCrop):
+                ref = self.refBG
+            else:
+                ref = None
+            futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
                                          self.minX, self.maxX, self.minY, self.maxY, 
                                          g.drizzleFactor, g.drizzleInterpolation, g.ui.childConn))
         
@@ -86,6 +96,16 @@ class Stack:
         g.ui.finishedStack()
         g.ui.childConn.send("stop")
         
+    # Creates the background used for transformed images
+    def generateRefBG(self):
+        video = Video()
+        (frame, M, diff, fd) = self.tmats[0]
+        ref = video.getFrame(g.file, frame).astype(np.float32)
+        self.refBG = transform(ref, None, np.identity(3),
+                               0, 0, 0, 0,
+                               fd[0], fd[1], fd[2], fd[3], 
+                               g.drizzleFactor, g.drizzleInterpolation)
+        
     # Aligns the RGB channels to help reduce chromatic aberrations
     def alignChannels(self):
         h, w = self.stackedImage.shape[:2]
@@ -98,12 +118,12 @@ class Stack:
             g.ui.childConn.send("Aligning RGB")
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, file, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
+def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
     video = Video()
     stackedImage = None
     for frame, M, diff, fd in frames:
         image = video.getFrame(file, frame).astype(np.float32)
-        image = transform(image, M, 
+        image = transform(image, ref, M, 
                           minX, maxX, minY, maxY, 
                           fd[0], fd[1], fd[2], fd[3], 
                           drizzleFactor, drizzleInterpolation)
@@ -115,7 +135,14 @@ def blendAverage(frames, file, minX, maxX, minY, maxY, drizzleFactor, drizzleInt
     return stackedImage
     
 # Multiprocess function to transform and save the images to cache
-def transform(image, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, drizzleFactor, drizzleInterpolation):
+def transform(image, ref, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, drizzleFactor, drizzleInterpolation):
+    dst = copy.deepcopy(ref)
+    if(ref is not None):
+        # Full Frame
+        borderMode = cv2.BORDER_TRANSPARENT
+    else:
+        # Auto Crop
+        borderMode = cv2.BORDER_CONSTANT
     i = 0
     I = np.identity(3)
     h, w = image.shape[:2]
@@ -130,7 +157,9 @@ def transform(image, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, drizzle
         T[1][1] = drizzleFactor
         M = M.dot(T) # Apply scale to Transformation
     if(not np.array_equal(M, I)):
-        image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation)
-        image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
-                      int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+        image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation, borderMode=borderMode, dst=dst)
+        if(ref is None):
+            # Auto Crop
+            image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
+                          int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
     return image
