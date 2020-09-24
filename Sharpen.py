@@ -198,9 +198,9 @@ def sharpenChannelLayers(params):
         if(params['level'][level]):
             # Apply Unsharp Mask
             if(params['radius'][level] > 0):
-                unsharp(c[i][0], params['radius'][level], 1)
-                unsharp(c[i][1], params['radius'][level], 1)
-                unsharp(c[i][2], params['radius'][level], 1)
+                unsharp(c[i][0], params['radius'][level], 2)
+                unsharp(c[i][1], params['radius'][level], 2)
+                unsharp(c[i][2], params['radius'][level], 2)
             # Multiply the layer to increase intensity
             if(params['sharpen'][level] > 0):
                 factor = (100 - 10*level)
