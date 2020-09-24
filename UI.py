@@ -275,7 +275,6 @@ class UI:
             g.file = self.openDialog.get_filename()
             try:
                 self.video = Video()
-                self.video.mkdirs()
                 img = cv2.imread(g.file)
                 h, w = img.shape[:2]
                 if(not self.checkMemory(w, h)):
@@ -656,7 +655,13 @@ class UI:
     # Sets the drizzle scaling factor
     def setDrizzleFactor(self, *args):
         text = self.drizzleFactor.get_active_text()
-        if(text == "1.0X"):
+        if(text == "0.25X"):
+            g.drizzleFactor = 0.25
+        elif(text == "0.50X"):
+            g.drizzleFactor = 0.50
+        elif(text == "0.75X"):
+            g.drizzleFactor = 0.75
+        elif(text == "1.0X"):
             g.drizzleFactor = 1.0
         elif(text == "1.5X"):
             g.drizzleFactor = 1.5

@@ -930,13 +930,16 @@ The 4 types of transformation are described below:
                               <object class="GtkComboBoxText" id="drizzleFactor">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="active">0</property>
+                                <property name="active">3</property>
                                 <items>
-                                  <item id="0" translatable="yes">1.0X</item>
-                                  <item id="1" translatable="yes">1.5X</item>
-                                  <item id="2" translatable="yes">2.0X</item>
-                                  <item id="3" translatable="yes">2.5X</item>
-                                  <item id="5" translatable="yes">3.0X</item>
+                                  <item id="0" translatable="yes">0.25X</item>
+                                  <item id="1" translatable="yes">0.50X</item>
+                                  <item id="2" translatable="yes">0.75X</item>
+                                  <item id="3" translatable="yes">1.0X</item>
+                                  <item id="5" translatable="yes">1.5X</item>
+                                  <item id="6" translatable="yes">2.0X</item>
+                                  <item id="7" translatable="yes">2.5X</item>
+                                  <item id="8" translatable="yes">3.0X</item>
                                 </items>
                                 <signal name="changed" handler="setDrizzleFactor" swapped="no"/>
                                 <signal name="scroll-event" handler="propagateScroll" swapped="no"/>

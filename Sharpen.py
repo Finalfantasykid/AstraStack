@@ -117,6 +117,7 @@ class Sharpen:
         
         # Gamma
         img[img<0] = 0
+        img[img>1] = 1
         img = pow(img, 1/(max(1, g.gamma)/100))
         
         # Decompose
