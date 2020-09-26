@@ -49,14 +49,19 @@ class Stack:
         def progress(msg):
             self.count += 1
             g.ui.setProgress(self.count, self.total, msg)
+            
         g.ui.createListener(progress)
         self.count = 0
         
         self.stackedImage = None
         i = 0
 
-        # Average Blend Mode
+        # Limit frames
         tmats = self.tmats[0:g.limit]
+        
+        # Sort the frames so that the likelyhood of it being the 'next' frame
+        tmats.sort(key=lambda tmat: tmat[0]) 
+        
         self.total = g.limit
         if(g.alignChannels):
             self.total += 4
@@ -156,10 +161,10 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, dr
         T[0][0] = drizzleFactor
         T[1][1] = drizzleFactor
         M = M.dot(T) # Apply scale to Transformation
-    if(not np.array_equal(M, I)):
-        image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation, borderMode=borderMode, dst=dst)
-        if(ref is None):
-            # Auto Crop
-            image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
-                          int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+
+    image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation, borderMode=borderMode, dst=dst)
+    if(ref is None):
+        # Auto Crop
+        image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
+                      int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
     return image

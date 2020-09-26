@@ -74,6 +74,20 @@ class Video:
                 self.frames += frames
                 sharps += sharp
             vidcap.release()
+            
+        # Some videos are weird with their frame timings, so get rid of possible duplicates
+        framesDict = dict()
+        tmpFrames = []
+        tmpSharps = []
+        for i, frame in enumerate(self.frames):
+            if(frame not in framesDict):
+                framesDict[frame] = True
+                tmpFrames.append(frame)
+                tmpSharps.append(sharps[i])
+        
+        sharps = tmpSharps
+        self.frames = tmpFrames
+        self.total = len(self.frames)
 
         if(len(sharps) > 0):
             self.sharpest = sharps.index(max(sharps))
@@ -83,7 +97,7 @@ class Video:
         g.ui.finishedVideo()
         g.ui.childConn.send("stop")
         
-    def getFrame(self, file, frame, next=False):
+    def getFrame(self, file, frame):
         if(isinstance(frame, str)):
             # Specific file
              image = cv2.imread(frame)
@@ -95,8 +109,10 @@ class Video:
             # Video
             if(self.vidcap is None):
                 self.vidcap = cv2.VideoCapture(file)
-            if(not next):
-                self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+            frameTime = ((1000/self.vidcap.get(cv2.CAP_PROP_FPS))+0.1)
+            lastTime = self.vidcap.get(cv2.CAP_PROP_POS_MSEC)
+            if(not (frame < lastTime + frameTime and frame > lastTime)):
+                self.vidcap.set(cv2.CAP_PROP_POS_MSEC, frame)
             success,image = self.vidcap.read()
         return image
        
@@ -115,7 +131,7 @@ def loadFrames(file, start, count, conn):
         success,image = vidcap.read()
         if(success):
             conn.send("Loading Frames")
-            frames.append(start + i)
+            frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
             sharps.append(calculateSharpness(image))
     vidcap.release()

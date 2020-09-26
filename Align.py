@@ -68,7 +68,7 @@ class Align:
         for i in range(0, g.nThreads):
             nFrames = math.ceil(len(self.frames)/g.nThreads)
             frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(align, frames, g.file, g.reference, referenceIndex, 
+            futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
                                          g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.ui.childConn))
         
         for i in range(0, g.nThreads):
@@ -112,7 +112,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
     i = startFrame
     tmats = []
     video = Video()
-    ref = cv2.cvtColor(video.getFrame(file, int(reference)), cv2.COLOR_BGR2GRAY)
+    ref = cv2.cvtColor(video.getFrame(file, reference), cv2.COLOR_BGR2GRAY)
     h1, w1 = ref.shape[:2]
     if(dx != 0 and dy != 0):
         # Drift
@@ -138,7 +138,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             fdy  = 0
             fdx1 = 0
             fdy1 = 0
-            mov = cv2.cvtColor(video.getFrame(file, frame, (i != startFrame)), cv2.COLOR_BGR2GRAY)
+            mov = cv2.cvtColor(video.getFrame(file, frame), cv2.COLOR_BGR2GRAY)
             if(dx != 0 and dy != 0):
                 # Drift
                 fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
@@ -150,8 +150,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
             if(normalize):
                 mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-            
-            
+
             if(sr is not None):
                 M = sr.register(mov, ref)
             else:

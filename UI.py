@@ -380,7 +380,7 @@ class UI:
             page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             videoIndex = int(self.frameSlider.get_value())
-            img = cv2.cvtColor(self.video.getFrame(g.file, videoIndex), cv2.COLOR_BGR2RGB)
+            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex]), cv2.COLOR_BGR2RGB)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -643,7 +643,7 @@ class UI:
         text = self.transformation.get_active_text()
         if(text == "None"):
             g.transformation = -1
-        if(text == "Translation"):
+        elif(text == "Translation"):
             g.transformation = StackReg.TRANSLATION
         elif(text == "Rigid Body"):
             g.transformation = StackReg.RIGID_BODY
