@@ -58,7 +58,7 @@ class Video:
             countPerThread = math.ceil(self.total/g.nThreads)
 
             for i in range(0, g.nThreads):
-                futures.append(g.pool.submit(loadFramesSequence, g.file, t*countPerThread, countPerThread, g.ui.childConn))
+                futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.ui.childConn))
             for i in range(0, g.nThreads):
                 frames, sharp = futures[i].result()
                 self.frames += frames
