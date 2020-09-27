@@ -9,6 +9,7 @@ import ssl
 import json
 import math
 import psutil
+import mimetypes
 from threading import Thread
 from multiprocessing import Pipe
 from concurrent.futures import ProcessPoolExecutor
@@ -73,6 +74,9 @@ class UI:
         self.limitPercent = self.builder.get_object("limitPercent")
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
+        
+        self.openDialog.set_preview_widget(Gtk.Image())
+        self.saveDialog.set_preview_widget(Gtk.Image())
         
         self.builder.get_object("alignTab").set_sensitive(False)
         self.builder.get_object("stackTab").set_sensitive(False)
@@ -226,6 +230,40 @@ class UI:
             response = self.showWarningDialog("Your system may not have enough memory to process this file, are you sure you want to continue?")
             return (response == Gtk.ResponseType.YES)
         return True
+    
+    # Shows preview image in file chooser dialog
+    def updatePreview(self, dialog):
+        path = dialog.get_preview_filename()
+        pixbuf = None
+        try:
+            # First try as image
+            pixbuf= GdkPixbuf.Pixbuf.new_from_file(path)
+        except Exception:
+            try:
+                # Now try as video
+                if("video/" in mimetypes.guess_type(path)[0]):
+                    video = Video()
+                    img = cv2.cvtColor(video.getFrame(path, 0), cv2.COLOR_BGR2RGB)
+                    height, width = img.shape[:2]
+                    
+                    z = img.tobytes()
+                    Z = GLib.Bytes.new(z)
+                    
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+            except Exception:
+                dialog.set_preview_widget_active(False)
+        if(pixbuf is not None):
+            # Valid pixbuf
+            maxwidth, maxheight = 250, 250
+            width, height = pixbuf.get_width(), pixbuf.get_height()
+            scale= min(maxwidth/width, maxheight/height)
+            if(scale<1):
+                width, height= int(width*scale), int(height*scale)
+                pixbuf= pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+
+            dialog.get_preview_widget().set_size_request(width + 10, height + 10)
+            dialog.get_preview_widget().set_from_pixbuf(pixbuf)
+            dialog.set_preview_widget_active(True)
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):

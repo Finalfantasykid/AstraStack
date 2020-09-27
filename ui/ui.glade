@@ -118,6 +118,7 @@
     <property name="action">save</property>
     <property name="do_overwrite_confirmation">True</property>
     <property name="filter">imageFilter</property>
+    <signal name="update-preview" handler="updatePreview" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -191,6 +192,7 @@
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
+    <signal name="update-preview" handler="updatePreview" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
