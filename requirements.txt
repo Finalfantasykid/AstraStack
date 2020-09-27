@@ -1,3 +1,4 @@
+natsort==7.0.1
 numpy==1.18.1
 opencv-python-headless==4.2.0.32
 psutil==5.7.0

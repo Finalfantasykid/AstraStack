@@ -1,6 +1,7 @@
 import cv2
 import glob
-from math import ceil
+import math
+from natsort import natsorted, ns
 from Globals import g
 
 class Video:
@@ -16,12 +17,9 @@ class Video:
     def checkMemory(self):
         if(isinstance(g.file, list)):
             # Image Sequence
-            for file in sorted(g.file):
-                image = cv2.imread(file)
-                h, w = image.shape[:2]
-                if(not g.ui.checkMemory(w, h)):
-                    raise MemoryError()
-                return
+            h, w = cv2.imread(g.file[0]).shape[:2]
+            if(not g.ui.checkMemory(w, h)):
+                raise MemoryError()
         else:
             # Video
             vidcap = cv2.VideoCapture(g.file)
@@ -39,38 +37,30 @@ class Video:
         g.ui.createListener(progress)
 
         sharps = []
+        futures = []
         if(isinstance(g.file, list)):
             # Image Sequence
             self.total = len(g.file)
-            i = 0
-            w = 0
-            h = 0
-            for file in sorted(g.file):
-                image = cv2.imread(file)
-                height, width = image.shape[:2]
-                if(w == 0 and h == 0):
-                    # Set height, width of first frame
-                    h = height
-                    w = width
-                if(w == width and h == height):
-                    # Only add if dimensions match
-                    self.frames.append(file)
-                    # Calculate sharpness
-                    sharps.append(calculateSharpness(image))
-                    i += 1
-                self.count += 1
-                g.ui.setProgress(self.count, self.total, "Loading Frames")
+            countPerThread = math.ceil(self.total/g.nThreads)
+            g.file = natsorted(g.file, alg=ns.IGNORECASE)
+            height, width = cv2.imread(g.file[0]).shape[:2]
+            
+            for i in range(0, g.nThreads):
+                futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.ui.childConn))
+            for i in range(0, g.nThreads):
+                frames, sharp = futures[i].result()
+                self.frames += frames
+                sharps += sharp
         else:
             # Video
             vidcap = cv2.VideoCapture(g.file)
             self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-            countPerThread = ceil(self.total/g.nThreads)
-            
-            futures = []
-            for t in range(0, g.nThreads):
-                futures.append(g.pool.submit(loadFrames, g.file, t*countPerThread, countPerThread, g.ui.childConn))
-            for t in range(0, g.nThreads):
-                frames, sharp = futures[t].result()
+            countPerThread = math.ceil(self.total/g.nThreads)
+
+            for i in range(0, g.nThreads):
+                futures.append(g.pool.submit(loadFramesSequence, g.file, t*countPerThread, countPerThread, g.ui.childConn))
+            for i in range(0, g.nThreads):
+                frames, sharp = futures[i].result()
                 self.frames += frames
                 sharps += sharp
             vidcap.release()
@@ -103,8 +93,7 @@ class Video:
              image = cv2.imread(frame)
         elif(isinstance(file, list)):
             # Image Sequence
-            files = sorted(file)
-            image = cv2.imread(files[frame])
+            image = cv2.imread(file[frame])
         else:
             # Video
             if(self.vidcap is None):
@@ -120,17 +109,32 @@ class Video:
 def calculateSharpness(image):
     h, w = image.shape[:2]
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
+   
+# Multiprocess function to load frames from an image sequence
+def loadFramesSequence(files, width, height, conn):
+    frames = []
+    sharps = []
+    for file in files:
+        conn.send("Loading Frames")
+        image = cv2.imread(file)
+        h, w = image.shape[:2]
+        if(h == height and w == width):
+            # Only add if dimensions match
+            frames.append(file)
+            # Calculate sharpness
+            sharps.append(calculateSharpness(image))
+    return (frames, sharps)
         
-# Multiprocess function to load frames
-def loadFrames(file, start, count, conn):
+# Multiprocess function to load frames from a video source
+def loadFramesVideo(file, start, count, conn):
     vidcap = cv2.VideoCapture(file)
     vidcap.set(cv2.CAP_PROP_POS_FRAMES, start)
     frames = []
     sharps = []
     for i in range(0, count):
         success,image = vidcap.read()
+        conn.send("Loading Frames")
         if(success):
-            conn.send("Loading Frames")
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
             sharps.append(calculateSharpness(image))

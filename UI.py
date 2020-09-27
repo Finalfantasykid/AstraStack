@@ -300,7 +300,7 @@ class UI:
         if(self.saveDialog.get_current_name() == ""):
             # Set default file to save if empty
             if(isinstance(g.file, list)):
-                sList = sorted(g.file)
+                sList = g.file
                 self.saveDialog.set_current_name(Path(sList[0]).stem + "_" + Path(sList[-1]).stem + ".png")
             else:
                 self.saveDialog.set_current_name(Path(g.file).stem + ".png")
@@ -341,7 +341,7 @@ class UI:
             self.setDriftPoint()
             self.enableUI()
             if(isinstance(g.file, list)):
-                sList = sorted(g.file)
+                sList = g.file
                 self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - " + UI.TITLE)
             else:
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
