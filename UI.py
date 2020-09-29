@@ -1,4 +1,5 @@
 from os import cpu_count, rmdir, scandir, unlink, path
+import subprocess, os, sys
 from pathlib import Path
 import math
 import cv2
@@ -181,6 +182,16 @@ class UI:
         dialog.set_version(UI.VERSION)
         response = dialog.run()
         dialog.hide()
+        
+    # Opens the user manual in the default pdf application
+    def showManual(self, *args):
+        filepath = "manual/Manual.pdf"
+        if sys.platform.startswith('darwin'):
+            subprocess.call(('open', filepath))
+        elif os.name == 'nt': # For Windows
+            os.startfile(filepath)
+        elif os.name == 'posix': # For Linux, Mac, etc.
+            subprocess.call(('xdg-open', filepath))
         
     # Disable inputs
     def disableUI(self):
