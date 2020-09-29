@@ -1987,7 +1987,15 @@ Note: Drift adjustment will still crop the image.</property>
                             <property name="receives_default">True</property>
                             <property name="popover">popover</property>
                             <child>
-                              <placeholder/>
+                              <object class="GtkButton">
+                                <property name="label" translatable="yes">Menu</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="relief">none</property>
+                                <property name="image_position">right</property>
+                                <property name="always_show_image">True</property>
+                              </object>
                             </child>
                           </object>
                           <packing>
