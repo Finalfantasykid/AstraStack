@@ -12,8 +12,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     mkdir -p dist/AstraStack/share_override/icons/Adwaita/
     cp -r share_override/icons/Adwaita dist/AstraStack/share_override/icons/
     cp -r ui dist/AstraStack/
+    cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
     rm dist/AstraStack/ui/logo.ico
+    rm dist/AstraStack/manual/Manual.odt
     cp scripts/astrastack dist/AstraStack/
     cp scripts/astrastack.desktop dist/AstraStack
     cp scripts/install.sh dist/
@@ -36,7 +38,9 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 AstraStack.py
     rm -fr dist/AstraStack/share/locale/
     cp -r ui dist/AstraStack/
+    cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
     rm dist/AstraStack/ui/logo.ico
+    rm dist/AstraStack/manual/Manual.odt
     C:/'Program Files (x86)'/'Inno Setup 6'/ISCC.exe scripts/inno.iss
 fi
