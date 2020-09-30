@@ -185,13 +185,12 @@ class UI:
         
     # Opens the user manual in the default pdf application
     def showManual(self, *args):
-        filepath = "manual/Manual.pdf"
         if sys.platform.startswith('darwin'):
-            subprocess.call(('open', filepath))
+            subprocess.call(('open', "manual/Manual.pdf"))
         elif os.name == 'nt': # For Windows
-            os.startfile(filepath)
+            os.startfile("manual\Manual.pdf")
         elif os.name == 'posix': # For Linux, Mac, etc.
-            subprocess.call(('xdg-open', filepath))
+            subprocess.call(('xdg-open', "manual/Manual.pdf"))
         
     # Disable inputs
     def disableUI(self):
