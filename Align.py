@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+import copy
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
@@ -157,8 +158,8 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
                 M = np.identity(3)
             
             # Apply transformation to small version to check similarity to reference
-            mov = cv2.warpPerspective(mov, M, (int(w*scaleFactor), int(h*scaleFactor)))
-
+            dst = copy.deepcopy(ref)
+            mov = cv2.warpPerspective(mov, M, (int(w*scaleFactor), int(h*scaleFactor)), borderMode=cv2.BORDER_TRANSPARENT, dst=dst)
             b, b_norm = calculateNorms(cv2.resize(mov, (64,64)))
             diff = np.dot(a / a_norm, b / b_norm)
             
