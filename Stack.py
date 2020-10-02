@@ -12,31 +12,15 @@ class Stack:
         self.tmats = tmats
         self.count = 0
         self.total = 0
-        self.minX = 0
-        self.minY = 0
-        self.maxX = 0
-        self.maxY = 0
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
-        
-        # Check how much we need to crop the frames by getting the max and min translations
-        for i, tmat in enumerate(self.tmats):
-            M = self.tmats[i][1]
-            
-            if(M[0][2] < 0):
-                self.minX = min(self.minX, M[0][2])
-            else:
-                self.maxX = max(self.maxX, M[0][2])
-            if(M[1][2] < 0):
-                self.minY = min(self.minY, M[1][2])
-            else:
-                self.maxY = max(self.maxY, M[1][2])
-        
-        self.minX = math.floor(self.minX)
-        self.minY = math.floor(self.minY)
-        self.maxX = math.ceil(self.maxX)
-        self.maxY = math.ceil(self.maxY)
+
+        # Copy over auto-crop
+        self.minX = g.ui.align.minX
+        self.maxX = g.ui.align.maxX
+        self.minY = g.ui.align.minY
+        self.maxY = g.ui.align.maxY
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):

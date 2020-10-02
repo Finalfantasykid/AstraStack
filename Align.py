@@ -13,6 +13,10 @@ class Align:
         self.tmats = [] # (frame, M, diff, (fdx, fdy, fdx1, fdy1))
         self.count = 0
         self.total = 0
+        self.minX = 0
+        self.minY = 0
+        self.maxX = 0
+        self.maxY = 0
         video = Video()
         self.height, self.width = video.getFrame(g.file, 0).shape[:2]
         
@@ -73,8 +77,13 @@ class Align:
                                          g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.ui.childConn))
         
         for i in range(0, g.nThreads):
-            self.tmats += futures[i].result()
-                
+            tmats, minX, minY, maxX, maxY = futures[i].result()
+            self.tmats += tmats
+            self.minX = math.floor(min(self.minX, minX))
+            self.maxX = math.ceil(max(self.maxX, maxX))
+            self.minY = math.floor(min(self.minY, minY))
+            self.maxY = math.ceil(max(self.maxY, maxY))
+            
         self.tmats.sort(key=lambda tup: tup[2], reverse=True)
 
         g.ui.finishedAlign()
@@ -112,6 +121,10 @@ class Align:
 def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, conn):
     i = startFrame
     tmats = []
+    minX = 0
+    minY = 0
+    maxX = 0
+    maxY = 0
     video = Video()
     ref = cv2.cvtColor(video.getFrame(file, reference), cv2.COLOR_BGR2GRAY)
     h1, w1 = ref.shape[:2]
@@ -166,6 +179,16 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             M[0][2] /= scaleFactor # X
             M[1][2] /= scaleFactor # Y
             
+            # Used for auto-crop
+            if(M[0][2] < 0):
+                minX = min(minX, M[0][2])
+            else:
+                maxX = max(maxX, M[0][2])
+            if(M[1][2] < 0):
+                minY = min(minY, M[1][2])
+            else:
+                maxY = max(maxY, M[1][2])
+            
             if(aoi1 != (0,0) and aoi2 != (0,0)):
                 # Shift the matrix origin to the Area of Interest, and then shift back
                 t1 = np.array([1, 0, -aoi1[0], 0, 1, -aoi1[1], 0, 0, 1]).reshape((3,3))
@@ -177,7 +200,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             print(e)
         conn.send("Aligning Frames")
         i += 1
-    return tmats
+    return (tmats, minX, minY, maxX, maxY)
 
 def calculateNorms(img):
     # https://github.com/petermat/image_similarity
