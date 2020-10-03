@@ -15,12 +15,6 @@ class Stack:
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
-
-        # Copy over auto-crop
-        self.minX = g.ui.align.minX
-        self.maxX = g.ui.align.maxX
-        self.minY = g.ui.align.minY
-        self.maxY = g.ui.align.maxY
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
@@ -61,7 +55,7 @@ class Stack:
             else:
                 ref = None
             futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
-                                         self.minX, self.maxX, self.minY, self.maxY, 
+                                         g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
                                          g.drizzleFactor, g.drizzleInterpolation, g.ui.childConn))
         
         for i in range(0, g.nThreads):

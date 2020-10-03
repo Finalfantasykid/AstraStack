@@ -447,7 +447,7 @@ class UI:
             else:
                 ref = None
             img = transform(img, ref, M,
-                            self.stack.minX, self.stack.maxX, self.stack.minY, self.stack.maxY, 
+                            self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, 
                             fd[0], fd[1], fd[2], fd[3], 
                             g.drizzleFactor, g.drizzleInterpolation)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
