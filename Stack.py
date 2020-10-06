@@ -82,11 +82,10 @@ class Stack:
     # Creates the background used for transformed images
     def generateRefBG(self):
         video = Video()
-        (frame, M, diff, fd) = self.tmats[0]
+        (frame, M, diff) = self.tmats[0]
         ref = video.getFrame(g.file, frame).astype(np.float32)
         self.refBG = transform(ref, None, np.identity(3),
                                0, 0, 0, 0,
-                               fd[0], fd[1], fd[2], fd[3], 
                                g.drizzleFactor, g.drizzleInterpolation)
         
     # Aligns the RGB channels to help reduce chromatic aberrations
@@ -104,11 +103,10 @@ class Stack:
 def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
     video = Video()
     stackedImage = None
-    for frame, M, diff, fd in frames:
+    for frame, M, diff in frames:
         image = video.getFrame(file, frame).astype(np.float32)
         image = transform(image, ref, M, 
-                          minX, maxX, minY, maxY, 
-                          fd[0], fd[1], fd[2], fd[3], 
+                          minX, maxX, minY, maxY,
                           drizzleFactor, drizzleInterpolation)
         if stackedImage is None:
             stackedImage = image
@@ -118,7 +116,7 @@ def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizz
     return stackedImage
     
 # Multiprocess function to transform and save the images to cache
-def transform(image, ref, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, drizzleFactor, drizzleInterpolation):
+def transform(image, ref, tmat, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation):
     dst = copy.deepcopy(ref)
     if(ref is not None):
         # Full Frame
@@ -129,9 +127,8 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, fdx, fdy, fdx1, fdy1, dr
     i = 0
     I = np.identity(3)
     h, w = image.shape[:2]
-    image = image[int(fdy1):int(h-fdy), int(fdx1):int(w-fdx)]
-    h, w = image.shape[:2]
     M = tmat.copy()
+    
     if(drizzleFactor != 1.0):
         M[0][2] *= drizzleFactor # X
         M[1][2] *= drizzleFactor # Y

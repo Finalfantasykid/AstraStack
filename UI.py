@@ -440,7 +440,6 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            fd = tmat[3]
             img = self.video.getFrame(g.file, videoIndex)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
@@ -448,7 +447,6 @@ class UI:
                 ref = None
             img = transform(img, ref, M,
                             self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, 
-                            fd[0], fd[1], fd[2], fd[3], 
                             g.drizzleFactor, g.drizzleInterpolation)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             height, width = img.shape[:2]

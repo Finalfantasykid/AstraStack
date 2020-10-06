@@ -47,4 +47,3 @@ The project can also be built in Windows using a mingw64 installation.  You can 
 1. StackReg - http://bigwww.epfl.ch/thevenaz/StackReg/
 1. A Pyramid Approach to Subpixel Registration Based on Intensity - http://bigwww.epfl.ch/publications/thevenaz9801.html
 1. Image Sharpening using Unsharp Masking and Wavelet Transform - http://ijarcsms.com/docs/paper/volume2/issue6/V2I6-0003.pdf
-1. image_similarity - https://github.com/petermat/image_similarity

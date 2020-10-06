@@ -10,7 +10,7 @@ class Align:
 
     def __init__(self, frames):
         self.frames = frames
-        self.tmats = [] # (frame, M, diff, (fdx, fdy, fdx1, fdy1))
+        self.tmats = [] # (frame, M, diff)
         self.count = 0
         self.total = 0
         self.minX = 0
@@ -121,64 +121,90 @@ class Align:
 def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, conn):
     i = startFrame
     tmats = []
-    minX = 0
-    minY = 0
-    maxX = 0
-    maxY = 0
+    minX = minY = maxX = maxY = 0
     video = Video()
-    ref = cv2.cvtColor(video.getFrame(file, reference), cv2.COLOR_BGR2GRAY)
-    h1, w1 = ref.shape[:2]
-    if(dx != 0 and dy != 0):
-        # Drift
-        fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
-        ref = ref[int(fdy1):int(h1-fdy), int(fdx1):int(w1-fdx)]
     
-    if(aoi1 != (0,0) and aoi2 != (0,0)):
-        # Area of Interest
-        ref = ref[aoi1[1]:aoi2[1],aoi1[0]:aoi2[0]]
+    # Load Reference
+    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference), cv2.COLOR_BGR2GRAY)
+    h1, w1 = ref.shape[:2]
+    
+    # Drift
+    rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
+    ref = ref[int(rfdy1):int(h1-rfdy), int(rfdx1):int(w1-rfdx)]
+        
+    # Area of Interest
+    ref = cropAreaOfInterest(ref, aoi1, aoi2)
+    refOrig = cropAreaOfInterest(refOrig, aoi1, aoi2, rfdx1, rfdy1)
+    
     if(transformation != -1):
         sr = StackReg(transformation)
     else:
         sr = None
+        
     h, w = ref.shape[:2]
     scaleFactor = min(1.0, (100/h))
     ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
+    refOrig = cv2.resize(refOrig, (64, 64))
+    
     if(normalize):
-        ref = cv2.normalize(ref, ref, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-    a, a_norm = calculateNorms(cv2.resize(ref, (64,64)))
+        ref = normalizeImg(ref)
+        refOrig = normalizeImg(refOrig)
+    
     for frame in frames:
         try:
-            fdx  = 0
-            fdy  = 0
-            fdx1 = 0
-            fdy1 = 0
-            mov = cv2.cvtColor(video.getFrame(file, frame), cv2.COLOR_BGR2GRAY)
-            if(dx != 0 and dy != 0):
-                # Drift
-                fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
-                mov = mov[int(fdy1):int(h1-fdy), int(fdx1):int(w1-fdx)]
-            
-            if(aoi1 != (0,0) and aoi2 != (0,0)):
-                # Area of Interest
-                mov = mov[aoi1[1]:aoi2[1],aoi1[0]:aoi2[0]]
-            mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
-            if(normalize):
-                mov = cv2.normalize(mov, mov, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+            # Load Frame
+            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame), cv2.COLOR_BGR2GRAY)
 
+            # Drift
+            fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
+            mov = mov[int(fdy1):int(h1-fdy), int(fdx1):int(w1-fdx)]
+            
+            # Area of Interest
+            mov = cropAreaOfInterest(mov, aoi1, aoi2)
+            
+            # Resize
+            mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
+            
+            if(normalize):
+                mov = normalizeImg(mov)
+
+            # Stack Registration
             if(sr is not None):
                 M = sr.register(mov, ref)
             else:
                 M = np.identity(3)
             
-            # Apply transformation to small version to check similarity to reference
-            dst = copy.deepcopy(ref)
-            mov = cv2.warpPerspective(mov, M, (int(w*scaleFactor), int(h*scaleFactor)), borderMode=cv2.BORDER_TRANSPARENT, dst=dst)
-            b, b_norm = calculateNorms(cv2.resize(mov, (64,64)))
-            diff = np.dot(a / a_norm, b / b_norm)
-            
+            # Scale back up
             M[0][2] /= scaleFactor # X
             M[1][2] /= scaleFactor # Y
             
+            # Shift the matrix origin to the Area of Interest, and then shift back
+            M = shiftOrigin(M, aoi1[0], aoi1[1])
+                
+            # Add drift transform
+            M[0][2] -= int(fdx1) - int(rfdx1)
+            M[1][2] -= int(fdy1) - int(rfdy1)
+            M = shiftOrigin(M, int(fdx1), int(fdy1))
+            
+            # Apply transformation to small version to check similarity to reference
+            movOrig = cv2.warpPerspective(movOrig, M, (w1, h1), borderMode=cv2.BORDER_REPLICATE)
+            
+            if(aoi1 != (0,0) and aoi2 != (0,0)):
+                # Area of Interest
+                movOrig = cropAreaOfInterest(movOrig, aoi1, aoi2, rfdx1, rfdy1)
+                xFactor = None
+                yFactor = None
+            else:
+                xFactor = 64/movOrig.shape[1]
+                yFactor = 64/movOrig.shape[0]
+            movOrig = cv2.resize(movOrig, (64, 64))
+            
+            if(normalize): 
+                movOrig = normalizeImg(movOrig)
+                
+            # Similarity
+            diff = calculateDiff(refOrig, movOrig, xFactor, yFactor, M, i)
+
             # Used for auto-crop
             if(M[0][2] < 0):
                 minX = min(minX, M[0][2])
@@ -189,24 +215,54 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             else:
                 maxY = max(maxY, M[1][2])
             
-            if(aoi1 != (0,0) and aoi2 != (0,0)):
-                # Shift the matrix origin to the Area of Interest, and then shift back
-                t1 = np.array([1, 0, -aoi1[0], 0, 1, -aoi1[1], 0, 0, 1]).reshape((3,3))
-                t2 = np.array([1, 0,  aoi1[0], 0, 1,  aoi1[1], 0, 0, 1]).reshape((3,3))
-                M = t2.dot(M.dot(t1))
-            
-            tmats.append((frame, M, diff, (fdx, fdy, fdx1, fdy1)))
+            tmats.append((frame, M, diff))
         except Exception as e:
             print(e)
         conn.send("Aligning Frames")
         i += 1
     return (tmats, minX, minY, maxX, maxY)
 
-def calculateNorms(img):
-    # https://github.com/petermat/image_similarity
-    # source: http://www.syntacticbayleaves.com/2008/12/03/determining-image-similarity/
-    vector = []
-    for pixel_tuple in img.flatten():
-        vector.append(np.average(pixel_tuple))
-    norm = np.linalg.norm(vector, 2)
-    return (vector, norm)
+# Crop image for Area of Interest
+def cropAreaOfInterest(img, aoi1, aoi2, fdx=0, fdy=0):
+    if(aoi1 != (0,0) and aoi2 != (0,0)):
+        img = img[int(aoi1[1]+fdy):int(aoi2[1]+fdy),
+                  int(aoi1[0]+fdx):int(aoi2[0]+fdx)]
+    return img
+
+# Shifts the position of the origin for rotations etc, and then back to where it was initially
+def shiftOrigin(M, x, y):
+    if(x != 0 and y != 0):
+        t1 = np.array([1, 0, -x, 0, 1, -y, 0, 0, 1]).reshape((3,3))
+        t2 = np.array([1, 0,  x, 0, 1,  y, 0, 0, 1]).reshape((3,3))
+        M = t2.dot(M.dot(t1))
+    return M
+
+# Nomalizes pixel values between 0 and 255
+def normalizeImg(img):
+    return cv2.normalize(img, img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+
+# Returns the similarity between the two images
+def calculateDiff(ref, mov, xFactor, yFactor, M, i):
+    # Simulate smaller auto-crop
+    if(xFactor != None and yFactor != None):
+        h, w = ref.shape[:2]
+        if(M[0][2] < 0):
+            minX = M[0][2]*xFactor
+            maxX = 0
+        else:
+            minX = 0
+            maxX = M[0][2]*xFactor
+        if(M[1][2] < 0):
+            minY = M[1][2]*yFactor
+            maxY = 0
+        else:
+            minY = 0
+            maxY = M[1][2]*yFactor
+
+        ref = ref[int(maxY):int((h+minY)), int(maxX):int((w+minX))]
+        mov = mov[int(maxY):int((h+minY)), int(maxX):int((w+minX))]
+    
+    h, w = ref.shape[:2]
+
+    diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32)/255, ref.astype(np.float32)/255)) ** 2)/(h*w)
+    return diff
