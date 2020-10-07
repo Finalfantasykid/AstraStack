@@ -106,7 +106,7 @@ class Align:
         
         return (fdx, fdy, fdx1, fdy1)
         
-    # returns the Area of Interest coordinates after being drifted
+    # Returns the Area of Interest coordinates after being drifted
     def calcAreaOfInterestCoords(aoi1, aoi2, fdx1, fdy1):
         aoic1 = (int(max(0, aoi1[0] - fdx1)), int(max(0, aoi1[1] - fdy1)))
         aoic2 = (int(max(0, aoi2[0] - fdx1)), int(max(0, aoi2[1] - fdy1)))
@@ -114,7 +114,19 @@ class Align:
         # Account for when points are not drawn in top-left, bottom right
         aoi1 = (min(aoic1[0], aoic2[0]), min(aoic1[1], aoic2[1]))
         aoi2 = (max(aoic1[0], aoic2[0]), max(aoic1[1], aoic2[1]))
-        return (aoi1, aoi2)     
+        return (aoi1, aoi2)
+    
+    # Returns new min/max X/Y shifts
+    def calcMinMax(M, minX, maxX, minY, maxY):
+        if(M[0][2] < 0):
+            minX = min(minX, M[0][2])
+        else:
+            maxX = max(maxX, M[0][2])
+        if(M[1][2] < 0):
+            minY = min(minY, M[1][2])
+        else:
+            maxY = max(maxY, M[1][2])
+        return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
 def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, conn):
@@ -205,14 +217,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
             diff = calculateDiff(refOrig, movOrig, xFactor, yFactor, M, i)
 
             # Used for auto-crop
-            if(M[0][2] < 0):
-                minX = min(minX, M[0][2])
-            else:
-                maxX = max(maxX, M[0][2])
-            if(M[1][2] < 0):
-                minY = min(minY, M[1][2])
-            else:
-                maxY = max(maxY, M[1][2])
+            minX, maxX, minY, maxY = Align.calcMinMax(M, minX, maxX, minY, maxY)
             
             tmats.append((frame, M, diff))
         except Exception as e:
@@ -244,24 +249,18 @@ def normalizeImg(img):
 def calculateDiff(ref, mov, xFactor, yFactor, M, i):
     # Simulate smaller auto-crop
     if(xFactor != None and yFactor != None):
+        minX, maxX, minY, maxY = Align.calcMinMax(M, 0, 0, 0, 0)
+        minX *= xFactor
+        maxX *= xFactor
+        minY *= yFactor
+        maxY *= yFactor
         h, w = ref.shape[:2]
-        if(M[0][2] < 0):
-            minX = M[0][2]*xFactor
-            maxX = 0
-        else:
-            minX = 0
-            maxX = M[0][2]*xFactor
-        if(M[1][2] < 0):
-            minY = M[1][2]*yFactor
-            maxY = 0
-        else:
-            minY = 0
-            maxY = M[1][2]*yFactor
 
         ref = ref[int(maxY):int((h+minY)), int(maxX):int((w+minX))]
         mov = mov[int(maxY):int((h+minY)), int(maxX):int((w+minX))]
     
     h, w = ref.shape[:2]
 
+    # Modified Means Squared Difference
     diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32)/255, ref.astype(np.float32)/255)) ** 2)/(h*w)
     return diff
