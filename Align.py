@@ -1,7 +1,6 @@
 import cv2
 import math
 import numpy as np
-import copy
 from pystackreg import StackReg
 from Globals import g
 from Video import Video

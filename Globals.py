@@ -1,3 +1,1 @@
-import tempfile
-
 g = type('', (), {})()
