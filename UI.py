@@ -11,8 +11,9 @@ import json
 import math
 import psutil
 import mimetypes
+import psutil
 from threading import Thread
-from multiprocessing import Pipe
+from multiprocessing import Pipe, active_children
 from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
@@ -40,6 +41,7 @@ class UI:
     
     def __init__(self):
         self.parentConn, self.childConn = Pipe(duplex=True)
+        self.pids = []
         self.newVersionUrl = ""
         self.video = None
         self.align = None
@@ -58,6 +60,7 @@ class UI:
         self.openDialog = self.builder.get_object("openDialog")
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
+        self.progressBox = self.builder.get_object("progressBox")
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
         self.overlay = self.builder.get_object("overlay")
@@ -194,12 +197,12 @@ class UI:
         
     # Disable inputs
     def disableUI(self):
-        self.builder.get_object("sidePanel").set_sensitive(False)
+        self.builder.get_object("tabs").set_sensitive(False)
         self.builder.get_object("toolbar").set_sensitive(False)
         
     # Enable inputs
     def enableUI(self):
-        self.builder.get_object("sidePanel").set_sensitive(True)
+        self.builder.get_object("tabs").set_sensitive(True)
         self.builder.get_object("toolbar").set_sensitive(True)
         
     # The following is needed to forcibly refresh the value spacing of the slider
@@ -213,6 +216,10 @@ class UI:
         if(g.pool is not None):
             g.pool.shutdown()
         g.pool = ProcessPoolExecutor(g.nThreads)
+        results = g.pool.map(get_pid, range(g.nThreads))
+        self.pids = []
+        for result in results:
+            self.pids.append(result)
         
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
@@ -549,10 +556,9 @@ class UI:
     def setProgress(self, i=0, total=0, text=""):
         def update():
             if(total == 0):
-                pass
-                self.progress.hide()
+                self.progressBox.hide()
             else:
-                self.progress.show()
+                self.progressBox.show()
                 self.progress.set_fraction(i/total)
                 self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
         GLib.idle_add(update)
@@ -748,6 +754,17 @@ class UI:
         thread.start()
         self.disableUI()
         
+    # Stops the current action being performed
+    def stopProcessing(self, *args):
+        for pid in self.pids:
+            if(psutil.pid_exists(pid)):
+                p = psutil.Process(pid)
+                p.kill()
+        g.pool = None
+        self.setThreads()
+        self.setProgress()
+        self.enableUI()
+        
     # Called when the Alignment is complete
     def finishedAlign(self):
         def update():
@@ -869,7 +886,11 @@ class UI:
 
     # Closes the application
     def close(self, *args):
+        self.stopProcessing()
         Gtk.main_quit()
+
+def get_pid(i):
+    return os.getpid()
 
 def run():
     # Newer versions of Adwaita scalable icons don't work well with older librsvg.

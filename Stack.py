@@ -2,6 +2,7 @@ import cv2
 import math
 import numpy as np
 import copy
+from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
@@ -47,24 +48,28 @@ class Stack:
         self.generateRefBG()
             
         futures = []
-        for i in range(0, g.nThreads):
-            nFrames = math.ceil(g.limit/g.nThreads)
-            frames = tmats[i*nFrames:(i+1)*nFrames]
-            if(g.autoCrop):
-                ref = self.refBG
-            else:
-                ref = None
-            futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
-                                         g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
-                                         g.drizzleFactor, g.drizzleInterpolation, g.ui.childConn))
-        
-        for i in range(0, g.nThreads):
-            result = futures[i].result()
-            if(result is not None):
-                if self.stackedImage is None:
-                    self.stackedImage = result
+        try:
+            for i in range(0, g.nThreads):
+                nFrames = math.ceil(g.limit/g.nThreads)
+                frames = tmats[i*nFrames:(i+1)*nFrames]
+                if(g.autoCrop):
+                    ref = self.refBG
                 else:
-                    self.stackedImage += result
+                    ref = None
+                futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
+                                             g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
+                                             g.drizzleFactor, g.drizzleInterpolation, g.ui.childConn))
+            
+            for i in range(0, g.nThreads):
+                result = futures[i].result()
+                if(result is not None):
+                    if self.stackedImage is None:
+                        self.stackedImage = result
+                    else:
+                        self.stackedImage += result
+        except BrokenProcessPool:
+            g.ui.childConn.send("stop")
+            return
 
         self.stackedImage /= g.limit
         

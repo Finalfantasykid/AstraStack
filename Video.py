@@ -1,6 +1,7 @@
 import cv2
 import glob
 import math
+from concurrent.futures.process import BrokenProcessPool
 from natsort import natsorted, ns
 from Globals import g
 
@@ -38,32 +39,36 @@ class Video:
 
         sharps = []
         futures = []
-        if(isinstance(g.file, list)):
-            # Image Sequence
-            self.total = len(g.file)
-            countPerThread = math.ceil(self.total/g.nThreads)
-            g.file = natsorted(g.file, alg=ns.IGNORECASE)
-            height, width = cv2.imread(g.file[0]).shape[:2]
-            
-            for i in range(0, g.nThreads):
-                futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.ui.childConn))
-            for i in range(0, g.nThreads):
-                frames, sharp = futures[i].result()
-                self.frames += frames
-                sharps += sharp
-        else:
-            # Video
-            vidcap = cv2.VideoCapture(g.file)
-            self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-            countPerThread = math.ceil(self.total/g.nThreads)
+        try:
+            if(isinstance(g.file, list)):
+                # Image Sequence
+                self.total = len(g.file)
+                countPerThread = math.ceil(self.total/g.nThreads)
+                g.file = natsorted(g.file, alg=ns.IGNORECASE)
+                height, width = cv2.imread(g.file[0]).shape[:2]
+                
+                for i in range(0, g.nThreads):
+                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.ui.childConn))
+                for i in range(0, g.nThreads):
+                    frames, sharp = futures[i].result()
+                    self.frames += frames
+                    sharps += sharp
+            else:
+                # Video
+                vidcap = cv2.VideoCapture(g.file)
+                self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+                countPerThread = math.ceil(self.total/g.nThreads)
 
-            for i in range(0, g.nThreads):
-                futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.ui.childConn))
-            for i in range(0, g.nThreads):
-                frames, sharp = futures[i].result()
-                self.frames += frames
-                sharps += sharp
-            vidcap.release()
+                for i in range(0, g.nThreads):
+                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.ui.childConn))
+                for i in range(0, g.nThreads):
+                    frames, sharp = futures[i].result()
+                    self.frames += frames
+                    sharps += sharp
+                vidcap.release()
+        except BrokenProcessPool:
+            g.ui.childConn.send("stop")
+            return
             
         # Some videos are weird with their frame timings, so get rid of possible duplicates
         framesDict = dict()

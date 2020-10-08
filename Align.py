@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
@@ -69,19 +70,23 @@ class Align:
         else:
             referenceIndex = int(g.reference) - g.startFrame
         
-        for i in range(0, g.nThreads):
-            nFrames = math.ceil(len(self.frames)/g.nThreads)
-            frames = self.frames[i*nFrames:(i+1)*nFrames]
-            futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
-                                         g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.ui.childConn))
-        
-        for i in range(0, g.nThreads):
-            tmats, minX, minY, maxX, maxY = futures[i].result()
-            self.tmats += tmats
-            self.minX = math.floor(min(self.minX, minX))
-            self.maxX = math.ceil(max(self.maxX, maxX))
-            self.minY = math.floor(min(self.minY, minY))
-            self.maxY = math.ceil(max(self.maxY, maxY))
+        try:
+            for i in range(0, g.nThreads):
+                nFrames = math.ceil(len(self.frames)/g.nThreads)
+                frames = self.frames[i*nFrames:(i+1)*nFrames]
+                futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
+                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.ui.childConn))
+            
+            for i in range(0, g.nThreads):
+                tmats, minX, minY, maxX, maxY = futures[i].result()
+                self.tmats += tmats
+                self.minX = math.floor(min(self.minX, minX))
+                self.maxX = math.ceil(max(self.maxX, maxX))
+                self.minY = math.floor(min(self.minY, minY))
+                self.maxY = math.ceil(max(self.maxY, maxY))
+        except BrokenProcessPool:
+            g.ui.childConn.send("stop")
+            return
             
         self.tmats.sort(key=lambda tup: tup[2], reverse=True)
 
