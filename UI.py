@@ -889,6 +889,7 @@ class UI:
     def close(self, *args):
         self.stopProcessing()
         Gtk.main_quit()
+        sys.exit()
 
 def get_pid(i):
     return os.getpid()
