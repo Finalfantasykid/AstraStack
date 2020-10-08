@@ -12,6 +12,7 @@ import math
 import psutil
 import mimetypes
 import psutil
+from packaging import version
 from threading import Thread
 from multiprocessing import Pipe, active_children
 from concurrent.futures import ProcessPoolExecutor
@@ -227,7 +228,7 @@ class UI:
             try:
                 contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
                 obj = json.loads(contents)
-                if(obj['name'] > UI.VERSION):
+                if(version.parse(obj['name']) > version.parse(UI.VERSION)):
                     self.newVersionUrl = obj['html_url']
                     button.show()
             except:
