@@ -134,7 +134,13 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, drizzleFactor, drizzleIn
     h, w = image.shape[:2]
     M = tmat.copy()
     
-    if(drizzleFactor != 1.0):
+    if(drizzleFactor < 1.0):
+        # Downscale (need to do it as a separate step since warpPerspective seems to force nearest neighbor when downscaling too much)
+        image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
+        M[0][2] *= drizzleFactor # X
+        M[1][2] *= drizzleFactor # Y
+    elif(drizzleFactor > 1.0):
+        # Upscale
         M[0][2] *= drizzleFactor # X
         M[1][2] *= drizzleFactor # Y
         T = np.identity(3) # Scale Matrix
