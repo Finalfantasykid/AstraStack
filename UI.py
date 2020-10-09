@@ -217,10 +217,15 @@ class UI:
         if(g.pool is not None):
             g.pool.shutdown()
         g.pool = ProcessPoolExecutor(g.nThreads)
-        results = g.pool.map(get_pid, range(g.nThreads))
+        
+        # This seems like the most reliable way to get the pid of pool processes
         self.pids = []
-        for result in results:
-            self.pids.append(result)
+        before = list(map(lambda p : p.pid, active_children()))
+        g.pool.submit(lambda x: x, ())
+        after = list(map(lambda p : p.pid, active_children()))
+        for pid in after:
+            if(pid not in before):
+                self.pids.append(pid)
         
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
@@ -755,12 +760,16 @@ class UI:
         thread.start()
         self.disableUI()
         
-    # Stops the current action being performed
-    def stopProcessing(self, *args):
+    # Kills all pool processes
+    def killPool(self):
         for pid in self.pids:
             if(psutil.pid_exists(pid)):
                 p = psutil.Process(pid)
                 p.kill()
+        
+    # Stops the current action being performed
+    def stopProcessing(self, *args):
+        self.killPool()
         g.pool = None
         self.setThreads()
         self.setProgress()
@@ -887,12 +896,9 @@ class UI:
 
     # Closes the application
     def close(self, *args):
-        self.stopProcessing()
+        self.killPool()
         Gtk.main_quit()
         sys.exit()
-
-def get_pid(i):
-    return os.getpid()
 
 def run():
     # Newer versions of Adwaita scalable icons don't work well with older librsvg.
