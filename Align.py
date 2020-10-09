@@ -87,7 +87,6 @@ class Align:
         except BrokenProcessPool:
             g.ui.childConn.send("stop")
             return
-        g.ui.setThreads()
             
         self.tmats.sort(key=lambda tup: tup[2], reverse=True)
 

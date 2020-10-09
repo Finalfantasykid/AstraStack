@@ -70,7 +70,6 @@ class Stack:
         except BrokenProcessPool:
             g.ui.childConn.send("stop")
             return
-        g.ui.setThreads()
 
         self.stackedImage /= g.limit
         

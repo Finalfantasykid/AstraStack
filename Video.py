@@ -69,7 +69,6 @@ class Video:
         except BrokenProcessPool:
             g.ui.childConn.send("stop")
             return
-        g.ui.setThreads()
             
         # Some videos are weird with their frame timings, so get rid of possible duplicates
         framesDict = dict()
