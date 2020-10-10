@@ -134,6 +134,8 @@ class Sharpen:
         
         # Recompose
         img = cv2.merge([R, G, B])
+        img[img<0] = 0
+        img[img>1] = 1
         
         # Saturation
         img = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
