@@ -219,7 +219,6 @@ class UI:
         g.pool = ProcessPoolExecutor(g.nThreads)
         
         # This seems like the most reliable way to get the pid of pool processes
-        self.disableUI()
         self.pids = []
         before = list(map(lambda p : p.pid, active_children()))
         g.pool.submit(lambda x: x, ())
@@ -227,7 +226,6 @@ class UI:
         for pid in after:
             if(pid not in before):
                 self.pids.append(pid)
-        self.enableUI()
         
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
