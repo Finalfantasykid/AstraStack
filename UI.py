@@ -221,7 +221,7 @@ class UI:
         # This seems like the most reliable way to get the pid of pool processes
         self.pids = []
         before = list(map(lambda p : p.pid, active_children()))
-        g.pool.submit(lambda x: x, ())
+        g.pool.submit(dummy, ())
         after = list(map(lambda p : p.pid, active_children()))
         for pid in after:
             if(pid not in before):
@@ -899,6 +899,10 @@ class UI:
         self.killPool()
         Gtk.main_quit()
         sys.exit()
+
+# Used to initialize pids
+def dummy():
+    return True
 
 def run():
     # Newer versions of Adwaita scalable icons don't work well with older librsvg.
