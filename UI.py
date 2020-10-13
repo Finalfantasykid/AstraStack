@@ -221,7 +221,7 @@ class UI:
         # This seems like the most reliable way to get the pid of pool processes
         self.pids = []
         before = list(map(lambda p : p.pid, active_children()))
-        g.pool.submit(dummy, ())
+        g.pool.submit(dummy, ()).result()
         after = list(map(lambda p : p.pid, active_children()))
         for pid in after:
             if(pid not in before):
