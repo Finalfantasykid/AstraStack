@@ -240,7 +240,7 @@ def cropAreaOfInterest(img, aoi1, aoi2, fdx=0, fdy=0):
 
 # Shifts the position of the origin for rotations etc, and then back to where it was initially
 def shiftOrigin(M, x, y):
-    if(x != 0 and y != 0):
+    if(x != 0 or y != 0):
         t1 = np.array([1, 0, -x, 0, 1, -y, 0, 0, 1]).reshape((3,3))
         t2 = np.array([1, 0,  x, 0, 1,  y, 0, 0, 1]).reshape((3,3))
         M = t2.dot(M.dot(t1))
