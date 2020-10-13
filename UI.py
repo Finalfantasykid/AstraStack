@@ -901,7 +901,7 @@ class UI:
         sys.exit()
 
 # Used to initialize pids
-def dummy():
+def dummy(*args):
     return True
 
 def run():
