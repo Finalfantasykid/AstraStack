@@ -213,8 +213,9 @@ class UI:
         
     # Sets the number of threads to use
     def setThreads(self, *args):
-        def initPool():
-            GLib.idle_add(self.disableUI)
+        def initPool(method=None):
+            if(method == "spawn"):
+                GLib.idle_add(self.disableUI)
             g.nThreads = int(self.cpus.get_value())
             if(g.pool is not None):
                 g.pool.shutdown()
@@ -228,9 +229,12 @@ class UI:
             for pid in after:
                 if(pid not in before):
                     self.pids.append(pid)
-            GLib.idle_add(self.enableUI)
-        if(get_start_method() == 'spawn'):
-            thread = Thread(target=initPool, args=())
+            if(method == "spawn"):
+                GLib.idle_add(self.enableUI)
+        
+        # Behave a bit differently depending on platform
+        if(get_start_method() == "spawn"):
+            thread = Thread(target=initPool, args=(get_start_method(),))
             thread.start()
         else:
             initPool()
