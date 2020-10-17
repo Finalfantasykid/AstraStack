@@ -1,5 +1,5 @@
 natsort==7.0.1
-numpy==1.18.1
+numpy==1.19.2
 opencv-python-headless==4.2.0.32
 packaging==20.4
 psutil==5.7.0

@@ -14,7 +14,7 @@ import mimetypes
 import psutil
 from packaging import version
 from threading import Thread
-from multiprocessing import Pipe, active_children
+from multiprocessing import Pipe, active_children, get_start_method
 from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
@@ -213,19 +213,27 @@ class UI:
         
     # Sets the number of threads to use
     def setThreads(self, *args):
-        g.nThreads = int(self.cpus.get_value())
-        if(g.pool is not None):
-            g.pool.shutdown()
-        g.pool = ProcessPoolExecutor(g.nThreads)
-        
-        # This seems like the most reliable way to get the pid of pool processes
-        self.pids = []
-        before = list(map(lambda p : p.pid, active_children()))
-        g.pool.submit(dummy, ()).result()
-        after = list(map(lambda p : p.pid, active_children()))
-        for pid in after:
-            if(pid not in before):
-                self.pids.append(pid)
+        def initPool():
+            GLib.idle_add(self.disableUI)
+            g.nThreads = int(self.cpus.get_value())
+            if(g.pool is not None):
+                g.pool.shutdown()
+            g.pool = ProcessPoolExecutor(g.nThreads)
+            
+            # This seems like the most reliable way to get the pid of pool processes
+            self.pids = []
+            before = list(map(lambda p : p.pid, active_children()))
+            g.pool.submit(dummy, ()).result()
+            after = list(map(lambda p : p.pid, active_children()))
+            for pid in after:
+                if(pid not in before):
+                    self.pids.append(pid)
+            GLib.idle_add(self.enableUI)
+        if(get_start_method() == 'spawn'):
+            thread = Thread(target=initPool, args=())
+            thread.start()
+        else:
+            initPool()
         
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
