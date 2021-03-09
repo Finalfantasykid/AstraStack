@@ -145,6 +145,8 @@ class UI:
         self.builder.get_object("radiusWidget3").set_events(mask)
         self.builder.get_object("radiusWidget4").set_events(mask)
         self.builder.get_object("radiusWidget5").set_events(mask)
+        
+        self.builder.get_object("deconvolveWidget").set_events(mask)
     
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
@@ -880,6 +882,8 @@ class UI:
         g.level3 = self.builder.get_object("level3").get_active()
         g.level4 = self.builder.get_object("level4").get_active()
         g.level5 = self.builder.get_object("level5").get_active()
+        
+        g.deconvolve = self.builder.get_object("deconvolve").get_value()
         
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()

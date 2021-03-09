@@ -106,6 +106,11 @@ class Sharpen:
             elif(result[0] == 'B'):
                 B = result[1]
                 
+        if(g.deconvolve >= 1):
+            R = deconvolve(R, g.deconvolve)
+            G = deconvolve(G, g.deconvolve)
+            B = deconvolve(B, g.deconvolve)
+                
         self.sharpenedImage = cv2.merge([R, G, B])[:self.h,:self.w]
     
     # Apply brightness & color sliders
@@ -233,3 +238,39 @@ def sharpenChannelLayers(params):
 def unsharp(image, radius, strength):
     blur = cv2.GaussianBlur(image, (0,0), radius)
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
+    
+# Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
+def deconvolve(img, radius):
+    radius = int(radius)
+    img = blur_edge(img)
+    IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
+
+    noise = 10**(-0.1*25)
+    psf = defocus_kernel(radius)
+    psf /= psf.sum()
+    psf_pad = np.zeros_like(img)
+    kh, kw = psf.shape
+    psf_pad[:kh, :kw] = psf
+    PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
+    PSF2 = (PSF**2).sum(-1)
+    iPSF = PSF / (PSF2 + noise)[...,np.newaxis]
+    RES = cv2.mulSpectrums(IMG, iPSF, 0)
+    res = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT )
+    res = np.roll(res, -kh//2, 0)
+    res = np.roll(res, -kw//2, 1)
+    return res
+
+def blur_edge(img, d=31):
+    h, w  = img.shape[:2]
+    img_pad = cv2.copyMakeBorder(img, d, d, d, d, cv2.BORDER_WRAP)
+    img_blur = cv2.GaussianBlur(img_pad, (2*d+1, 2*d+1), -1)[d:-d,d:-d]
+    y, x = np.indices((h, w))
+    dist = np.dstack([x, w-x-1, y, h-y-1]).min(-1)
+    w = np.minimum(np.float32(dist)/d, 1.0)
+    return img*w + img_blur*(1-w)
+
+def defocus_kernel(d, sz=65):
+    kern = np.zeros((sz, sz), np.uint8)
+    cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA, shift=1)
+    kern = np.float32(kern) / 255.0
+    return kern
