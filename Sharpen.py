@@ -29,24 +29,37 @@ class Sharpen:
         stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
         self.h, self.w = stackedImage.shape[:2]
         self.sharpenedImage = stackedImage
+        self.debluredImage = stackedImage
         self.finalImage = stackedImage
         self.calculateCoefficients(stackedImage)
         self.processAgain = False
+        self.processDeblurAgain = False
         self.processColorAgain = False
         
-    def run(self, processAgain=True, processColorAgain=False):
+    def run(self, processAgain=True, processDeblurAgain=False, processColorAgain=False):
         self.processAgain = processAgain
+        self.processDeblurAgain = processDeblurAgain
         self.processColorAgain = processColorAgain
-        while(self.processAgain or self.processColorAgain):
+        while(self.processAgain or self.processDeblurAgain or self.processColorAgain):
             if(self.processAgain):
-                # Process sharpening and color
+                # Process sharpening, deblur and color
                 self.processAgain = False
+                self.processDeblurAgain = False
                 self.processColorAgain = False
                 self.sharpenLayers()
+                self.deblur()
+                self.processColor()
+            elif(self.processDeblurAgain):
+                # Process deblur and color
+                self.processAgain = False
+                self.processDeblurAgain = False
+                self.processColorAgain = False
+                self.deblur()
                 self.processColor()
             else:
                 # Only process color
                 self.processAgain = False
+                self.processDeblurAgain = False
                 self.processColorAgain = False
                 self.processColor()
             g.ui.finishedSharpening()
@@ -106,16 +119,33 @@ class Sharpen:
             elif(result[0] == 'B'):
                 B = result[1]
                 
-        if(g.deconvolve >= 1):
-            R = deconvolve(R, g.deconvolve)
-            G = deconvolve(G, g.deconvolve)
-            B = deconvolve(B, g.deconvolve)
-                
         self.sharpenedImage = cv2.merge([R, G, B])[:self.h,:self.w]
+        
+    def deblur(self):
+        img = self.sharpenedImage
+        
+        # Decompose
+        (R, G, B) = cv2.split(img)
+        
+        # Deconvolve
+        if(g.deconvolveRadius >= 1):
+            futures = []
+
+            futures.append(pool.submit(deconvolve, R, g.deconvolveRadius, g.deconvolveAmount))
+            futures.append(pool.submit(deconvolve, G, g.deconvolveRadius, g.deconvolveAmount))
+            futures.append(pool.submit(deconvolve, B, g.deconvolveRadius, g.deconvolveAmount))
+            
+            R = futures[0].result()
+            G = futures[1].result()
+            B = futures[2].result()
+        
+        # Recompose
+        img = cv2.merge([R, G, B])
+        self.debluredImage = img
     
     # Apply brightness & color sliders
     def processColor(self):
-        img = self.sharpenedImage
+        img = self.debluredImage
         
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
@@ -240,13 +270,15 @@ def unsharp(image, radius, strength):
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, radius):
+def deconvolve(img, radius, strength):
+    beforeAvg = np.average(img)
     radius = int(radius)
-    img = blur_edge(img)
+
+    img = blur_edge(img, radius+1)
     IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
 
-    noise = 10**(-0.1*25)
-    psf = defocus_kernel(radius)
+    noise = 10**(-0.1*strength)
+    psf = defocus_kernel(radius, (radius*2)+1)
     psf /= psf.sum()
     psf_pad = np.zeros_like(img)
     kh, kw = psf.shape
@@ -258,6 +290,14 @@ def deconvolve(img, radius):
     res = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT )
     res = np.roll(res, -kh//2, 0)
     res = np.roll(res, -kw//2, 1)
+    
+    # Brightness tends to darken the image slightly, so adjust the brightness
+    try:
+        afterAvg = np.average(res)
+        factor = beforeAvg / afterAvg
+        res *= factor
+    except:
+        pass
     return res
 
 def blur_edge(img, d=31):
@@ -270,6 +310,7 @@ def blur_edge(img, d=31):
     return img*w + img_blur*(1-w)
 
 def defocus_kernel(d, sz=65):
+    sz = max(11,sz)
     kern = np.zeros((sz, sz), np.uint8)
     cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA, shift=1)
     kern = np.float32(kern) / 255.0

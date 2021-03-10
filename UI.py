@@ -145,8 +145,6 @@ class UI:
         self.builder.get_object("radiusWidget3").set_events(mask)
         self.builder.get_object("radiusWidget4").set_events(mask)
         self.builder.get_object("radiusWidget5").set_events(mask)
-        
-        self.builder.get_object("deconvolveWidget").set_events(mask)
     
     # Sets up a listener so that processes can communicate with each other
     def createListener(self, function):
@@ -883,7 +881,8 @@ class UI:
         g.level4 = self.builder.get_object("level4").get_active()
         g.level5 = self.builder.get_object("level5").get_active()
         
-        g.deconvolve = self.builder.get_object("deconvolve").get_value()
+        g.deconvolveRadius = self.builder.get_object("deconvolveRadius").get_value()
+        g.deconvolveAmount = self.builder.get_object("deconvolveAmount").get_value()
         
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
@@ -902,9 +901,16 @@ class UI:
                               self.builder.get_object("saturationAdjust") == args[0] or
                               self.builder.get_object("valueAdjust") == args[0])):
             processAgain = self.sharpen.processAgain
+            processDeblur = self.sharpen.processDeblurAgain
             processColor = True
+        elif(len(args) > 0 and (self.builder.get_object("deconvolveRadius") == args[0] or
+                                self.builder.get_object("deconvolveAmount") == args[0])):
+            processAgain = self.sharpen.processAgain
+            processDeblur = True
+            processColor = False
         else:
             processAgain = True
+            processDeblur = False
             processColor = False
         
         if(self.sharpen is None):
@@ -914,9 +920,10 @@ class UI:
                 self.sharpen = Sharpen(g.file, True)
         if(self.processThread != None and self.processThread.is_alive()):
             self.sharpen.processAgain = processAgain
+            self.sharpen.processDeblurAgain = processDeblur
             self.sharpen.processColorAgain = processColor
         else:
-            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processColor))
+            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processDeblur, processColor))
             self.processThread.start()
     
     # Called when sharpening is complete
