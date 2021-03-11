@@ -1661,7 +1661,7 @@ Note: Drift adjustment will still crop the image.</property>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Deconvolution can be used to adjust for imperfect focus.  This may affect the brightness slightly.</property>
+                                        <property name="tooltip_text" translatable="yes">Deconvolution can be used to adjust for imperfect focus.</property>
                                         <property name="label" translatable="yes">Deconvolution</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>

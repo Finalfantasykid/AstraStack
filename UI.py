@@ -87,6 +87,8 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
         
+        self.builder.get_object("deconvolveRadiusWidget").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveAmountWidget").add_mark(10, Gtk.PositionType.TOP, None)
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)

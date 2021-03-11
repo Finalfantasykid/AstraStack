@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import copy
+import time
 from concurrent.futures import ProcessPoolExecutor, wait
 from multiprocessing import Manager, Lock
 from pywt import swt2, iswt2
@@ -274,22 +275,28 @@ def deconvolve(img, radius, strength):
     beforeAvg = np.average(img)
     radius = int(radius)
 
-    img = blur_edge(img, radius+1)
-    IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
-
+    rows, cols = img.shape
+    opt_rows = cv2.getOptimalDFTSize(rows)
+    opt_cols = cv2.getOptimalDFTSize(cols)
+    opt_img = cv2.copyMakeBorder(img, 0, opt_rows-rows, 0, opt_cols-cols, cv2.BORDER_REFLECT)
+    opt_img = blur_edge(opt_img, radius+1)
+    IMG = cv2.dft(opt_img, flags=cv2.DFT_COMPLEX_OUTPUT)
+    
     noise = 10**(-0.1*strength)
     psf = defocus_kernel(radius, (radius*2)+1)
     psf /= psf.sum()
-    psf_pad = np.zeros_like(img)
+    psf_pad = np.zeros_like(opt_img)
     kh, kw = psf.shape
     psf_pad[:kh, :kw] = psf
     PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
     PSF2 = (PSF**2).sum(-1)
     iPSF = PSF / (PSF2 + noise)[...,np.newaxis]
     RES = cv2.mulSpectrums(IMG, iPSF, 0)
-    res = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT )
+    res = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
     res = np.roll(res, -kh//2, 0)
     res = np.roll(res, -kw//2, 1)
+    
+    res = res[:rows, :cols]
     
     # Brightness tends to darken the image slightly, so adjust the brightness
     try:
