@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import math
 import copy
-import time
 from concurrent.futures import ProcessPoolExecutor, wait
 from multiprocessing import Manager, Lock
 from pywt import swt2, iswt2
@@ -124,24 +123,31 @@ class Sharpen:
         
     def deblur(self):
         img = self.sharpenedImage
-        
-        # Decompose
-        (R, G, B) = cv2.split(img)
-        
-        # Deconvolve
-        if(g.deconvolveRadius >= 1):
-            futures = []
 
-            futures.append(pool.submit(deconvolve, R, g.deconvolveRadius, g.deconvolveAmount))
-            futures.append(pool.submit(deconvolve, G, g.deconvolveRadius, g.deconvolveAmount))
-            futures.append(pool.submit(deconvolve, B, g.deconvolveRadius, g.deconvolveAmount))
+        # Deconvolve
+        if((g.deconvolveCircular and g.deconvolveRadius1 >= 1) or 
+           (g.deconvolveLinear and g.deconvolveRadius2 >= 1)):
+            # Decompose
+            (R, G, B) = cv2.split(img)
+            
+            futures = []
+            futures.append(pool.submit(deconvolve, R, g.deconvolveRadius1, g.deconvolveAmount1, 
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
+                                                      g.deconvolveCircular, g.deconvolveLinear))
+            futures.append(pool.submit(deconvolve, G, g.deconvolveRadius1, g.deconvolveAmount1, 
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
+                                                      g.deconvolveCircular, g.deconvolveLinear))
+            futures.append(pool.submit(deconvolve, B, g.deconvolveRadius1, g.deconvolveAmount1, 
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
+                                                      g.deconvolveCircular, g.deconvolveLinear))
             
             R = futures[0].result()
             G = futures[1].result()
             B = futures[2].result()
         
-        # Recompose
-        img = cv2.merge([R, G, B])
+            # Recompose
+            img = cv2.merge([R, G, B])
+            
         self.debluredImage = img
     
     # Apply brightness & color sliders
@@ -271,41 +277,49 @@ def unsharp(image, radius, strength):
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, radius, strength):
+def deconvolve(img, radius1, strength1, radius2, strength2, angle, circular, linear):
     beforeAvg = np.average(img)
-    radius = int(radius)
+    radius1 = int(radius1)
+    radius2 = int(radius2)
 
     rows, cols = img.shape
     opt_rows = cv2.getOptimalDFTSize(rows)
     opt_cols = cv2.getOptimalDFTSize(cols)
     opt_img = cv2.copyMakeBorder(img, 0, opt_rows-rows, 0, opt_cols-cols, cv2.BORDER_REFLECT)
-    opt_img = blur_edge(opt_img, radius+1)
-    IMG = cv2.dft(opt_img, flags=cv2.DFT_COMPLEX_OUTPUT)
+    opt_img = blur_edge(opt_img, max(radius1,radius2)+1)
     
-    noise = 10**(-0.1*strength)
-    psf = defocus_kernel(radius, (radius*2)+1)
-    psf /= psf.sum()
-    psf_pad = np.zeros_like(opt_img)
-    kh, kw = psf.shape
-    psf_pad[:kh, :kw] = psf
-    PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
-    PSF2 = (PSF**2).sum(-1)
-    iPSF = PSF / (PSF2 + noise)[...,np.newaxis]
-    RES = cv2.mulSpectrums(IMG, iPSF, 0)
-    res = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
-    res = np.roll(res, -kh//2, 0)
-    res = np.roll(res, -kw//2, 1)
+    for deconvolveType in ("circular", "linear"):
+        if(deconvolveType == "circular" and circular and radius1 >= 1):
+            psf = defocus_kernel(radius1, (radius1*2)+1)
+            noise = 10**(-0.1*strength1)
+        elif(deconvolveType == "linear" and linear and radius2 >= 1):
+            psf = motion_kernel(angle, radius2, (radius2*2))
+            noise = 10**(-0.1*strength2)
+        else:
+            continue
+        IMG = cv2.dft(opt_img, flags=cv2.DFT_COMPLEX_OUTPUT)
+        psf /= psf.sum()
+        psf_pad = np.zeros_like(opt_img)
+        kh, kw = psf.shape
+        psf_pad[:kh, :kw] = psf
+        PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
+        PSF2 = (PSF**2).sum(-1)
+        iPSF = PSF / (PSF2 + noise)[...,np.newaxis]
+        RES = cv2.mulSpectrums(IMG, iPSF, 0)
+        opt_img = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
+        opt_img = np.roll(opt_img, -kh//2, 0)
+        opt_img = np.roll(opt_img, -kw//2, 1)
     
-    res = res[:rows, :cols]
+    opt_img = opt_img[:rows, :cols]
     
     # Brightness tends to darken the image slightly, so adjust the brightness
     try:
-        afterAvg = np.average(res)
+        afterAvg = np.average(opt_img)
         factor = beforeAvg / afterAvg
-        res *= factor
+        opt_img *= factor
     except:
         pass
-    return res
+    return opt_img
 
 def blur_edge(img, d=31):
     h, w  = img.shape[:2]
@@ -316,9 +330,20 @@ def blur_edge(img, d=31):
     w = np.minimum(np.float32(dist)/d, 1.0)
     return img*w + img_blur*(1-w)
 
-def defocus_kernel(d, sz=65):
+def defocus_kernel(d, sz=101):
     sz = max(11,sz)
     kern = np.zeros((sz, sz), np.uint8)
     cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA, shift=1)
     kern = np.float32(kern) / 255.0
+    return kern
+    
+def motion_kernel(angle, d, sz=100):
+    sz = max(10,sz)
+    angle = np.deg2rad(angle)
+    kern = np.ones((1, d), np.float32)
+    c, s = np.cos(angle), np.sin(angle)
+    A = np.float32([[c, -s, 0], [s, c, 0]])
+    sz2 = sz // 2
+    A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((d-1)*0.5, 0))
+    kern = cv2.warpAffine(kern, A, (sz, sz), flags=cv2.INTER_LINEAR)
     return kern

@@ -87,8 +87,11 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
         
-        self.builder.get_object("deconvolveRadiusWidget").add_mark(0, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveAmountWidget").add_mark(10, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveRadiusWidget1").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveAmountWidget1").add_mark(10, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveRadiusWidget2").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveAmountWidget2").add_mark(10, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveAngleWidget2").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
@@ -883,8 +886,14 @@ class UI:
         g.level4 = self.builder.get_object("level4").get_active()
         g.level5 = self.builder.get_object("level5").get_active()
         
-        g.deconvolveRadius = self.builder.get_object("deconvolveRadius").get_value()
-        g.deconvolveAmount = self.builder.get_object("deconvolveAmount").get_value()
+        g.deconvolveCircular = self.builder.get_object("deconvolveCircular").get_active()
+        g.deconvolveLinear = self.builder.get_object("deconvolveLinear").get_active()
+        
+        g.deconvolveRadius1 = self.builder.get_object("deconvolveRadius1").get_value()
+        g.deconvolveAmount1 = self.builder.get_object("deconvolveAmount1").get_value()
+        g.deconvolveRadius2 = self.builder.get_object("deconvolveRadius2").get_value()
+        g.deconvolveAmount2 = self.builder.get_object("deconvolveAmount2").get_value()
+        g.deconvolveAngle2 = self.builder.get_object("deconvolveAngle2").get_value()
         
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
@@ -905,8 +914,13 @@ class UI:
             processAgain = self.sharpen.processAgain
             processDeblur = self.sharpen.processDeblurAgain
             processColor = True
-        elif(len(args) > 0 and (self.builder.get_object("deconvolveRadius") == args[0] or
-                                self.builder.get_object("deconvolveAmount") == args[0])):
+        elif(len(args) > 0 and (self.builder.get_object("deconvolveCircular") == args[0] or
+                                self.builder.get_object("deconvolveLinear") == args[0] or
+                                self.builder.get_object("deconvolveRadius1") == args[0] or
+                                self.builder.get_object("deconvolveAmount1") == args[0] or
+                                self.builder.get_object("deconvolveRadius2") == args[0] or
+                                self.builder.get_object("deconvolveAmount2") == args[0] or
+                                self.builder.get_object("deconvolveAngle2") == args[0])):
             processAgain = self.sharpen.processAgain
             processDeblur = True
             processColor = False
