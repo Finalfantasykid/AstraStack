@@ -278,72 +278,86 @@ def unsharp(image, radius, strength):
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
 def deconvolve(img, radius1, strength1, radius2, strength2, angle, circular, linear):
-    beforeAvg = np.average(img)
+    if(not circular or radius1 == 0):
+        radius1 = 0
+        circular = False
+    if(not linear or radius2 == 0):
+        radius2 = 0
+        linear = False
     radius1 = int(radius1)
     radius2 = int(radius2)
-
+    r = max(radius1,radius2)
+    beforeAvg = np.average(img)
     rows, cols = img.shape
-    opt_rows = cv2.getOptimalDFTSize(rows)
-    opt_cols = cv2.getOptimalDFTSize(cols)
-    opt_img = cv2.copyMakeBorder(img, 0, opt_rows-rows, 0, opt_cols-cols, cv2.BORDER_REFLECT)
-    opt_img = blur_edge(opt_img, max(radius1,radius2)+1)
     
+    # Resize so that the dimensions are a multiple of the radius
+    rowMod = r - ((rows+r*2) % r)
+    colMod = r - ((cols+r*2) % r)
+    top = r + math.floor(rowMod/2)
+    bottom = r + math.ceil(rowMod/2)
+    left = r + math.floor(colMod/2)
+    right = r + math.ceil(colMod/2)
+    img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_REPLICATE)
+    img = blur_edge(img, r*2, (r + math.ceil(max(rowMod/2, colMod/2)))*2)
+    
+    # Start the deconvolution
     for deconvolveType in ("circular", "linear"):
-        if(deconvolveType == "circular" and circular and radius1 >= 1):
+        if(deconvolveType == "circular" and circular):
             psf = defocus_kernel(radius1, (radius1*2)+1)
             noise = 10**(-0.1*strength1)
-        elif(deconvolveType == "linear" and linear and radius2 >= 1):
+        elif(deconvolveType == "linear" and linear):
             psf = motion_kernel(angle, radius2, (radius2*2))
             noise = 10**(-0.1*strength2)
         else:
             continue
-        IMG = cv2.dft(opt_img, flags=cv2.DFT_COMPLEX_OUTPUT)
+        IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
         psf /= psf.sum()
-        psf_pad = np.zeros_like(opt_img)
+        psf_pad = np.zeros_like(img)
         kh, kw = psf.shape
         psf_pad[:kh, :kw] = psf
         PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
         PSF2 = (PSF**2).sum(-1)
         iPSF = PSF / (PSF2 + noise)[...,np.newaxis]
         RES = cv2.mulSpectrums(IMG, iPSF, 0)
-        opt_img = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
-        opt_img = np.roll(opt_img, -kh//2, 0)
-        opt_img = np.roll(opt_img, -kw//2, 1)
+        img = cv2.idft(RES, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
+        img = np.roll(img, -kh//2, 0)
+        img = np.roll(img, -kw//2, 1)
     
-    opt_img = opt_img[:rows, :cols]
+    # Crop the image to the original dimensions
+    img = img[top:-bottom,left:-right]
     
     # Brightness tends to darken the image slightly, so adjust the brightness
     try:
-        afterAvg = np.average(opt_img)
+        afterAvg = np.average(img)
         factor = beforeAvg / afterAvg
-        opt_img *= factor
+        img *= factor
     except:
         pass
-    return opt_img
+    return img
 
-def blur_edge(img, d=31):
+def blur_edge(img, r, d):
     h, w  = img.shape[:2]
-    img_pad = cv2.copyMakeBorder(img, d, d, d, d, cv2.BORDER_WRAP)
-    img_blur = cv2.GaussianBlur(img_pad, (2*d+1, 2*d+1), -1)[d:-d,d:-d]
+    img_pad = cv2.copyMakeBorder(img, r, r, r, r, cv2.BORDER_WRAP)
+    img_blur = cv2.GaussianBlur(img_pad, (2*r+1, 2*r+1), -1)[r:-r,r:-r]
     y, x = np.indices((h, w))
     dist = np.dstack([x, w-x-1, y, h-y-1]).min(-1)
-    w = np.minimum(np.float32(dist)/d, 1.0)
+    w = np.minimum(np.float32(dist)/(d), 1.0)
     return img*w + img_blur*(1-w)
 
-def defocus_kernel(d, sz=101):
+def defocus_kernel(r, sz=101):
     sz = max(11,sz)
     kern = np.zeros((sz, sz), np.uint8)
-    cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA, shift=1)
+    cv2.circle(kern, (sz, sz), r, 255, -1, cv2.LINE_AA, shift=1)
     kern = np.float32(kern) / 255.0
     return kern
     
-def motion_kernel(angle, d, sz=100):
+def motion_kernel(angle, r, sz=100):
     sz = max(10,sz)
     angle = np.deg2rad(angle)
-    kern = np.ones((1, d), np.float32)
+    kern = np.ones((1, r), np.float32)/2
     c, s = np.cos(angle), np.sin(angle)
     A = np.float32([[c, -s, 0], [s, c, 0]])
     sz2 = sz // 2
-    A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((d-1)*0.5, 0))
+    A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((r-1)*0.5, 0))
     kern = cv2.warpAffine(kern, A, (sz, sz), flags=cv2.INTER_LINEAR)
     return kern

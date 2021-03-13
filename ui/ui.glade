@@ -59,14 +59,14 @@
   </object>
   <object class="GtkAdjustment" id="deconvolveAmount1">
     <property name="lower">1</property>
-    <property name="upper">25</property>
+    <property name="upper">50</property>
     <property name="value">10</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveAmount2">
     <property name="lower">1</property>
-    <property name="upper">25</property>
+    <property name="upper">50</property>
     <property name="value">10</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
@@ -1678,8 +1678,8 @@ Note: Drift adjustment will still crop the image.</property>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Deconvolution can be used to adjust for imperfect focus or motion blur.</property>
-                                        <property name="label" translatable="yes">Deconvolution</property>
+                                        <property name="tooltip_text" translatable="yes">Deblur (deconvolution) can be used to adjust for imperfect focus or motion blur.</property>
+                                        <property name="label" translatable="yes">Deblur</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
                                         </attributes>
