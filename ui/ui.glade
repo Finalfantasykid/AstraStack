@@ -416,6 +416,12 @@
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="valueAdjust">
+    <property name="upper">400</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AstraStack</property>
@@ -1331,6 +1337,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkSpinButton" id="denoiseWidget3">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
+                                            <property name="margin_right">5</property>
                                             <property name="text" translatable="yes">0.0</property>
                                             <property name="adjustment">denoise3</property>
                                             <property name="digits">1</property>
@@ -1359,6 +1366,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkSpinButton" id="denoiseWidget2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
+                                            <property name="margin_right">5</property>
                                             <property name="text" translatable="yes">0.0</property>
                                             <property name="adjustment">denoise2</property>
                                             <property name="digits">1</property>
@@ -1387,6 +1395,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkSpinButton" id="denoiseWidget1">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
+                                            <property name="margin_right">5</property>
                                             <property name="text" translatable="yes">0.0</property>
                                             <property name="adjustment">denoise1</property>
                                             <property name="digits">1</property>
@@ -1533,6 +1542,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkSpinButton" id="denoiseWidget4">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
+                                            <property name="margin_right">5</property>
                                             <property name="text" translatable="yes">0.0</property>
                                             <property name="adjustment">denoise4</property>
                                             <property name="digits">1</property>
@@ -1600,6 +1610,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkSpinButton" id="denoiseWidget5">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
+                                            <property name="margin_right">5</property>
                                             <property name="text" translatable="yes">0.0</property>
                                             <property name="adjustment">denoise5</property>
                                             <property name="digits">1</property>
@@ -2418,12 +2429,6 @@ Note: Drift adjustment will still crop the image.</property>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="valueAdjust">
-    <property name="upper">400</property>
-    <property name="value">100</property>
-    <property name="step_increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>
