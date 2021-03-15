@@ -133,6 +133,8 @@ class UI:
         self.setAutoCrop()
         self.setThreads()
         self.frameScale.set_sensitive(False)
+        
+        g.file = None
         g.reference = "0"
         g.deconvolveFile = None
         
@@ -920,6 +922,8 @@ class UI:
         
     # Sharpens the final Stacked image
     def sharpenImage(self, *args):
+        if(g.file is None):
+            return
         self.processSpinner.start()
         self.processSpinner.show()
         g.sharpen1 = self.builder.get_object("sharpen1").get_value()
