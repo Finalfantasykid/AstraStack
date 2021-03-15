@@ -2220,12 +2220,33 @@ Note: Drift adjustment will still crop the image.</property>
                       </packing>
                     </child>
                     <child type="tab">
-                      <object class="GtkLabel">
-                        <property name="height_request">38</property>
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Process</property>
-                        <property name="width_chars">7</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="height_request">38</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Process</property>
+                            <property name="width_chars">7</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinner" id="processSpinner">
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="position">3</property>

@@ -63,6 +63,7 @@ class UI:
         self.cpus = self.builder.get_object("cpus")
         self.progressBox = self.builder.get_object("progressBox")
         self.progress = self.builder.get_object("progress")
+        self.processSpinner = self.builder.get_object("processSpinner")
         self.frame = self.builder.get_object("frame")
         self.overlay = self.builder.get_object("overlay")
         self.psfImage = self.builder.get_object("psfImage")
@@ -919,6 +920,8 @@ class UI:
         
     # Sharpens the final Stacked image
     def sharpenImage(self, *args):
+        self.processSpinner.start()
+        self.processSpinner.show()
         g.sharpen1 = self.builder.get_object("sharpen1").get_value()
         g.sharpen2 = self.builder.get_object("sharpen2").get_value()
         g.sharpen3 = self.builder.get_object("sharpen3").get_value()
@@ -1012,6 +1015,8 @@ class UI:
             Z = GLib.Bytes.new(z)
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, self.sharpen.w, self.sharpen.h, self.sharpen.w*3)
             self.frame.set_from_pixbuf(pixbuf)
+            self.processSpinner.stop()
+            self.processSpinner.hide()
         GLib.idle_add(update)
 
     # Closes the application
