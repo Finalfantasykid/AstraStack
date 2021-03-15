@@ -92,6 +92,7 @@ class UI:
         self.builder.get_object("deconvolveRadiusWidget2").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAmountWidget2").add_mark(10, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAngleWidget2").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveAmountWidget3").add_mark(10, Gtk.PositionType.TOP, None)
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
@@ -131,6 +132,7 @@ class UI:
         self.setThreads()
         self.frameScale.set_sensitive(False)
         g.reference = "0"
+        g.deconvolveFile = None
         
     # Cancels scroll event for widget
     def propagateScroll(self, widget, event):
@@ -447,6 +449,27 @@ class UI:
             self.builder.get_object("processTab").set_sensitive(False)
             self.stack = None
         GLib.idle_add(update)
+        
+    # Opens the file chooser to open load a psf file (g.deconvolveFile)
+    def openPSF(self, *args):
+        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_select_multiple(False)
+        self.openDialog.set_filter(self.builder.get_object("imageFilter"))
+        response = self.openDialog.run()
+        self.openDialog.hide()
+        if(response == Gtk.ResponseType.OK):
+            try:
+                img = cv2.imread(self.openDialog.get_filename(), cv2.IMREAD_GRAYSCALE)
+                if(max(img.shape) > 100):
+                    raise Exception
+                if(len(np.unique(img)) <= 1):
+                    raise Exception
+                img = np.float32(img)/255
+                cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+                g.deconvolveFile = img
+                self.sharpenImage(self.builder.get_object("deconvolveFile"))
+            except: # Open Failed
+                self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
@@ -888,12 +911,14 @@ class UI:
         
         g.deconvolveCircular = self.builder.get_object("deconvolveCircular").get_active()
         g.deconvolveLinear = self.builder.get_object("deconvolveLinear").get_active()
+        g.deconvolveCustom = self.builder.get_object("deconvolveCustom").get_active()
         
         g.deconvolveRadius1 = self.builder.get_object("deconvolveRadius1").get_value()
         g.deconvolveAmount1 = self.builder.get_object("deconvolveAmount1").get_value()
         g.deconvolveRadius2 = self.builder.get_object("deconvolveRadius2").get_value()
         g.deconvolveAmount2 = self.builder.get_object("deconvolveAmount2").get_value()
         g.deconvolveAngle2 = self.builder.get_object("deconvolveAngle2").get_value()
+        g.deconvolveAmount3 = self.builder.get_object("deconvolveAmount3").get_value()
         
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
@@ -920,7 +945,10 @@ class UI:
                                 self.builder.get_object("deconvolveAmount1") == args[0] or
                                 self.builder.get_object("deconvolveRadius2") == args[0] or
                                 self.builder.get_object("deconvolveAmount2") == args[0] or
-                                self.builder.get_object("deconvolveAngle2") == args[0])):
+                                self.builder.get_object("deconvolveAngle2") == args[0] or
+                                self.builder.get_object("deconvolveCustom") == args[0] or
+                                self.builder.get_object("deconvolveFile") == args[0] or
+                                self.builder.get_object("deconvolveAmount3") == args[0])):
             processAgain = self.sharpen.processAgain
             processDeblur = True
             processColor = False

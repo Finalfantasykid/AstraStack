@@ -123,23 +123,26 @@ class Sharpen:
         
     def deblur(self):
         img = self.sharpenedImage
-
         # Deconvolve
         if((g.deconvolveCircular and g.deconvolveRadius1 >= 1) or 
-           (g.deconvolveLinear and g.deconvolveRadius2 >= 1)):
+           (g.deconvolveLinear and g.deconvolveRadius2 >= 1) or
+           (g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray))):
             # Decompose
             (R, G, B) = cv2.split(img)
             
             futures = []
             futures.append(pool.submit(deconvolve, R, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
-                                                      g.deconvolveCircular, g.deconvolveLinear))
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+                                                      g.deconvolveFile, g.deconvolveAmount3,
+                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
             futures.append(pool.submit(deconvolve, G, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
-                                                      g.deconvolveCircular, g.deconvolveLinear))
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+                                                      g.deconvolveFile, g.deconvolveAmount3,
+                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
             futures.append(pool.submit(deconvolve, B, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2, 
-                                                      g.deconvolveCircular, g.deconvolveLinear))
+                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+                                                      g.deconvolveFile, g.deconvolveAmount3,
+                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
             
             R = futures[0].result()
             G = futures[1].result()
@@ -277,19 +280,25 @@ def unsharp(image, radius, strength):
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, radius1, strength1, radius2, strength2, angle, circular, linear):
+def deconvolve(img, radius1, strength1, radius2, strength2, angle, psfFile, strength3, circular, linear, custom):
+    # Do some initial checks
     if(not circular or radius1 == 0):
         radius1 = 0
         circular = False
     if(not linear or radius2 == 0):
         radius2 = 0
         linear = False
+    if(not custom or not isinstance(psfFile,np.ndarray)):
+        radius3 = 0
+        custom = False
+    if(custom):
+        radius3 = max(psfFile.shape)
     radius1 = int(radius1)
     radius2 = int(radius2)
-    r = max(radius1,radius2)
+    
+    r = max(radius1,radius2,radius3)
     beforeAvg = np.average(img)
     rows, cols = img.shape
-    
     # Resize so that the dimensions are a multiple of the radius
     rowMod = r - ((rows+r*2) % r)
     colMod = r - ((cols+r*2) % r)
@@ -301,13 +310,16 @@ def deconvolve(img, radius1, strength1, radius2, strength2, angle, circular, lin
     img = blur_edge(img, r*2, (r + math.ceil(max(rowMod/2, colMod/2)))*2)
     
     # Start the deconvolution
-    for deconvolveType in ("circular", "linear"):
+    for deconvolveType in ("circular", "linear", "custom"):
         if(deconvolveType == "circular" and circular):
             psf = defocus_kernel(radius1, (radius1*2)+1)
             noise = 10**(-0.1*strength1)
         elif(deconvolveType == "linear" and linear):
             psf = motion_kernel(angle, radius2, (radius2*2))
             noise = 10**(-0.1*strength2)
+        elif(deconvolveType == "custom" and custom):
+            psf = psfFile
+            noise = 10**(-0.1*strength3)
         else:
             continue
         IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
