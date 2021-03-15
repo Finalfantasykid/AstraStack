@@ -124,23 +124,23 @@ class Sharpen:
     def deblur(self):
         img = self.sharpenedImage
         # Deconvolve
-        if((g.deconvolveCircular and g.deconvolveRadius1 >= 1) or 
-           (g.deconvolveLinear and g.deconvolveRadius2 >= 1) or
+        if((g.deconvolveCircular and g.deconvolveDiameter1 > 1) or 
+           (g.deconvolveLinear and g.deconvolveDiameter2 > 1) or
            (g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray))):
             # Decompose
             (R, G, B) = cv2.split(img)
             
             futures = []
-            futures.append(pool.submit(deconvolve, R, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+            futures.append(pool.submit(deconvolve, R, g.deconvolveDiameter1, g.deconvolveAmount1, 
+                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
                                                       g.deconvolveFile, g.deconvolveAmount3,
                                                       g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
-            futures.append(pool.submit(deconvolve, G, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+            futures.append(pool.submit(deconvolve, G, g.deconvolveDiameter1, g.deconvolveAmount1, 
+                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
                                                       g.deconvolveFile, g.deconvolveAmount3,
                                                       g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
-            futures.append(pool.submit(deconvolve, B, g.deconvolveRadius1, g.deconvolveAmount1, 
-                                                      g.deconvolveRadius2, g.deconvolveAmount2, g.deconvolveAngle2,
+            futures.append(pool.submit(deconvolve, B, g.deconvolveDiameter1, g.deconvolveAmount1, 
+                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
                                                       g.deconvolveFile, g.deconvolveAmount3,
                                                       g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
             
@@ -280,42 +280,42 @@ def unsharp(image, radius, strength):
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, radius1, strength1, radius2, strength2, angle, psfFile, strength3, circular, linear, custom):
+def deconvolve(img, diameter1, strength1, diameter2, strength2, angle, psfFile, strength3, circular, linear, custom):
     # Do some initial checks
-    if(not circular or radius1 == 0):
-        radius1 = 0
+    if(not circular or diameter1 <= 1):
+        diameter1 = 0
         circular = False
-    if(not linear or radius2 == 0):
-        radius2 = 0
+    if(not linear or diameter2 <= 1):
+        diameter2 = 0
         linear = False
     if(not custom or not isinstance(psfFile,np.ndarray)):
-        radius3 = 0
+        diameter3 = 0
         custom = False
     if(custom):
-        radius3 = max(psfFile.shape)
-    radius1 = int(radius1)
-    radius2 = int(radius2)
+        diameter3 = max(psfFile.shape)
+    diameter1 = int(diameter1)
+    diameter2 = int(diameter2)
     
-    r = max(radius1,radius2,radius3)
+    d = max(diameter1,diameter2,diameter3)
     beforeAvg = np.average(img)
     rows, cols = img.shape
-    # Resize so that the dimensions are a multiple of the radius
-    rowMod = r - ((rows+r*2) % r)
-    colMod = r - ((cols+r*2) % r)
-    top = r + math.floor(rowMod/2)
-    bottom = r + math.ceil(rowMod/2)
-    left = r + math.floor(colMod/2)
-    right = r + math.ceil(colMod/2)
+    # Resize so that the dimensions are a multiple of the diameter
+    rowMod = d - ((rows+d*2) % d)
+    colMod = d - ((cols+d*2) % d)
+    top = d + math.floor(rowMod/2)
+    bottom = d + math.ceil(rowMod/2)
+    left = d + math.floor(colMod/2)
+    right = d + math.ceil(colMod/2)
     img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_REPLICATE)
-    img = blur_edge(img, r*2, (r + math.ceil(max(rowMod/2, colMod/2)))*2)
+    img = blur_edge(img, d*2, (d + math.ceil(max(rowMod/2, colMod/2)))*2)
     
     # Start the deconvolution
     for deconvolveType in ("circular", "linear", "custom"):
         if(deconvolveType == "circular" and circular):
-            psf = defocus_kernel(radius1, (radius1*2)+1)
+            psf = defocus_kernel(diameter1, diameter1*2)
             noise = 10**(-0.1*strength1)
         elif(deconvolveType == "linear" and linear):
-            psf = motion_kernel(angle, radius2, (radius2*2))
+            psf = motion_kernel(angle, diameter2, diameter2*2)
             noise = 10**(-0.1*strength2)
         elif(deconvolveType == "custom" and custom):
             psf = psfFile
@@ -356,20 +356,20 @@ def blur_edge(img, r, d):
     w = np.minimum(np.float32(dist)/(d), 1.0)
     return img*w + img_blur*(1-w)
 
-def defocus_kernel(r, sz=101):
-    sz = max(11,sz)
-    kern = np.zeros((sz, sz), np.uint8)
-    cv2.circle(kern, (sz, sz), r, 255, -1, cv2.LINE_AA, shift=1)
+def defocus_kernel(d, sz=100):
+    kern = np.zeros((sz*2, sz*2), np.uint8)
+    cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA)
+    kern = cv2.resize(kern, (sz, sz), interpolation=cv2.INTER_LINEAR)
     kern = np.float32(kern) / 255.0
     return kern
     
-def motion_kernel(angle, r, sz=100):
+def motion_kernel(angle, d, sz=100):
     sz = max(10,sz)
     angle = np.deg2rad(angle)
-    kern = np.ones((1, r), np.float32)
+    kern = np.ones((1, d), np.float32)
     c, s = np.cos(angle), np.sin(angle)
     A = np.float32([[c, -s, 0], [s, c, 0]])
     sz2 = sz // 2
-    A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((r-1)*0.5, 0))
+    A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((d-1)*0.5, 0))
     kern = cv2.warpAffine(kern, A, (sz, sz), flags=cv2.INTER_LINEAR)
     return kern

@@ -83,13 +83,17 @@
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="deconvolveRadius1">
+  <object class="GtkAdjustment" id="deconvolveDiameter1">
+    <property name="lower">1</property>
     <property name="upper">50</property>
+    <property name="value">1</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="deconvolveRadius2">
+  <object class="GtkAdjustment" id="deconvolveDiameter2">
+    <property name="lower">1</property>
     <property name="upper">50</property>
+    <property name="value">1</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
@@ -1693,8 +1697,8 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">The radius/distance of the deconvolution in pixels.</property>
-                                            <property name="label" translatable="yes">Radius</property>
+                                            <property name="tooltip_text" translatable="yes">The diameter/distance of the deconvolution in pixels.</property>
+                                            <property name="label" translatable="yes">Diameter</property>
                                             <attributes>
                                               <attribute name="weight" value="bold"/>
                                             </attributes>
@@ -1720,10 +1724,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveRadiusWidget1">
+                                          <object class="GtkScale" id="deconvolveDiameterWidget1">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveRadius1</property>
+                                            <property name="adjustment">deconvolveDiameter1</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1760,10 +1764,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveRadiusWidget2">
+                                          <object class="GtkScale" id="deconvolveDiameterWidget2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveRadius2</property>
+                                            <property name="adjustment">deconvolveDiameter2</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>

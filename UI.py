@@ -89,9 +89,9 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
         
-        self.builder.get_object("deconvolveRadiusWidget1").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveDiameterWidget1").add_mark(1, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAmountWidget1").add_mark(10, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveRadiusWidget2").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveDiameterWidget2").add_mark(1, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAmountWidget2").add_mark(10, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAngleWidget2").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveAmountWidget3").add_mark(10, Gtk.PositionType.TOP, None)
@@ -619,11 +619,11 @@ class UI:
         sz = 100
         img = np.zeros((sz,sz), np.float32)
         count = 0
-        if(g.deconvolveCircular and g.deconvolveRadius1 >= 1):
-            img += defocus_kernel(int(g.deconvolveRadius1), sz)
+        if(g.deconvolveCircular and g.deconvolveDiameter1 > 1):
+            img += defocus_kernel(int(g.deconvolveDiameter1), sz)
             count += 1
-        if(g.deconvolveLinear and g.deconvolveRadius2 >= 1):
-            img += motion_kernel(int(g.deconvolveAngle2), int(g.deconvolveRadius2), sz)
+        if(g.deconvolveLinear and g.deconvolveDiameter2 > 1):
+            img += motion_kernel(int(g.deconvolveAngle2), int(g.deconvolveDiameter2), sz)
             count += 1
         if(g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray)):
             tmp = g.deconvolveFile
@@ -954,9 +954,9 @@ class UI:
         g.deconvolveLinear = self.builder.get_object("deconvolveLinear").get_active()
         g.deconvolveCustom = self.builder.get_object("deconvolveCustom").get_active()
         
-        g.deconvolveRadius1 = self.builder.get_object("deconvolveRadius1").get_value()
+        g.deconvolveDiameter1 = self.builder.get_object("deconvolveDiameter1").get_value()
         g.deconvolveAmount1 = self.builder.get_object("deconvolveAmount1").get_value()
-        g.deconvolveRadius2 = self.builder.get_object("deconvolveRadius2").get_value()
+        g.deconvolveDiameter2 = self.builder.get_object("deconvolveDiameter2").get_value()
         g.deconvolveAmount2 = self.builder.get_object("deconvolveAmount2").get_value()
         g.deconvolveAngle2 = self.builder.get_object("deconvolveAngle2").get_value()
         g.deconvolveAmount3 = self.builder.get_object("deconvolveAmount3").get_value()
@@ -982,9 +982,9 @@ class UI:
             processColor = True
         elif(len(args) > 0 and (self.builder.get_object("deconvolveCircular") == args[0] or
                                 self.builder.get_object("deconvolveLinear") == args[0] or
-                                self.builder.get_object("deconvolveRadius1") == args[0] or
+                                self.builder.get_object("deconvolveDiameter1") == args[0] or
                                 self.builder.get_object("deconvolveAmount1") == args[0] or
-                                self.builder.get_object("deconvolveRadius2") == args[0] or
+                                self.builder.get_object("deconvolveDiameter2") == args[0] or
                                 self.builder.get_object("deconvolveAmount2") == args[0] or
                                 self.builder.get_object("deconvolveAngle2") == args[0] or
                                 self.builder.get_object("deconvolveCustom") == args[0] or
