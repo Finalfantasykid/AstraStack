@@ -21,7 +21,7 @@ from pystackreg import StackReg
 from Video import Video
 from Align import Align
 from Stack import Stack, transform
-from Sharpen import Sharpen
+from Sharpen import Sharpen, defocus_kernel, motion_kernel
 from Globals import g
 
 from gi import require_version
@@ -65,6 +65,7 @@ class UI:
         self.progress = self.builder.get_object("progress")
         self.frame = self.builder.get_object("frame")
         self.overlay = self.builder.get_object("overlay")
+        self.psfImage = self.builder.get_object("psfImage")
         self.frameSlider = self.builder.get_object("frameSlider")
         self.frameScale = self.builder.get_object("frameScale")
         self.startFrame = self.builder.get_object("startFrame")
@@ -467,9 +468,9 @@ class UI:
                 img = np.float32(img)/255
                 cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
                 g.deconvolveFile = img
-                self.sharpenImage(self.builder.get_object("deconvolveFile"))
             except: # Open Failed
                 self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
+            self.sharpenImage(self.builder.get_object("deconvolveFile"))
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
@@ -609,6 +610,39 @@ class UI:
             if(dx2 != 0 and dy2 != 0 and current == g.endFrame):
                 # Draw point on last frame
                 drawPoint(cr, dx2, dy2)
+        
+    # Updates the PSF Image to the current configuration for deblurring        
+    def updatePSFImage(self, *args):
+        sz = 100
+        img = np.zeros((sz,sz), np.float32)
+        count = 0
+        if(g.deconvolveCircular and g.deconvolveRadius1 >= 1):
+            img += defocus_kernel(int(g.deconvolveRadius1), sz)
+            count += 1
+        if(g.deconvolveLinear and g.deconvolveRadius2 >= 1):
+            img += motion_kernel(int(g.deconvolveAngle2), int(g.deconvolveRadius2), sz)
+            count += 1
+        if(g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray)):
+            tmp = g.deconvolveFile
+            h, w = tmp.shape[:2]
+            tmp = cv2.copyMakeBorder(tmp, math.ceil((sz-h)/2), math.floor((sz-h)/2), math.ceil((sz-w)/2), math.floor((sz-w)/2), cv2.BORDER_CONSTANT)
+            img += tmp
+            count += 1
+            
+        if(count > 0):
+            img /= count
+        else:
+            img[int(sz/2)][int(sz/2)] = 1
+            
+        img = np.uint8(img*255)
+        
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        
+        z = img.tobytes()
+        Z = GLib.Bytes.new(z)
+        
+        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, sz, sz, sz*3)
+        self.psfImage.set_from_pixbuf(pixbuf)
         
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
@@ -969,6 +1003,7 @@ class UI:
         else:
             self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processDeblur, processColor))
             self.processThread.start()
+        self.updatePSFImage(args)
     
     # Called when sharpening is complete
     def finishedSharpening(self):
