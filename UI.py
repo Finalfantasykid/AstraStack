@@ -21,7 +21,7 @@ from pystackreg import StackReg
 from Video import Video
 from Align import Align
 from Stack import Stack, transform
-from Sharpen import Sharpen, defocus_kernel, motion_kernel
+from Sharpen import Sharpen, defocus_kernel, gaussian_kernel, motion_kernel
 from Globals import g
 
 from gi import require_version
@@ -89,12 +89,14 @@ class UI:
         self.builder.get_object("stackTab").set_sensitive(False)
         self.builder.get_object("processTab").set_sensitive(False)
         
-        self.builder.get_object("deconvolveDiameterWidget1").add_mark(1, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveAmountWidget1").add_mark(10, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveDiameterWidget2").add_mark(1, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveAmountWidget2").add_mark(10, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveAngleWidget2").add_mark(0, Gtk.PositionType.TOP, None)
-        self.builder.get_object("deconvolveAmountWidget3").add_mark(10, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveCircularDiameterWidget").add_mark(1, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveCircularAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveGaussianDiameterWidget").add_mark(1, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveGaussianAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveLinearDiameterWidget").add_mark(1, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveLinearAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveLinearAngleWidget").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deconvolveCustomAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
@@ -136,7 +138,7 @@ class UI:
         
         g.file = None
         g.reference = "0"
-        g.deconvolveFile = None
+        g.deconvolveCustomFile = None
         
     # Cancels scroll event for widget
     def propagateScroll(self, widget, event):
@@ -454,7 +456,7 @@ class UI:
             self.stack = None
         GLib.idle_add(update)
         
-    # Opens the file chooser to open load a psf file (g.deconvolveFile)
+    # Opens the file chooser to open load a psf file (g.deconvolveCustomFile)
     def openPSF(self, *args):
         self.openDialog.set_current_folder(path.expanduser("~"))
         self.openDialog.set_select_multiple(False)
@@ -470,10 +472,10 @@ class UI:
                     raise Exception
                 img = np.float32(img)/255
                 cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-                g.deconvolveFile = img
+                g.deconvolveCustomFile = img
             except: # Open Failed
                 self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
-            self.sharpenImage(self.builder.get_object("deconvolveFile"))
+            self.sharpenImage(self.builder.get_object("deconvolveCustomFile"))
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
@@ -619,17 +621,21 @@ class UI:
         sz = 100
         img = np.zeros((sz,sz), np.float32)
         count = 0
-        if(g.deconvolveCircular and g.deconvolveDiameter1 > 1):
-            img += defocus_kernel(int(g.deconvolveDiameter1), sz)
+        if(g.deconvolveCircular and g.deconvolveCircularDiameter > 1):
+            img += defocus_kernel(int(g.deconvolveCircularDiameter), sz)
             count += 1
-        if(g.deconvolveLinear and g.deconvolveDiameter2 > 1):
-            img += motion_kernel(int(g.deconvolveAngle2), int(g.deconvolveDiameter2), sz)
+        if(g.deconvolveGaussian and g.deconvolveGaussianDiameter > 1):
+            kern = gaussian_kernel(int(g.deconvolveGaussianDiameter), sz)
+            img += cv2.normalize(kern, kern, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
             count += 1
-        if(g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray)):
-            tmp = g.deconvolveFile
-            h, w = tmp.shape[:2]
-            tmp = cv2.copyMakeBorder(tmp, math.ceil((sz-h)/2), math.floor((sz-h)/2), math.ceil((sz-w)/2), math.floor((sz-w)/2), cv2.BORDER_CONSTANT)
-            img += tmp
+        if(g.deconvolveLinear and g.deconvolveLinearDiameter > 1):
+            img += motion_kernel(int(g.deconvolveLinearAngle), int(g.deconvolveLinearDiameter), sz)
+            count += 1
+        if(g.deconvolveCustom and isinstance(g.deconvolveCustomFile,np.ndarray)):
+            kern = g.deconvolveCustomFile
+            h, w = kern.shape[:2]
+            kern = cv2.copyMakeBorder(kern, math.ceil((sz-h)/2), math.floor((sz-h)/2), math.ceil((sz-w)/2), math.floor((sz-w)/2), cv2.BORDER_CONSTANT)
+            img += kern
             count += 1
             
         if(count > 0):
@@ -951,15 +957,18 @@ class UI:
         g.level5 = self.builder.get_object("level5").get_active()
         
         g.deconvolveCircular = self.builder.get_object("deconvolveCircular").get_active()
+        g.deconvolveGaussian = self.builder.get_object("deconvolveGaussian").get_active()
         g.deconvolveLinear = self.builder.get_object("deconvolveLinear").get_active()
         g.deconvolveCustom = self.builder.get_object("deconvolveCustom").get_active()
         
-        g.deconvolveDiameter1 = self.builder.get_object("deconvolveDiameter1").get_value()
-        g.deconvolveAmount1 = self.builder.get_object("deconvolveAmount1").get_value()
-        g.deconvolveDiameter2 = self.builder.get_object("deconvolveDiameter2").get_value()
-        g.deconvolveAmount2 = self.builder.get_object("deconvolveAmount2").get_value()
-        g.deconvolveAngle2 = self.builder.get_object("deconvolveAngle2").get_value()
-        g.deconvolveAmount3 = self.builder.get_object("deconvolveAmount3").get_value()
+        g.deconvolveCircularDiameter = self.builder.get_object("deconvolveCircularDiameter").get_value()
+        g.deconvolveCircularAmount = self.builder.get_object("deconvolveCircularAmount").get_value()
+        g.deconvolveGaussianDiameter = self.builder.get_object("deconvolveGaussianDiameter").get_value()
+        g.deconvolveGaussianAmount = self.builder.get_object("deconvolveGaussianAmount").get_value()
+        g.deconvolveLinearDiameter = self.builder.get_object("deconvolveLinearDiameter").get_value()
+        g.deconvolveLinearAmount = self.builder.get_object("deconvolveLinearAmount").get_value()
+        g.deconvolveLinearAngle = self.builder.get_object("deconvolveLinearAngle").get_value()
+        g.deconvolveCustomAmount = self.builder.get_object("deconvolveCustomAmount").get_value()
         
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
@@ -981,15 +990,18 @@ class UI:
             processDeblur = self.sharpen.processDeblurAgain
             processColor = True
         elif(len(args) > 0 and (self.builder.get_object("deconvolveCircular") == args[0] or
+                                self.builder.get_object("deconvolveGaussian") == args[0] or
                                 self.builder.get_object("deconvolveLinear") == args[0] or
-                                self.builder.get_object("deconvolveDiameter1") == args[0] or
-                                self.builder.get_object("deconvolveAmount1") == args[0] or
-                                self.builder.get_object("deconvolveDiameter2") == args[0] or
-                                self.builder.get_object("deconvolveAmount2") == args[0] or
-                                self.builder.get_object("deconvolveAngle2") == args[0] or
                                 self.builder.get_object("deconvolveCustom") == args[0] or
-                                self.builder.get_object("deconvolveFile") == args[0] or
-                                self.builder.get_object("deconvolveAmount3") == args[0])):
+                                self.builder.get_object("deconvolveCircularDiameter") == args[0] or
+                                self.builder.get_object("deconvolveCircularAmount") == args[0] or
+                                self.builder.get_object("deconvolveGaussianDiameter") == args[0] or
+                                self.builder.get_object("deconvolveGaussianAmount") == args[0] or
+                                self.builder.get_object("deconvolveLinearDiameter") == args[0] or
+                                self.builder.get_object("deconvolveLinearAmount") == args[0] or
+                                self.builder.get_object("deconvolveLinearAngle") == args[0] or
+                                self.builder.get_object("deconvolveCustomFile") == args[0] or
+                                self.builder.get_object("deconvolveCustomAmount") == args[0])):
             processAgain = self.sharpen.processAgain
             processDeblur = True
             processColor = False

@@ -57,40 +57,50 @@
     <signal name="changed" handler="setThreads" swapped="no"/>
     <signal name="value-changed" handler="setThreads" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="deconvolveAmount1">
-    <property name="lower">1</property>
+  <object class="GtkAdjustment" id="deconvolveCircularAmount">
     <property name="upper">50</property>
-    <property name="value">10</property>
+    <property name="value">25</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="deconvolveAmount2">
-    <property name="lower">1</property>
-    <property name="upper">50</property>
-    <property name="value">10</property>
-    <property name="step_increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="deconvolveAmount3">
-    <property name="lower">1</property>
-    <property name="upper">50</property>
-    <property name="value">10</property>
-    <property name="step_increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="deconvolveAngle2">
-    <property name="upper">180</property>
-    <property name="step_increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="deconvolveDiameter1">
+  <object class="GtkAdjustment" id="deconvolveCircularDiameter">
     <property name="lower">1</property>
     <property name="upper">50</property>
     <property name="value">1</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="deconvolveDiameter2">
+  <object class="GtkAdjustment" id="deconvolveCustomAmount">
+    <property name="upper">50</property>
+    <property name="value">25</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deconvolveGaussianAmount">
+    <property name="upper">50</property>
+    <property name="value">25</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deconvolveGaussianDiameter">
+    <property name="lower">1</property>
+    <property name="upper">50</property>
+    <property name="value">1</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deconvolveLinearAmount">
+    <property name="upper">50</property>
+    <property name="value">25</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deconvolveLinearAngle">
+    <property name="upper">180</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deconvolveLinearDiameter">
     <property name="lower">1</property>
     <property name="upper">50</property>
     <property name="value">1</property>
@@ -1724,10 +1734,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveDiameterWidget1">
+                                          <object class="GtkScale" id="deconvolveCircularDiameterWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveDiameter1</property>
+                                            <property name="adjustment">deconvolveCircularDiameter</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1739,10 +1749,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveAmountWidget1">
+                                          <object class="GtkScale" id="deconvolveCircularAmountWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveAmount1</property>
+                                            <property name="adjustment">deconvolveCircularAmount</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1764,10 +1774,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveDiameterWidget2">
+                                          <object class="GtkScale" id="deconvolveLinearDiameterWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveDiameter2</property>
+                                            <property name="adjustment">deconvolveLinearDiameter</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1775,14 +1785,14 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
-                                            <property name="top_attach">2</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveAmountWidget2">
+                                          <object class="GtkScale" id="deconvolveLinearAmountWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveAmount2</property>
+                                            <property name="adjustment">deconvolveLinearAmount</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1790,22 +1800,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
-                                            <property name="top_attach">2</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">The angle of the deconvolution (linear only).</property>
-                                            <property name="label" translatable="yes">Angle</property>
-                                            <attributes>
-                                              <attribute name="weight" value="bold"/>
-                                            </attributes>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">3</property>
-                                            <property name="top_attach">0</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1819,10 +1814,10 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveAngleWidget2">
+                                          <object class="GtkScale" id="deconvolveLinearAngleWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveAngle2</property>
+                                            <property name="adjustment">deconvolveLinearAngle</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
@@ -1830,7 +1825,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">3</property>
-                                            <property name="top_attach">2</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1845,7 +1840,7 @@ Note: Drift adjustment will still crop the image.</property>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
-                                                <property name="tooltip_text" translatable="yes">Focus deblur</property>
+                                                <property name="tooltip_text" translatable="yes">Circular deblur</property>
                                                 <property name="label" translatable="yes">Circular</property>
                                               </object>
                                             </child>
@@ -1874,7 +1869,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">2</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1896,11 +1891,11 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkButton" id="deconvolveFile">
+                                          <object class="GtkButton" id="deconvolveCustomFile">
                                             <property name="label" translatable="yes">Open</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -1910,31 +1905,21 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScale" id="deconvolveAmountWidget3">
+                                          <object class="GtkScale" id="deconvolveCustomAmountWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="adjustment">deconvolveAmount3</property>
+                                            <property name="adjustment">deconvolveCustomAmount</property>
                                             <property name="round_digits">0</property>
                                             <property name="digits">0</property>
                                             <property name="value_pos">left</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
-                                            <property name="top_attach">3</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">3</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1946,8 +1931,95 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">4</property>
+                                            <property name="top_attach">5</property>
                                             <property name="width">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCheckButton" id="deconvolveGaussian">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <child>
+                                              <object class="GtkLabel">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="tooltip_text" translatable="yes">Gaussian deblur</property>
+                                                <property name="label" translatable="yes">Gaussian</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deconvolveGaussianDiameterWidget">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deconvolveGaussianDiameter</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deconvolveGaussianAmountWidget">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deconvolveGaussianAmount</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The angle of the deconvolution (linear only).</property>
+                                            <property name="label" translatable="yes">Angle</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">0</property>
                                           </packing>
                                         </child>
                                       </object>

@@ -124,25 +124,33 @@ class Sharpen:
     def deblur(self):
         img = self.sharpenedImage
         # Deconvolve
-        if((g.deconvolveCircular and g.deconvolveDiameter1 > 1) or 
-           (g.deconvolveLinear and g.deconvolveDiameter2 > 1) or
-           (g.deconvolveCustom and isinstance(g.deconvolveFile,np.ndarray))):
+        if((g.deconvolveCircular and g.deconvolveCircularDiameter > 1) or 
+           (g.deconvolveGaussian and g.deconvolveGaussianDiameter > 1) or 
+           (g.deconvolveLinear and g.deconvolveLinearDiameter > 1) or
+           (g.deconvolveCustom and g.deconvolveCustomFile is not None)):
             # Decompose
             (R, G, B) = cv2.split(img)
             
+            gParam = {
+                'circular': g.deconvolveCircular,
+                'gaussian': g.deconvolveGaussian,
+                'linear': g.deconvolveLinear,
+                'custom': g.deconvolveCustom,
+                'circularDiameter': g.deconvolveCircularDiameter,
+                'circularAmount': g.deconvolveCircularAmount,
+                'gaussianDiameter': g.deconvolveGaussianDiameter,
+                'gaussianAmount': g.deconvolveGaussianAmount,
+                'linearDiameter': g.deconvolveLinearDiameter,
+                'linearAmount': g.deconvolveLinearAmount,
+                'linearAngle': g.deconvolveLinearAngle,
+                'customFile': g.deconvolveCustomFile,
+                'customAmount': g.deconvolveCustomAmount
+            }
+            
             futures = []
-            futures.append(pool.submit(deconvolve, R, g.deconvolveDiameter1, g.deconvolveAmount1, 
-                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
-                                                      g.deconvolveFile, g.deconvolveAmount3,
-                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
-            futures.append(pool.submit(deconvolve, G, g.deconvolveDiameter1, g.deconvolveAmount1, 
-                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
-                                                      g.deconvolveFile, g.deconvolveAmount3,
-                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
-            futures.append(pool.submit(deconvolve, B, g.deconvolveDiameter1, g.deconvolveAmount1, 
-                                                      g.deconvolveDiameter2, g.deconvolveAmount2, g.deconvolveAngle2,
-                                                      g.deconvolveFile, g.deconvolveAmount3,
-                                                      g.deconvolveCircular, g.deconvolveLinear, g.deconvolveCustom))
+            futures.append(pool.submit(deconvolve, R, gParam))
+            futures.append(pool.submit(deconvolve, G, gParam))
+            futures.append(pool.submit(deconvolve, B, gParam))
             
             R = futures[0].result()
             G = futures[1].result()
@@ -280,23 +288,30 @@ def unsharp(image, radius, strength):
     sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
     
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, diameter1, strength1, diameter2, strength2, angle, psfFile, strength3, circular, linear, custom):
+def deconvolve(img, params):
     # Do some initial checks
-    if(not circular or diameter1 <= 1):
-        diameter1 = 0
-        circular = False
-    if(not linear or diameter2 <= 1):
-        diameter2 = 0
-        linear = False
-    if(not custom or not isinstance(psfFile,np.ndarray)):
-        diameter3 = 0
-        custom = False
-    if(custom):
-        diameter3 = max(psfFile.shape)
-    diameter1 = int(diameter1)
-    diameter2 = int(diameter2)
+    if(not params['circular'] or params['circularDiameter'] <= 1):
+        params['circularDiameter'] = 0
+        params['circular'] = False
+    if(not params['gaussian'] or params['gaussianDiameter'] <= 1):
+        params['gaussianDiameter'] = 0
+        params['gaussian'] = False
+    if(not params['linear'] or params['linearDiameter'] <= 1):
+        params['linearDiameter'] = 0
+        params['linear'] = False
+    if(not params['custom'] or params['customFile'] is None):
+        params['customDiameter'] = 0
+        params['custom'] = False
+    if(params['custom']):
+        params['customDiameter'] = max(params['customFile'].shape)
+    params['circularDiameter'] = int(params['circularDiameter'])
+    params['gaussianDiameter'] = int(params['gaussianDiameter'])
+    params['linearDiameter'] = int(params['linearDiameter'])
     
-    d = max(diameter1,diameter2,diameter3)
+    d = max(params['circularDiameter'],
+            params['gaussianDiameter'],
+            params['linearDiameter'],
+            params['customDiameter'])
     beforeAvg = np.average(img)
     rows, cols = img.shape
     # Resize so that the dimensions are a multiple of the diameter
@@ -310,16 +325,19 @@ def deconvolve(img, diameter1, strength1, diameter2, strength2, angle, psfFile, 
     img = blur_edge(img, d*2, (d + math.ceil(max(rowMod/2, colMod/2)))*2)
     
     # Start the deconvolution
-    for deconvolveType in ("circular", "linear", "custom"):
-        if(deconvolveType == "circular" and circular):
-            psf = defocus_kernel(diameter1, diameter1*2)
-            noise = 10**(-0.1*strength1)
-        elif(deconvolveType == "linear" and linear):
-            psf = motion_kernel(angle, diameter2, diameter2*2)
-            noise = 10**(-0.1*strength2)
-        elif(deconvolveType == "custom" and custom):
-            psf = psfFile
-            noise = 10**(-0.1*strength3)
+    for deconvolveType in ("circular", "gaussian", "linear", "custom"):
+        if(deconvolveType == "circular" and params['circular']):
+            psf = defocus_kernel(params['circularDiameter'], params['circularDiameter']*2)
+            noise = 10**(-0.1*params['circularAmount'])
+        elif(deconvolveType == "gaussian" and params['gaussian']):
+            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianDiameter']*2)
+            noise = 10**(-0.1*params['gaussianAmount'])
+        elif(deconvolveType == "linear" and params['linear']):
+            psf = motion_kernel(params['linearAngle'], params['linearDiameter'], params['linearDiameter']*2)
+            noise = 10**(-0.1*params['linearAmount'])
+        elif(deconvolveType == "custom" and params['custom']):
+            psf = params['customFile']
+            noise = 10**(-0.1*params['customAmount'])
         else:
             continue
         IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
@@ -357,14 +375,19 @@ def blur_edge(img, r, d):
     return img*w + img_blur*(1-w)
 
 def defocus_kernel(d, sz=100):
-    kern = np.zeros((sz*2, sz*2), np.uint8)
+    kern = np.zeros((sz*2, sz*2), np.float32)
     cv2.circle(kern, (sz, sz), d, 255, -1, cv2.LINE_AA)
     kern = cv2.resize(kern, (sz, sz), interpolation=cv2.INTER_LINEAR)
     kern = np.float32(kern) / 255.0
     return kern
     
+def gaussian_kernel(d, sz=100):
+    kern = np.zeros((sz, sz), np.float32)
+    kern[math.ceil(sz/2)][math.ceil(sz/2)] = 1
+    kern = cv2.GaussianBlur(kern, (0,0), d/4)
+    return kern
+    
 def motion_kernel(angle, d, sz=100):
-    sz = max(10,sz)
     angle = np.deg2rad(angle)
     kern = np.ones((1, d), np.float32)
     c, s = np.cos(angle), np.sin(angle)
