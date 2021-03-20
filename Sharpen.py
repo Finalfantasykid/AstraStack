@@ -129,6 +129,7 @@ class Sharpen:
            (g.deconvolveLinear and g.deconvolveLinearDiameter > 1) or
            (g.deconvolveCustom and g.deconvolveCustomFile is not None)):
             # Decompose
+            beforeAvg = np.average(img)
             (R, G, B) = cv2.split(img)
             
             gParam = {
@@ -140,6 +141,7 @@ class Sharpen:
                 'circularAmount': g.deconvolveCircularAmount,
                 'gaussianDiameter': g.deconvolveGaussianDiameter,
                 'gaussianAmount': g.deconvolveGaussianAmount,
+                'gaussianSpread': g.deconvolveGaussianSpread,
                 'linearDiameter': g.deconvolveLinearDiameter,
                 'linearAmount': g.deconvolveLinearAmount,
                 'linearAngle': g.deconvolveLinearAngle,
@@ -158,7 +160,14 @@ class Sharpen:
         
             # Recompose
             img = cv2.merge([R, G, B])
-            
+            # Brightness tends to darken the image slightly, so adjust the brightness
+            try:
+                afterAvg = np.average(img)
+                factor = beforeAvg / afterAvg
+                img *= factor
+            except:
+                pass
+           
         self.debluredImage = img
     
     # Apply brightness & color sliders
@@ -167,12 +176,7 @@ class Sharpen:
         
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
-        
-        # Gamma
-        img[img<0] = 0
-        img[img>1] = 1
-        img = pow(img, 1/(max(1, g.gamma)/100))
-        
+
         # Decompose
         (R, G, B) = cv2.split(img)
         
@@ -197,6 +201,11 @@ class Sharpen:
         img = cv2.merge([H, V, S])
         
         img = cv2.cvtColor(img, cv2.COLOR_HLS2RGB)
+        
+        # Gamma
+        img[img<0] = 0
+        img[img>1] = 1
+        img = pow(img, 1/(max(1, g.gamma)/100))
         
         # Clip at 0 and 255
         img *= 255
@@ -312,7 +321,8 @@ def deconvolve(img, params):
             params['gaussianDiameter'],
             params['linearDiameter'],
             params['customDiameter'])
-    beforeAvg = np.average(img)
+    if(params['gaussianDiameter'] > 1):
+        d = max(d, 10)
     rows, cols = img.shape
     # Resize so that the dimensions are a multiple of the diameter
     rowMod = d - ((rows+d*2) % d)
@@ -330,7 +340,7 @@ def deconvolve(img, params):
             psf = defocus_kernel(params['circularDiameter'], params['circularDiameter']*2)
             noise = 10**(-0.1*params['circularAmount'])
         elif(deconvolveType == "gaussian" and params['gaussian']):
-            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianDiameter']*2)
+            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianSpread'], max(10, params['gaussianDiameter']*2))
             noise = 10**(-0.1*params['gaussianAmount'])
         elif(deconvolveType == "linear" and params['linear']):
             psf = motion_kernel(params['linearAngle'], params['linearDiameter'], params['linearDiameter']*2)
@@ -355,14 +365,7 @@ def deconvolve(img, params):
     
     # Crop the image to the original dimensions
     img = img[top:-bottom,left:-right]
-    
-    # Brightness tends to darken the image slightly, so adjust the brightness
-    try:
-        afterAvg = np.average(img)
-        factor = beforeAvg / afterAvg
-        img *= factor
-    except:
-        pass
+
     return img
 
 def blur_edge(img, r, d):
@@ -381,10 +384,28 @@ def defocus_kernel(d, sz=100):
     kern = np.float32(kern) / 255.0
     return kern
     
-def gaussian_kernel(d, sz=100):
+def gaussian_kernel(d, spread=10, sz=100):
     kern = np.zeros((sz, sz), np.float32)
-    kern[math.ceil(sz/2)][math.ceil(sz/2)] = 1
-    kern = cv2.GaussianBlur(kern, (0,0), d/4)
+    if(spread > 10):
+        # Gaussian
+        d1 = d*1.025
+        kern[math.ceil(sz/2)][math.ceil(sz/2)] = 1
+        kern = cv2.GaussianBlur(kern, (0,0), (d1/4))
+    else:
+        # Moffat
+        d1 = d*(1+(1/(spread+1)))
+        d1 = d1/(10/spread)
+        x0 = sz/2
+        y0 = sz/2
+        for y, row in enumerate(kern):
+            for x, col in enumerate(row):
+                kern[y][x] = (1 + ((x-x0)**2 + (y-y0)**2)/d1**2)**(-spread)
+    edgeMax = max(kern[0].max(), 
+                  kern[sz-1].max(),
+                  kern[:,0].max(),
+                  kern[:,sz-1].max())
+    kern -= edgeMax
+    kern[kern<0] = 0
     return kern
     
 def motion_kernel(angle, d, sz=100):

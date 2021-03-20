@@ -89,6 +89,13 @@
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="deconvolveGaussianSpread">
+    <property name="lower">1</property>
+    <property name="upper">11</property>
+    <property name="value">11</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="deconvolveLinearAmount">
     <property name="upper">50</property>
     <property name="value">25</property>
@@ -1704,36 +1711,6 @@ Note: Drift adjustment will still crop the image.</property>
                                         <property name="margin_top">5</property>
                                         <property name="column_homogeneous">True</property>
                                         <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">The diameter/distance of the deconvolution in pixels.</property>
-                                            <property name="label" translatable="yes">Diameter</property>
-                                            <attributes>
-                                              <attribute name="weight" value="bold"/>
-                                            </attributes>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">1</property>
-                                            <property name="top_attach">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">The strength of the deconvolution.  A higher value will result in a sharper image, but will have more artifacts and noise.</property>
-                                            <property name="label" translatable="yes">Amount</property>
-                                            <attributes>
-                                              <attribute name="weight" value="bold"/>
-                                            </attributes>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">2</property>
-                                            <property name="top_attach">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
                                           <object class="GtkScale" id="deconvolveCircularDiameterWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -1764,16 +1741,6 @@ Note: Drift adjustment will still crop the image.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">0</property>
-                                            <property name="top_attach">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
                                           <object class="GtkScale" id="deconvolveLinearDiameterWidget">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -1785,7 +1752,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">5</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1800,17 +1767,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
-                                            <property name="top_attach">3</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">3</property>
-                                            <property name="top_attach">1</property>
+                                            <property name="top_attach">5</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1825,7 +1782,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">3</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">5</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1842,12 +1799,15 @@ Note: Drift adjustment will still crop the image.</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="tooltip_text" translatable="yes">Circular deblur</property>
                                                 <property name="label" translatable="yes">Circular</property>
+                                                <attributes>
+                                                  <attribute name="weight" value="bold"/>
+                                                </attributes>
                                               </object>
                                             </child>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">1</property>
+                                            <property name="top_attach">0</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1864,12 +1824,15 @@ Note: Drift adjustment will still crop the image.</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="tooltip_text" translatable="yes">Motion deblur</property>
                                                 <property name="label" translatable="yes">Linear</property>
+                                                <attributes>
+                                                  <attribute name="weight" value="bold"/>
+                                                </attributes>
                                               </object>
                                             </child>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">3</property>
+                                            <property name="top_attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1884,14 +1847,17 @@ Note: Drift adjustment will still crop the image.</property>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
-                                                <property name="tooltip_text" translatable="yes">Custom PSF.  Select an image representing the point spread function</property>
+                                                <property name="tooltip_text" translatable="yes">Custom PSF.  Select an image representing the PSF.</property>
                                                 <property name="label" translatable="yes">Custom</property>
+                                                <attributes>
+                                                  <attribute name="weight" value="bold"/>
+                                                </attributes>
                                               </object>
                                             </child>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">4</property>
+                                            <property name="top_attach">6</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1905,7 +1871,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
-                                            <property name="top_attach">4</property>
+                                            <property name="top_attach">7</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1919,19 +1885,19 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
-                                            <property name="top_attach">4</property>
+                                            <property name="top_attach">7</property>
                                           </packing>
                                         </child>
                                         <child>
                                           <object class="GtkImage" id="psfImage">
-                                            <property name="height_request">101</property>
+                                            <property name="height_request">100</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="margin_top">5</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
-                                            <property name="top_attach">5</property>
+                                            <property name="top_attach">8</property>
                                             <property name="width">4</property>
                                           </packing>
                                         </child>
@@ -1949,6 +1915,9 @@ Note: Drift adjustment will still crop the image.</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="tooltip_text" translatable="yes">Gaussian deblur</property>
                                                 <property name="label" translatable="yes">Gaussian</property>
+                                                <attributes>
+                                                  <attribute name="weight" value="bold"/>
+                                                </attributes>
                                               </object>
                                             </child>
                                           </object>
@@ -1969,7 +1938,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
-                                            <property name="top_attach">2</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1984,13 +1953,63 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
-                                            <property name="top_attach">2</property>
+                                            <property name="top_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deconvolveGaussianSpreadWidget">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deconvolveGaussianSpread</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The strength of the deconvolution.  A higher value will result in a sharper image, but will have more artifacts and noise.</property>
+                                            <property name="label" translatable="yes">Amount</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The diameter of the deconvolution in pixels.</property>
+                                            <property name="label" translatable="yes">Diameter</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The angle of the linear motion.</property>
+                                            <property name="label" translatable="yes">Angle</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
                                           </object>
                                           <packing>
                                             <property name="left_attach">3</property>
@@ -2001,6 +2020,89 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The approximate size of the PSF.  This is roughly equal to the diameter, but can vary depending on the spread model.</property>
+                                            <property name="label" translatable="yes">Diameter</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The strength of the deconvolution.  A higher value will result in a sharper image, but will have more artifacts and noise.</property>
+                                            <property name="label" translatable="yes">Amount</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The strength of the deconvolution.  A higher value will result in a sharper image, but will have more artifacts and noise.</property>
+                                            <property name="label" translatable="yes">Amount</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The distance or the motion.</property>
+                                            <property name="label" translatable="yes">Distance</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">The file location of the PSF.  This file can be no larger than 100x100 pixels.</property>
+                                            <property name="label" translatable="yes">File</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">6</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Which model to use to for the PSF:
+1: Lorentzian
+2-10: Moffat
+11: Gaussian</property>
+                                            <property name="label" translatable="yes">Spread</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
                                           </object>
                                           <packing>
                                             <property name="left_attach">3</property>
@@ -2011,15 +2113,95 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">The angle of the deconvolution (linear only).</property>
-                                            <property name="label" translatable="yes">Angle</property>
+                                            <property name="tooltip_text" translatable="yes">The strength of the deconvolution.  A higher value will result in a sharper image, but will have more artifacts and noise.</property>
+                                            <property name="label" translatable="yes">Amount</property>
                                             <attributes>
                                               <attribute name="weight" value="bold"/>
                                             </attributes>
                                           </object>
                                           <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">6</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
                                             <property name="left_attach">3</property>
                                             <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">1</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">5</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">7</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">6</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">7</property>
                                           </packing>
                                         </child>
                                       </object>
@@ -2029,7 +2211,7 @@ Note: Drift adjustment will still crop the image.</property>
                                         <property name="width_request">0</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Deblur (deconvolution) can be used to adjust for imperfect focus or motion blur.</property>
+                                        <property name="tooltip_text" translatable="yes">Deblur (deconvolution) can be used to adjust for imperfect focus, seeing or motion blur.</property>
                                         <property name="label" translatable="yes">Deblur</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>

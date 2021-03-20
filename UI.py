@@ -625,7 +625,7 @@ class UI:
             img += defocus_kernel(int(g.deconvolveCircularDiameter), sz)
             count += 1
         if(g.deconvolveGaussian and g.deconvolveGaussianDiameter > 1):
-            kern = gaussian_kernel(int(g.deconvolveGaussianDiameter), sz)
+            kern = gaussian_kernel(int(g.deconvolveGaussianDiameter), int(g.deconvolveGaussianSpread), sz)
             img += cv2.normalize(kern, kern, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
             count += 1
         if(g.deconvolveLinear and g.deconvolveLinearDiameter > 1):
@@ -965,6 +965,7 @@ class UI:
         g.deconvolveCircularAmount = self.builder.get_object("deconvolveCircularAmount").get_value()
         g.deconvolveGaussianDiameter = self.builder.get_object("deconvolveGaussianDiameter").get_value()
         g.deconvolveGaussianAmount = self.builder.get_object("deconvolveGaussianAmount").get_value()
+        g.deconvolveGaussianSpread = self.builder.get_object("deconvolveGaussianSpread").get_value()
         g.deconvolveLinearDiameter = self.builder.get_object("deconvolveLinearDiameter").get_value()
         g.deconvolveLinearAmount = self.builder.get_object("deconvolveLinearAmount").get_value()
         g.deconvolveLinearAngle = self.builder.get_object("deconvolveLinearAngle").get_value()
@@ -997,6 +998,7 @@ class UI:
                                 self.builder.get_object("deconvolveCircularAmount") == args[0] or
                                 self.builder.get_object("deconvolveGaussianDiameter") == args[0] or
                                 self.builder.get_object("deconvolveGaussianAmount") == args[0] or
+                                self.builder.get_object("deconvolveGaussianSpread") == args[0] or
                                 self.builder.get_object("deconvolveLinearDiameter") == args[0] or
                                 self.builder.get_object("deconvolveLinearAmount") == args[0] or
                                 self.builder.get_object("deconvolveLinearAngle") == args[0] or
