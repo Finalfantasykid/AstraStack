@@ -1822,7 +1822,7 @@ Note: Drift adjustment will still crop the image.</property>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
-                                                <property name="tooltip_text" translatable="yes">Motion deblur</property>
+                                                <property name="tooltip_text" translatable="yes">Motion deblur.  If combined with Circular or Gaussian, it will apply the linear motion to them.</property>
                                                 <property name="label" translatable="yes">Linear</property>
                                                 <attributes>
                                                   <attribute name="weight" value="bold"/>
@@ -1890,7 +1890,7 @@ Note: Drift adjustment will still crop the image.</property>
                                         </child>
                                         <child>
                                           <object class="GtkImage" id="psfImage">
-                                            <property name="height_request">100</property>
+                                            <property name="height_request">110</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="margin_top">5</property>

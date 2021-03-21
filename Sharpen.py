@@ -317,8 +317,8 @@ def deconvolve(img, params):
     params['gaussianDiameter'] = int(params['gaussianDiameter'])
     params['linearDiameter'] = int(params['linearDiameter'])
     
-    d = max(params['circularDiameter'],
-            params['gaussianDiameter'],
+    d = max(params['circularDiameter'] + params['linearDiameter'] - 1,
+            params['gaussianDiameter'] + params['linearDiameter'] - 1,
             params['linearDiameter'],
             params['customDiameter'])
     if(params['gaussianDiameter'] > 1):
@@ -337,23 +337,30 @@ def deconvolve(img, params):
     # Start the deconvolution
     for deconvolveType in ("circular", "gaussian", "linear", "custom"):
         if(deconvolveType == "circular" and params['circular']):
-            psf = defocus_kernel(params['circularDiameter'], params['circularDiameter']*2)
+            # Circular
+            psf = defocus_kernel(params['circularDiameter'], (params['circularDiameter'] + params['linearDiameter'] - 1)*2) 
             noise = 10**(-0.1*params['circularAmount'])
         elif(deconvolveType == "gaussian" and params['gaussian']):
-            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianSpread'], max(10, params['gaussianDiameter']*2))
+            # Gaussian
+            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianSpread'], max(10, (params['gaussianDiameter'] + params['linearDiameter'] - 1)*2))
             noise = 10**(-0.1*params['gaussianAmount'])
-        elif(deconvolveType == "linear" and params['linear']):
-            psf = motion_kernel(params['linearAngle'], params['linearDiameter'], params['linearDiameter']*2)
-            noise = 10**(-0.1*params['linearAmount'])
         elif(deconvolveType == "custom" and params['custom']):
+            # Custom
             psf = params['customFile']
             noise = 10**(-0.1*params['customAmount'])
+        elif(deconvolveType == "linear" and params['linear'] and not params['circular'] and not params['gaussian']):
+            # Linear Only
+            psf = motion_kernel(params['linearAngle'], params['linearDiameter'], (params['linearDiameter'] + params['linearDiameter'] - 1)*2)
+            noise = 10**(-0.1*params['linearAmount'])
         else:
             continue
+        if((deconvolveType == "circular" or deconvolveType == "gaussian") and params['linear']):
+            # Stretch&Rotate the Gaussian/Circular
+            psf = stretchPSF(psf, (params['linearDiameter']/max(params['gaussianDiameter'],params['circularDiameter'])), params['linearAngle'])
+        kh, kw = psf.shape   
         IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
         psf /= psf.sum()
         psf_pad = np.zeros_like(img)
-        kh, kw = psf.shape
         psf_pad[:kh, :kw] = psf
         PSF = cv2.dft(psf_pad, flags=cv2.DFT_COMPLEX_OUTPUT, nonzeroRows = kh)
         PSF2 = (PSF**2).sum(-1)
@@ -400,12 +407,7 @@ def gaussian_kernel(d, spread=10, sz=100):
         for y, row in enumerate(kern):
             for x, col in enumerate(row):
                 kern[y][x] = (1 + ((x-x0)**2 + (y-y0)**2)/d1**2)**(-spread)
-    edgeMax = max(kern[0].max(), 
-                  kern[sz-1].max(),
-                  kern[:,0].max(),
-                  kern[:,sz-1].max())
-    kern -= edgeMax
-    kern[kern<0] = 0
+    kern = blackenEdge(kern)
     return kern
     
 def motion_kernel(angle, d, sz=100):
@@ -416,4 +418,24 @@ def motion_kernel(angle, d, sz=100):
     sz2 = sz // 2
     A[:,2] = (sz2, sz2) - np.dot(A[:,:2], ((d-1)*0.5, 0))
     kern = cv2.warpAffine(kern, A, (sz, sz), flags=cv2.INTER_LINEAR)
+    return kern
+    
+def stretchPSF(psf, d, angle):
+    h, w  = psf.shape[:2]
+    M = cv2.getRotationMatrix2D((w//2, h//2), -angle, 1)
+    T = np.identity(3) # Scale Matrix
+    T[0][0] = 1 + d
+    T[0][2] -= (w/2)*(T[0][0]-1)
+    M = M.dot(T) # Apply scale to Transformation
+    psf = cv2.warpAffine(psf, M, (w, h), flags=cv2.INTER_LINEAR)
+    return blackenEdge(psf)
+    
+def blackenEdge(kern):
+    h, w  = kern.shape[:2]
+    edgeMax = max(kern[0].max(), 
+                  kern[h-1].max(),
+                  kern[:,0].max(),
+                  kern[:,w-1].max())
+    kern -= edgeMax
+    kern[kern<0] = 0
     return kern

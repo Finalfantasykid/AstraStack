@@ -21,7 +21,7 @@ from pystackreg import StackReg
 from Video import Video
 from Align import Align
 from Stack import Stack, transform
-from Sharpen import Sharpen, defocus_kernel, gaussian_kernel, motion_kernel
+from Sharpen import Sharpen, defocus_kernel, gaussian_kernel, motion_kernel, stretchPSF, blackenEdge
 from Globals import g
 
 from gi import require_version
@@ -618,36 +618,44 @@ class UI:
         
     # Updates the PSF Image to the current configuration for deblurring        
     def updatePSFImage(self, *args):
-        sz = 100
-        img = np.zeros((sz,sz), np.float32)
+        sz = 110
+        psf = np.zeros((sz,sz), np.float32)
         count = 0
         if(g.deconvolveCircular and g.deconvolveCircularDiameter > 1):
-            img += defocus_kernel(int(g.deconvolveCircularDiameter), sz)
+            # Circular
+            psf += defocus_kernel(int(g.deconvolveCircularDiameter), sz)
             count += 1
         if(g.deconvolveGaussian and g.deconvolveGaussianDiameter > 1):
+            # Gaussian
             kern = gaussian_kernel(int(g.deconvolveGaussianDiameter), int(g.deconvolveGaussianSpread), sz)
-            img += cv2.normalize(kern, kern, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+            psf += cv2.normalize(kern, kern, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
             count += 1
         if(g.deconvolveLinear and g.deconvolveLinearDiameter > 1):
-            img += motion_kernel(int(g.deconvolveLinearAngle), int(g.deconvolveLinearDiameter), sz)
+            # Stretch&Rotate the Gaussian/Circular
+            psf = stretchPSF(psf, (g.deconvolveLinearDiameter/max(g.deconvolveGaussianDiameter,g.deconvolveCircularDiameter)), g.deconvolveLinearAngle)
+        if(count == 0 and g.deconvolveLinear and g.deconvolveLinearDiameter > 1):
+            # Linear
+            psf += motion_kernel(int(g.deconvolveLinearAngle), int(g.deconvolveLinearDiameter), sz)
             count += 1
-        if(g.deconvolveCustom and isinstance(g.deconvolveCustomFile,np.ndarray)):
+        if(g.deconvolveCustom and g.deconvolveCustomFile is not None):
+            # Custom
             kern = g.deconvolveCustomFile
             h, w = kern.shape[:2]
             kern = cv2.copyMakeBorder(kern, math.ceil((sz-h)/2), math.floor((sz-h)/2), math.ceil((sz-w)/2), math.floor((sz-w)/2), cv2.BORDER_CONSTANT)
-            img += kern
+            psf += kern
             count += 1
             
         if(count > 0):
-            img /= count
+            psf /= count
         else:
-            img[int(sz/2)][int(sz/2)] = 1
-            
-        img = np.uint8(img*255)
+            psf[int(sz/2)][int(sz/2)] = 1
         
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        psf = cv2.normalize(psf, psf, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)    
+        psf = np.uint8(psf*255)
         
-        z = img.tobytes()
+        psf = cv2.cvtColor(psf, cv2.COLOR_GRAY2RGB)
+        
+        z = psf.tobytes()
         Z = GLib.Bytes.new(z)
         
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, sz, sz, sz*3)
