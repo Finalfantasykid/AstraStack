@@ -18,10 +18,11 @@ from multiprocessing import Pipe, active_children, get_start_method
 from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
+from deconvolution import *
 from Video import Video
 from Align import Align
 from Stack import Stack, transform
-from Sharpen import Sharpen, defocus_kernel, gaussian_kernel, motion_kernel, stretchPSF, blackenEdge
+from Sharpen import Sharpen
 from Globals import g
 
 from gi import require_version
