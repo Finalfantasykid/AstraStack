@@ -38,7 +38,7 @@ def deconvolve(img, params):
     left = d + math.floor(colMod/2)
     right = d + math.ceil(colMod/2)
     img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_REPLICATE)
-    img = blur_edge(img, d*2, (d + math.ceil(max(rowMod/2, colMod/2)))*2)
+    img = blur_edge(img, d, d)
     
     # Start the deconvolution
     for deconvolveType in ("circular", "gaussian", "linear", "custom"):
