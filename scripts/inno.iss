@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "AstraStack"
-#define MyAppVersion "2.0.1"
+#define MyAppVersion "2.1.0"
 #define MyAppPublisher "David Turner"
 #define MyAppURL "https://github.com/Finalfantasykid/AstraStack"
 #define MyAppExeName "AstraStack.exe"
