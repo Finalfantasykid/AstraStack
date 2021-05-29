@@ -117,7 +117,13 @@ class UI:
         self.builder.connect_signals(self)
         
         # Needed so it can be temporarily removed
-        self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent) 
+        self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent)
+        
+        # Default Open/Save Dialog buttons
+        self.openDialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        self.openDialog.add_button("Open", Gtk.ResponseType.OK)
+        self.saveDialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        self.saveDialog.add_button("Save", Gtk.ResponseType.OK)
         
         g.driftP1 = (0, 0)
         g.driftP2 = (0, 0)
