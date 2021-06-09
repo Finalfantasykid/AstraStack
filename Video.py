@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import glob
 import math
 from concurrent.futures.process import BrokenProcessPool
@@ -95,10 +96,12 @@ class Video:
     def getFrame(self, file, frame):
         if(isinstance(frame, str)):
             # Specific file
-             image = cv2.imread(frame)
+            image = cv2.imread(frame, cv2.IMREAD_UNCHANGED)
+            image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         elif(isinstance(file, list)):
             # Image Sequence
-            image = cv2.imread(file[frame])
+            image = cv2.imread(file[frame], cv2.IMREAD_UNCHANGED)
+            image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         else:
             # Video
             if(self.vidcap is None):
@@ -110,7 +113,7 @@ class Video:
             success,image = self.vidcap.read()
         return image
        
-# Returns a number based on how sharp the image is (higher = sharper) 
+# Returns a number based on how sharp the image is (higher = sharper)
 def calculateSharpness(image):
     h, w = image.shape[:2]
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()

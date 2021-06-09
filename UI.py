@@ -76,6 +76,7 @@ class UI:
         self.alignChannels = self.builder.get_object("alignChannels")
         self.autoCrop = self.builder.get_object("autoCrop")
         self.transformation = self.builder.get_object("transformation")
+        self.bitDepth = self.builder.get_object("bitDepth")
         self.drizzleFactor = self.builder.get_object("drizzleFactor")
         self.drizzleInterpolation = self.builder.get_object("drizzleInterpolation")
         self.limit = self.builder.get_object("limit")
@@ -415,13 +416,23 @@ class UI:
                 self.saveDialog.set_current_name(Path(sList[0]).stem + "_" + Path(sList[-1]).stem + ".png")
             else:
                 self.saveDialog.set_current_name(Path(g.file).stem + ".png")
-        response = self.saveDialog.run()
-        if(response == Gtk.ResponseType.OK):
-            fileName = self.saveDialog.get_filename()
-            try:
-                cv2.imwrite(fileName, cv2.cvtColor(self.sharpen.finalImage.astype('uint8'), cv2.COLOR_RGB2BGR))
-            except: # Save Failed
-                self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
+        def start():
+            response = self.saveDialog.run()
+            if(response == Gtk.ResponseType.OK):
+                fileName = self.saveDialog.get_filename()
+                try:
+                    bitDepth = self.bitDepth.get_active_text()
+                    if(bitDepth == "8-bit"):
+                        cv2.imwrite(fileName, cv2.cvtColor(self.sharpen.finalImage.astype('uint8'), cv2.COLOR_RGB2BGR))
+                    elif(bitDepth == "16-bit"):
+                        if(fileName.endswith(".png") or fileName.endswith(".tif") or fileName.endswith(".tiff")):
+                            cv2.imwrite(fileName, cv2.cvtColor((self.sharpen.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
+                        else:
+                            self.showErrorDialog("Only .png and .tif are supported for 16-bit images")
+                            start()
+                except: # Save Failed
+                    self.showErrorDialog("There was an error saving the image, make sure it is a valid file extension.")
+        start()
         self.saveDialog.hide()
         
     # Called when the video is finished loading
@@ -512,7 +523,7 @@ class UI:
             page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             videoIndex = int(self.frameSlider.get_value())
-            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex]), cv2.COLOR_BGR2RGB)
+            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex]), cv2.COLOR_BGR2RGB).astype(np.uint8)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -524,7 +535,7 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex)
+            img = self.video.getFrame(g.file, videoIndex).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:

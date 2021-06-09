@@ -7,6 +7,7 @@ from multiprocessing import Manager, Lock
 from pywt import swt2, iswt2
 from time import sleep
 from deconvolution import *
+from Video import Video
 from Globals import g
 
 pool = ProcessPoolExecutor(3)
@@ -23,7 +24,8 @@ class Sharpen:
     def __init__(self, stackedImage, isFile=False):
         if(isFile):
             # Single image provided
-            stackedImage = cv2.imread(stackedImage)
+            video = Video()
+            stackedImage = video.getFrame(None, stackedImage)
         else:
             # Use the higher bit depth version from the stacking process
             pass
