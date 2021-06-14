@@ -423,10 +423,10 @@ class UI:
                 try:
                     bitDepth = self.bitDepth.get_active_text()
                     if(bitDepth == "8-bit"):
-                        cv2.imwrite(fileName, cv2.cvtColor(self.sharpen.finalImage.astype('uint8'), cv2.COLOR_RGB2BGR))
+                        cv2.imwrite(fileName, cv2.cvtColor(np.around(self.sharpen.finalImage).astype('uint8'), cv2.COLOR_RGB2BGR))
                     elif(bitDepth == "16-bit"):
                         if(fileName.endswith(".png") or fileName.endswith(".tif") or fileName.endswith(".tiff")):
-                            cv2.imwrite(fileName, cv2.cvtColor((self.sharpen.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
+                            cv2.imwrite(fileName, cv2.cvtColor(np.around(self.sharpen.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
                         else:
                             self.showErrorDialog("Only .png and .tif are supported for 16-bit images")
                             start()
@@ -1055,7 +1055,7 @@ class UI:
     # Called when sharpening is complete
     def finishedSharpening(self):
         def update():
-            z = self.sharpen.finalImage.astype('uint8').tobytes()
+            z = np.around(self.sharpen.finalImage).astype('uint8').tobytes()
             Z = GLib.Bytes.new(z)
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, self.sharpen.w, self.sharpen.h, self.sharpen.w*3)
             self.frame.set_from_pixbuf(pixbuf)

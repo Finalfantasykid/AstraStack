@@ -176,7 +176,6 @@ class Sharpen:
     # Apply brightness & color sliders
     def processColor(self):
         img = self.debluredImage
-        
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
 
