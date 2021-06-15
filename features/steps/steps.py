@@ -52,6 +52,9 @@ def asyncPressButton(context, button):
 def chooseFile(context, file, dialog):
     window = g.ui.builder.get_object(dialog)
     window.select_filename(os.getcwd() + "/features/testFiles/" + file)
+    if("*" in file):
+        delay()
+        window.select_all()
     delay(0.5)
     def update():
         if(window.get_action() == Gtk.FileChooserAction.SAVE):
