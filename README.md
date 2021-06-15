@@ -30,15 +30,28 @@ You can run the application with
 $ python AstraStack.py
 ```
 
-# Build Instructions
-In order to build the project for Linux, you will need to install pyinstaller using pip, and then run the build command
+# Developer Instructions
+There are other packages which are used for developers
 
 ```
-$ pip install pyinstaller
+$ pip install -r requirements_dev.txt
+```
+
+## Build Instructions
+Building primarily uses pyinstaller to package into an executable.
+
+```
 $ ./build.sh
 ```
 
-The project can also be built in Windows using a mingw64 installation.  You can install the python packages via the pacman package manager that it comes with, as well as with pip.
+The project can also be built in Windows using a mingw64 installation.  You can install the python packages via the pacman package manager that it comes with, as well as with pip.  Inno Setup is also used to create an installer file.
+
+## Testing
+Testing uses the behave package and Gtk instructions are 'simulated' during testing.  To run the tests run the following:
+
+```
+$ behave
+```
 
 # References
 1. RegiStax - https://www.astronomie.be/registax/
