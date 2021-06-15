@@ -1067,7 +1067,6 @@ class UI:
     def close(self, *args):
         self.killPool()
         Gtk.main_quit()
-        sys.exit()
 
 # Used to initialize pids
 def dummy(*args):

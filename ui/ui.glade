@@ -492,7 +492,7 @@
                         <property name="row_spacing">5</property>
                         <property name="column_homogeneous">True</property>
                         <child>
-                          <object class="GtkButton" id="openButton">
+                          <object class="GtkButton" id="openVideo">
                             <property name="label" translatable="yes">Open Video</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -561,7 +561,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="openButton1">
+                          <object class="GtkButton" id="openSequence">
                             <property name="label" translatable="yes">Open Image Sequence</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -603,7 +603,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="openButton2">
+                          <object class="GtkButton" id="openImage">
                             <property name="label" translatable="yes">Open Image</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1228,7 +1228,7 @@ Note: Drift adjustment will still crop the image.</property>
                             <property name="row_spacing">5</property>
                             <property name="column_homogeneous">True</property>
                             <child>
-                              <object class="GtkButton">
+                              <object class="GtkButton" id="stackButton">
                                 <property name="label" translatable="yes">Stack</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1254,7 +1254,7 @@ Note: Drift adjustment will still crop the image.</property>
                       </packing>
                     </child>
                     <child type="tab">
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="stackLabel">
                         <property name="height_request">30</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -1285,7 +1285,7 @@ Note: Drift adjustment will still crop the image.</property>
                                 <property name="margin_bottom">10</property>
                                 <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkExpander">
+                                  <object class="GtkExpander" id="wavelets">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="margin_bottom">10</property>
@@ -1700,7 +1700,7 @@ Note: Drift adjustment will still crop the image.</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkExpander">
+                                  <object class="GtkExpander" id="deblur">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="margin_bottom">10</property>
@@ -2226,7 +2226,7 @@ Note: Drift adjustment will still crop the image.</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkExpander">
+                                  <object class="GtkExpander" id="colors">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="margin_bottom">10</property>
@@ -2455,7 +2455,7 @@ Note: Drift adjustment will still crop the image.</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton">
+                                  <object class="GtkButton" id="saveButton">
                                     <property name="label" translatable="yes">Save Image</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
