@@ -5,6 +5,7 @@ import time
 import cv2
 import numpy as np
 from threading import Thread
+from multiprocessing import Value
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
@@ -21,15 +22,25 @@ tabMap = {"Load": UI.LOAD_TAB,
 def delay(delay=0.1):
     time.sleep(delay)
     
+def idle_add_delay(fn):
+    updateDone = Value('b', False)
+    def update(updateDone):
+        fn()
+        updateDone.value = True
+    GLib.idle_add(update, updateDone)
+    while(not updateDone.value):
+        delay(0.01)
+    delay(0.01) # Always delay just a bit
+    
 def widgetValidation(id):
     widget = g.ui.builder.get_object(id)
     i = 0
     while ((widget is None or
-            widget.is_visible() or
-            widget.is_sensitive()) and 
+            not widget.is_visible() or
+            not widget.is_sensitive()) and 
            i < 10):
         # Give it a chance to become valid before asserting
-        delay(0.01)
+        delay(0.05)
         i += 1
     assert widget != None, "The widget " + button + " does not exist"
     assert widget.is_visible(), "The button " + button + " is not visible"
@@ -42,22 +53,21 @@ def wait(context, ms):
 @given(u'I wait until active tab is "{tab}"')
 def waitUntil(context, tab):
     while(g.ui.builder.get_object("tabs").get_current_page() != tabMap[tab]):
-        delay()
+        delay(0.01)
 
 @given(u'I am on tab "{tab}"')
 def changeTab(context, tab):
     widgetValidation("tabs")
-    g.ui.builder.get_object("tabs").set_current_page(tabMap[tab])
-    delay()
+    def update():
+        g.ui.builder.get_object("tabs").set_current_page(tabMap[tab])
+    idle_add_delay(update)
 
 @given(u'I press "{button}"')
 def pressButton(context, button):
     widgetValidation(button)
     def update():
         g.ui.builder.get_object(button).clicked()
-        clickButton(button)
-    GLib.idle_add(update)
-    delay()
+    idle_add_delay(update)
 
 @given(u'I async press "{button}"')
 def asyncPressButton(context, button):
@@ -74,7 +84,7 @@ def asyncPressButton(context, button):
 def chooseFile(context, file, dialog):
     window = g.ui.builder.get_object(dialog)
     while(not window.is_visible()):
-        delay()
+        delay(0.01)
     def update1():
         window.select_filename(os.getcwd() + "/features/testFiles/" + file)
     def update2():
@@ -84,20 +94,31 @@ def chooseFile(context, file, dialog):
             window.set_current_name(file.split("/")[-1])
     def update3():
         window.get_widget_for_response(Gtk.ResponseType.OK).clicked()
-    GLib.idle_add(update1)
-    delay()
-    GLib.idle_add(update2)
-    delay()
-    GLib.idle_add(update3)
+    idle_add_delay(update1)
+    idle_add_delay(update2)
+    idle_add_delay(update3)
     while(window.is_visible()):
-        delay()
+        delay(0.01)
     
 @given(u'I set "{adjustment}" to "{value}"')
 def setAdjustment(context, adjustment, value):
     def update():
         g.ui.builder.get_object(adjustment).set_value(float(value))
-    GLib.idle_add(update)
-    delay()
+    idle_add_delay(update)
+    
+@given(u'I check "{checkbox}"')
+def setCheck(context, checkbox):
+    widgetValidation(checkbox)
+    def update():
+        g.ui.builder.get_object(checkbox).set_active(True)
+    idle_add_delay(update)
+    
+@given(u'I uncheck "{checkbox}"')
+def setUncheck(context, checkbox):
+    widgetValidation(checkbox)
+    def update():
+        g.ui.builder.get_object(checkbox).set_active(False)
+    idle_add_delay(update)
     
 @given(u'I select "{value}" from "{combo}"')
 def setCombo(context, value, combo):
@@ -117,13 +138,14 @@ def setCombo(context, value, combo):
     assert id is not None, "Item '" + value + "' not found"
     def update():
         g.ui.builder.get_object(combo).set_active(id)
-    GLib.idle_add(update)
-    delay()
+    idle_add_delay(update)
     
 @given(u'I set point "{var}" to "{point}"')
 def setPoint(context, var, point):
     point = point.split(",")
     point = [int(x) for x in point]
+    assert (var == "driftP1" or var == "driftP2" or
+            var == "areaOfInterestP1" or var == "areaOfInterestP2"), var + " is not a valid variable"
     def update1():
         if(var == "driftP1"):
             g.ui.clickDriftP1()
@@ -131,10 +153,6 @@ def setPoint(context, var, point):
             g.ui.clickDriftP2()
         elif(var == "areaOfInterestP1"):
             g.ui.clickAreaOfInterest()
-        elif(var == "areaOfInterestP2"):
-            pass
-        else:
-            assert False, var + " is not a valid variable"
     def update2():
         g.ui.mousePosition = point
         if(var == "driftP1" or var == "driftP2"):
@@ -144,10 +162,8 @@ def setPoint(context, var, point):
         elif(var == "areaOfInterestP2"):
             g.ui.dragEnd()
         g.ui.updateImage()
-    GLib.idle_add(update1)
-    delay()
-    GLib.idle_add(update2)
-    delay()
+    idle_add_delay(update1)
+    idle_add_delay(update2)
     
 @then(u'"{file1}" and "{file2}" should be equal')
 def compareImages(context, file1, file2):
