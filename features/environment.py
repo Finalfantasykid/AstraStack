@@ -32,12 +32,11 @@ def before_scenario(context, scenario):
         Gtk.main()
     thread = Thread(target=run, args=())
     thread.start()
-    time.sleep(0.1)
-    
+    time.sleep(0.5)
     
 def after_scenario(context, scenario):
     g.ui.window.close()
-    time.sleep(1)
+    time.sleep(0.1)
     
 def after_all(context):
     try:

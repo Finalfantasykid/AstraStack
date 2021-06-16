@@ -13,21 +13,25 @@ sys.path.insert(0, os.getcwd())
 from UI import UI
 from Globals import g
 
+tabMap = {"Load": UI.LOAD_TAB,
+          "Align": UI.ALIGN_TAB,
+          "Stack": UI.STACK_TAB,
+          "Process": UI.SHARPEN_TAB}
+
 def delay(delay=0.1):
     time.sleep(delay)
     
 @given(u'I wait "{ms}"')
-@when(u'I wait "{ms}"')
 def wait(context, ms):
     delay(int(ms)/1000)
+    
+@given(u'I wait until active tab is "{tab}"')
+def waitUntil(context, tab):
+    while(g.ui.builder.get_object("tabs").get_current_page() != tabMap[tab]):
+        delay()
 
 @given(u'I am on tab "{tab}"')
-@when(u'I am on tab "{tab}"')
 def changeTab(context, tab):
-    tabMap = {"Load": UI.LOAD_TAB,
-              "Align": UI.ALIGN_TAB,
-              "Stack": UI.STACK_TAB,
-              "Process": UI.SHARPEN_TAB}
     g.ui.builder.get_object("tabs").set_current_page(tabMap[tab])
     delay()
 
@@ -46,25 +50,29 @@ def asyncPressButton(context, button):
         GLib.idle_add(update)
     thread = Thread(target=run, args=())
     thread.start()
-    delay(1)
+    delay()
     
 @given(u'I choose file "{file}" from "{dialog}"')
 def chooseFile(context, file, dialog):
     window = g.ui.builder.get_object(dialog)
-    window.select_filename(os.getcwd() + "/features/testFiles/" + file)
-    if("*" in file):
+    while(not window.is_visible()):
         delay()
-        window.select_all()
-    delay(0.5)
-    def update():
+    def update1():
+        window.select_filename(os.getcwd() + "/features/testFiles/" + file)
+    def update2():
+        if("*" in file):
+            window.select_all()
         if(window.get_action() == Gtk.FileChooserAction.SAVE):
             window.set_current_name(file.split("/")[-1])
-            delay(0.5)
+    def update3():
         window.get_widget_for_response(Gtk.ResponseType.OK).clicked()
-    GLib.idle_add(update)
-    delay(0.5)
-    if(window.get_action() == Gtk.FileChooserAction.SAVE):
-        delay(1)
+    GLib.idle_add(update1)
+    delay()
+    GLib.idle_add(update2)
+    delay()
+    GLib.idle_add(update3)
+    while(window.is_visible()):
+        delay()
     
 @given(u'I set "{adjustment}" to "{value}"')
 def setAdjustment(context, adjustment, value):
@@ -97,7 +105,7 @@ def setCombo(context, value, combo):
 def setPoint(context, var, point):
     point = point.split(",")
     point = [int(x) for x in point]
-    def update():
+    def update1():
         if(var == "driftP1"):
             g.ui.clickDriftP1()
         elif(var == "driftP2"):
@@ -108,6 +116,7 @@ def setPoint(context, var, point):
             pass
         else:
             assert False, var + " is not a valid variable"
+    def update2():
         g.ui.mousePosition = point
         if(var == "driftP1" or var == "driftP2"):
             g.ui.setDriftPoint()
@@ -116,8 +125,10 @@ def setPoint(context, var, point):
         elif(var == "areaOfInterestP2"):
             g.ui.dragEnd()
         g.ui.updateImage()
-    GLib.idle_add(update)
-    delay(0.5)
+    GLib.idle_add(update1)
+    delay()
+    GLib.idle_add(update2)
+    delay()
     
 @then(u'"{file1}" and "{file2}" should be equal')
 def compareImages(context, file1, file2):
