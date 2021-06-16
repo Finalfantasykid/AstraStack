@@ -21,6 +21,20 @@ tabMap = {"Load": UI.LOAD_TAB,
 def delay(delay=0.1):
     time.sleep(delay)
     
+def widgetValidation(id):
+    widget = g.ui.builder.get_object(id)
+    i = 0
+    while ((widget is None or
+            widget.is_visible() or
+            widget.is_sensitive()) and 
+           i < 10):
+        # Give it a chance to become valid before asserting
+        delay(0.01)
+        i += 1
+    assert widget != None, "The widget " + button + " does not exist"
+    assert widget.is_visible(), "The button " + button + " is not visible"
+    assert widget.is_sensitive(), "The button " + button + " is not sensitive"
+    
 @given(u'I wait "{ms}"')
 def wait(context, ms):
     delay(int(ms)/1000)
@@ -32,18 +46,22 @@ def waitUntil(context, tab):
 
 @given(u'I am on tab "{tab}"')
 def changeTab(context, tab):
+    widgetValidation("tabs")
     g.ui.builder.get_object("tabs").set_current_page(tabMap[tab])
     delay()
 
 @given(u'I press "{button}"')
 def pressButton(context, button):
+    widgetValidation(button)
     def update():
         g.ui.builder.get_object(button).clicked()
+        clickButton(button)
     GLib.idle_add(update)
     delay()
 
 @given(u'I async press "{button}"')
 def asyncPressButton(context, button):
+    widgetValidation(button)
     def run():
         def update():
             g.ui.builder.get_object(button).clicked()
@@ -83,6 +101,7 @@ def setAdjustment(context, adjustment, value):
     
 @given(u'I select "{value}" from "{combo}"')
 def setCombo(context, value, combo):
+    widgetValidation(combo)
     model = g.ui.builder.get_object(combo).get_model()
     iter = model.get_iter_first()
     id = None
