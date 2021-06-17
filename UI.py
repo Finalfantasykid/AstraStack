@@ -12,6 +12,7 @@ import math
 import psutil
 import mimetypes
 import psutil
+import time
 from packaging import version
 from threading import Thread
 from multiprocessing import Pipe, active_children, get_start_method
@@ -421,6 +422,8 @@ class UI:
             if(response == Gtk.ResponseType.OK):
                 fileName = self.saveDialog.get_filename()
                 try:
+                    while(self.processThread != None and self.processThread.is_alive()):
+                        time.sleep(0.1) # Make sure the file isn't still being processed
                     bitDepth = self.bitDepth.get_active_text()
                     if(bitDepth == "8-bit"):
                         cv2.imwrite(fileName, cv2.cvtColor(np.around(self.sharpen.finalImage).astype('uint8'), cv2.COLOR_RGB2BGR))

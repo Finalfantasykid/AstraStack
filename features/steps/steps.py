@@ -85,6 +85,7 @@ def chooseFile(context, file, dialog):
     window = g.ui.builder.get_object(dialog)
     while(not window.is_visible()):
         delay(0.01)
+    delay() # Sometimes it crashes if going to the next step too quickly, so delay a bit
     def update1():
         window.select_filename(os.getcwd() + "/features/testFiles/" + file)
     def update2():
