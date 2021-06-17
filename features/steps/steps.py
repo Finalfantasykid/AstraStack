@@ -42,9 +42,9 @@ def widgetValidation(id):
         # Give it a chance to become valid before asserting
         delay(0.05)
         i += 1
-    assert widget != None, "The widget " + button + " does not exist"
-    assert widget.is_visible(), "The button " + button + " is not visible"
-    assert widget.is_sensitive(), "The button " + button + " is not sensitive"
+    assert widget != None, "The widget " + id + " does not exist"
+    assert widget.is_visible(), "The widget " + id + " is not visible"
+    assert widget.is_sensitive(), "The widget " + id + " is not sensitive"
     
 @given(u'I wait "{ms}"')
 def wait(context, ms):
