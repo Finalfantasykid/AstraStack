@@ -166,6 +166,16 @@ def setPoint(context, var, point):
     idle_add_delay(update1)
     idle_add_delay(update2)
     
+@then(u'"{var}" should equal "{val}"')
+def compareImages(context, var, val):
+    if(hasattr(g, var)):
+        assert str(getattr(g, var)) == str(val)
+    elif(isinstance(g.ui.builder.get_object(var), Gtk.Adjustment)):
+        print(g.ui.builder.get_object(var).get_value(), "\n\r")
+        assert str(g.ui.builder.get_object(var).get_value()) == str(val)
+    elif(isinstance(g.ui.builder.get_object(var), Gtk.Label)):
+        assert str(g.ui.builder.get_object(var).get_text()) == str(val)
+    
 @then(u'"{file1}" and "{file2}" should be equal')
 def compareImages(context, file1, file2):
     img1 = cv2.imread("features/testFiles/" + file1, cv2.IMREAD_UNCHANGED)
