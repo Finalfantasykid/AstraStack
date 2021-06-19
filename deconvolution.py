@@ -29,6 +29,7 @@ def deconvolve(img, params):
             params['customDiameter'])
     if(params['gaussianDiameter'] > 1):
         d = max(d, 10)
+    d = max(d, 1) # Make sure 'd' is always at least 1
     rows, cols = img.shape
     # Resize so that the dimensions are a multiple of the diameter
     rowMod = d - ((rows+d*2) % d)
