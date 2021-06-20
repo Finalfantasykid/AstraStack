@@ -42,9 +42,9 @@ def widgetValidation(id):
         # Give it a chance to become valid before asserting
         delay(0.05)
         i += 1
-    assert widget != None, "The widget " + id + " does not exist"
-    assert widget.is_visible(), "The widget " + id + " is not visible"
-    assert widget.is_sensitive(), "The widget " + id + " is not sensitive"
+    assert widget != None, f"The widget '{id}' does not exist"
+    assert widget.is_visible(), f"The widget '{id}' is not visible"
+    assert widget.is_sensitive(), f"The widget '{id}' is not sensitive"
     
 @given(u'I wait "{ms}"')
 def wait(context, ms):
@@ -136,7 +136,7 @@ def setCombo(context, value, combo):
         i += 1
         if iter is None:
             break
-    assert id is not None, "Item '" + value + "' not found"
+    assert id is not None, f"Item '{value}' not found"
     def update():
         g.ui.builder.get_object(combo).set_active(id)
     idle_add_delay(update)
@@ -146,7 +146,7 @@ def setPoint(context, var, point):
     point = point.split(",")
     point = [int(x) for x in point]
     assert (var == "driftP1" or var == "driftP2" or
-            var == "areaOfInterestP1" or var == "areaOfInterestP2"), var + " is not a valid variable"
+            var == "areaOfInterestP1" or var == "areaOfInterestP2"), f"'{var}' is not a valid variable"
     def update1():
         if(var == "driftP1"):
             g.ui.clickDriftP1()
@@ -167,17 +167,18 @@ def setPoint(context, var, point):
     idle_add_delay(update2)
     
 @then(u'"{var}" should equal "{val}"')
-def compareImages(context, var, val):
+def shouldEqual(context, var, val):
     if(hasattr(g, var)):
-        assert str(getattr(g, var)) == str(val)
+        assert str(getattr(g, var)) == str(val), f"'{var}' does not equal '{val}'"
     elif(isinstance(g.ui.builder.get_object(var), Gtk.Adjustment)):
-        print(g.ui.builder.get_object(var).get_value(), "\n\r")
-        assert str(g.ui.builder.get_object(var).get_value()) == str(val)
+        assert str(g.ui.builder.get_object(var).get_value()) == str(val), f"'{var}' does not equal '{val}'"
     elif(isinstance(g.ui.builder.get_object(var), Gtk.Label)):
-        assert str(g.ui.builder.get_object(var).get_text()) == str(val)
+        assert str(g.ui.builder.get_object(var).get_text()) == str(val), f"'{var}' does not equal '{val}'"
+    else:
+        assert False, f"'{var}' does not exist"
     
 @then(u'"{file1}" and "{file2}" should be equal')
 def compareImages(context, file1, file2):
     img1 = cv2.imread("features/testFiles/" + file1, cv2.IMREAD_UNCHANGED)
     img2 = cv2.imread("features/testFiles/" + file2, cv2.IMREAD_UNCHANGED)
-    assert np.array_equal(img1, img2), "'" + file1 + "' and '" + file2 + "' are not equal"
+    assert np.array_equal(img1, img2), f"'{file1}' and '{file2}' are not equal"
