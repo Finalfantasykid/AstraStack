@@ -1,0 +1,118 @@
+body {
+    font-family: 'DIN-Regular', 'Helvetica', 'Arial', 'Verdana', sans-serif;
+    margin: 0;
+    background: #F8F8F8;
+}
+
+h1, h2, h3, h4, h5, h6, h7 {
+    font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
+}
+
+div#header_container {
+    height: 200px;
+    background: #00002f url('../images/header.png');
+    background-size: auto 200px;
+    width: auto;
+    color: #FFFFFF;
+}
+
+div#header_container h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+div#header_container h2 {
+    margin-bottom: 0;
+    font-weight: normal;
+    font-size: 1.25em;
+}
+
+div#header {
+    position: relative;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div#logo {
+    height: 200px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+div#logo img {
+    height: 200px;
+}
+
+div#title {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 1em;
+    text-shadow: 5px 5px 10px black;
+}
+
+a#github {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: url("../images/blacktocat.png") #0055aa no-repeat 95% 50%;
+    padding: 10px 50px 10px 10px;
+    color: white;
+    font-weight: bold;
+    font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
+    box-shadow: 0 0 20px #000000;
+    text-decoration: none;
+}
+
+a#github:hover {
+    text-decoration: underline;
+}
+
+div#nav_container {
+    height: 50px;
+    width: 100%;
+    color: #333333;
+    border-bottom: 1px solid #E8E8E8;
+    position: sticky;
+    top: 0;
+    background: #F8F8F8;
+}
+
+div#nav {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 50px;
+}
+
+a.navlink {
+    padding: 0 10px 0 10px;
+    font-weight: bold;
+    font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
+    color: #333333;
+    text-decoration: none;
+}
+
+a.navlink:first-child {
+    padding-left: 0;
+}
+
+a.navlink:last-child {
+    padding-right: 0;
+}
+
+div#body {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #333333;
+}
+
+a {
+    color: #0055aa;
+}
+
+a:hover {
+    color: #0055aa;
+}
