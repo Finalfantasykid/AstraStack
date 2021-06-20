@@ -63,7 +63,7 @@ Feature: Video
         And I choose file "tmp/jupiter3.png" from "saveDialog"
         Then "tmp/jupiter3.png" and "reference/jupiter3.png" should be equal
         
-    Scenario: Upscaling
+    Scenario: 2X Upscaling
         Given I am on tab "Load"
         And I async press "openVideo"
         And I choose file "Jupiter.mp4" from "openDialog"
@@ -79,7 +79,24 @@ Feature: Video
         And I choose file "tmp/Jupiter2X.png" from "saveDialog"
         Then "tmp/Jupiter2X.png" and "reference/Jupiter2X.png" should be equal
         
-    Scenario: Downscaling
+    Scenario: 2X Upscaling (test with 1 cpu for rounding bug)
+        Given I am on tab "Load"
+        And I set "cpus" to "1"
+        And I async press "openVideo"
+        And I choose file "Jupiter.mp4" from "openDialog"
+        And I wait until active tab is "Align"
+        And I select "Affine" from "transformation"
+        And I press "alignButton"
+        And I wait until active tab is "Stack"
+        And I select "2.0X" from "drizzleFactor"
+        And I select "Lanczos" from "drizzleInterpolation"
+        And I press "stackButton"
+        And I wait until active tab is "Process"
+        And I async press "saveButton"
+        And I choose file "tmp/Jupiter2X_1cpu.png" from "saveDialog"
+        Then "tmp/Jupiter2X_1cpu.png" and "reference/Jupiter2X.png" should be equal
+        
+    Scenario: 0.50X Downscaling
         Given I am on tab "Load"
         And I async press "openVideo"
         And I choose file "Jupiter.mp4" from "openDialog"

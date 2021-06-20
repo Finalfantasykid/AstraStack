@@ -173,6 +173,7 @@ def shouldEqual(context, var, val):
     elif(isinstance(g.ui.builder.get_object(var), Gtk.Adjustment)):
         assert str(g.ui.builder.get_object(var).get_value()) == str(val), f"'{var}' does not equal '{val}'"
     elif(isinstance(g.ui.builder.get_object(var), Gtk.Label)):
+        widgetValidation(var)
         assert str(g.ui.builder.get_object(var).get_text()) == str(val), f"'{var}' does not equal '{val}'"
     else:
         assert False, f"'{var}' does not exist"

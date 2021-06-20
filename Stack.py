@@ -76,6 +76,7 @@ class Stack:
         # Make sure there wasn't any overshoot from the transformations
         self.stackedImage[self.stackedImage>255] = 255
         self.stackedImage[self.stackedImage<0] = 0
+        self.stackedImage = self.stackedImage.astype(np.float32)
         
         if(g.alignChannels):
             g.ui.childConn.send("Aligning RGB")
@@ -109,10 +110,10 @@ def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizz
     video = Video()
     stackedImage = None
     for frame, M, diff in frames:
-        image = video.getFrame(file, frame).astype(np.float32)
+        image = video.getFrame(file, frame)
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY,
-                          drizzleFactor, drizzleInterpolation)
+                          drizzleFactor, drizzleInterpolation).astype(np.float64)
         if stackedImage is None:
             stackedImage = image
         else:
