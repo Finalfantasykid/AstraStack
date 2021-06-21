@@ -40,9 +40,12 @@ div#logo {
     vertical-align: middle;
 }
 
-div#logo img {
+div#logo a {
+    display: block;
     height: 200px;
     width: 200px;
+    background: url('../images/logo.png');
+    background-size: 100% 100%;
 }
 
 div#title {
