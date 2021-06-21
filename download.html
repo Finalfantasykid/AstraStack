@@ -1,6 +1,6 @@
 <script type="text/javascript">
     $.get("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest", function(response){
-        $("span.downloadVersion").html(response.name + " (" + new Date(response.published_at).toLocaleDateString() + ")");
+        $("span.downloadVersion").html(response.name + " (" + new Date(response.published_at).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) + ")");
         $("p.downloadReleaseNotes").html(response.body.replaceAll("\r\n", "<br />"));
         $("span.source").html("<a href='" + response.tarball_url + "'>AstraStack.tar.gz</a><br /><a href='" + response.zipball_url + "'>AstraStack.zip</a>");
         response.assets.forEach(function(asset){
@@ -45,3 +45,5 @@
         <span class="downloadInfo source"></span>
     </div>
 </div>
+<hr />
+<a href="https://github.com/Finalfantasykid/AstraStack/releases">View older releases</a>
