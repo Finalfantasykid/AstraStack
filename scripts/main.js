@@ -12,7 +12,7 @@ function resizeBody(){
     var minHeight = $(window).height() - ($("#footer_container").outerHeight(true) + 
                                           $("#nav_container").outerHeight(true) +
                                           $("#header_container").outerHeight(true));
-    $("#body_container").css("min-height", minHeight-16);
+    $("#body_container").css("min-height", minHeight-parseInt($("#footer_container").css('margin-top')));
 }
 
 $(document).ready(function(){
