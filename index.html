@@ -3,6 +3,10 @@
     <head>
         <meta charset="utf-8">
         <title>Index - AstraStack</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+                crossorigin="anonymous"></script>
+        <script src="scripts/main.js"></script>
         <link rel="stylesheet" href="style/font.css" />
         <link rel="stylesheet" href="style/style.css" />
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
@@ -11,7 +15,7 @@
         <div id="header_container">
             <div id="header">
                 <div id="logo">
-                    <a href="index.html"></a>
+                    <a href="./"></a>
                 </div>
                 <div id="title">
                     <h1>AstraStack</h1>
@@ -22,19 +26,14 @@
         </div>
         <div id="nav_container">
             <div id="nav">
-                <a class="navlink" href="index.html">Home</a>
-                <a class="navlink" href="#">About</a>
-                <a class="navlink" href="#">Guides/Tutorials</a>
-                <a class="navlink" href="#">Download</a>
+                <a class="navlink" data-page="home" href="./">Home</a>
+                <a class="navlink" data-page="about" href="?page=about">About</a>
+                <a class="navlink" data-page="guides" href="?page=guides">Guides/Tutorials</a>
+                <a class="navlink" data-page="download" href="?page=download">Download</a>
             </div>
         </div>
         <div id="body">
-            <h1>Lorem Ipsum</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis porttitor, libero eu volutpat facilisis, ipsum purus suscipit mauris, eget tristique ex ex in nunc. Mauris gravida, dui ac consectetur dignissim, libero lectus consectetur lectus, sed varius nisl eros id ante. Etiam aliquet odio et porta aliquet. Vivamus convallis tincidunt lorem quis condimentum. Cras egestas gravida mollis. Aenean in nisi aliquet, aliquam turpis eget, vulputate sem. Vestibulum ornare mollis ornare. Morbi gravida erat eu velit suscipit volutpat. Curabitur volutpat nibh non hendrerit mattis. Aenean id neque fermentum, dictum enim sit amet, scelerisque felis. Ut laoreet tortor nunc, sit amet mollis orci volutpat vitae. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus rhoncus, lorem in egestas porttitor, augue leo tempor eros, et viverra nisi massa sit amet tellus.</p>
-
-            <p>Mauris sodales et nunc in varius. Mauris quis volutpat ligula. Proin faucibus varius faucibus. Ut id diam auctor, suscipit metus non, cursus neque. Donec ac sem nec odio elementum cursus sit amet eu diam. Nam vel mi mauris. Sed nunc nisl, pretium tempor nulla vitae, congue maximus nisi.</p>
-
-            <p>Sed ac bibendum mi. Duis sagittis, sem sed cursus tempor, lectus justo blandit ex, a ultricies elit ligula et metus. Suspendisse hendrerit felis sem, quis aliquet tellus ornare vulputate. Donec nec vestibulum nulla. Praesent ex risus, bibendum a libero vitae, feugiat tristique augue. Duis in facilisis mauris, ut fringilla arcu. Praesent vulputate porta quam ac blandit. Maecenas commodo risus cursus quam vehicula, a convallis eros aliquet. Morbi eleifend diam in augue rutrum, in dignissim dolor volutpat. Praesent laoreet magna vel neque blandit, sed fermentum justo ornare. Maecenas vitae mollis purus. Aenean ullamcorper aliquet metus ut blandit.</p>
+            
         </div>
     </body>
 </html>

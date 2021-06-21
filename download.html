@@ -1,0 +1,47 @@
+<script type="text/javascript">
+    $.get("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest", function(response){
+        $("span.downloadVersion").html(response.name + " (" + new Date(response.published_at).toLocaleDateString() + ")");
+        $("p.downloadReleaseNotes").html(response.body.replaceAll("\r\n", "<br />"));
+        $("span.source").html("<a href='" + response.tarball_url + "'>AstraStack.tar.gz</a><br /><a href='" + response.zipball_url + "'>AstraStack.zip</a>");
+        response.assets.forEach(function(asset){
+            var url = asset.browser_download_url;
+            var filename = asset.name;
+            var filesize = (asset.size/1024/1024).toFixed(2);
+            var os = "linux";
+            if(url.indexOf(".tar.bz2") != -1){
+                os = "linux";
+            }
+            else if(url.indexOf(".exe") != -1){
+                os = "windows";
+            }
+            $("span." + os).html("<a href='" + url + "'>" + filename + "</a> (" + filesize + " MB)");
+        });
+    });
+</script>
+<h1>Download</h1>
+<h2>Version <span class="downloadVersion"></span></h2>
+<p class="downloadReleaseNotes"></p>
+<hr />
+<div>
+    <img class="downloadIcon" src="images/linux.png" />
+    <div class="downloadCell">
+        <b style="font-size: 1.25em;">Linux</b><br />
+        <span class="downloadInfo linux"></span>
+    </div>
+</div>
+<hr />
+<div>
+    <img class="downloadIcon" src="images/windows.png" />
+    <div class="downloadCell">
+        <b style="font-size: 1.25em;">Windows</b><br />
+        <span class="downloadInfo windows"></span>
+    </div>
+</div>
+<hr />
+<div>
+    <img class="downloadIcon" src="images/source.png" />
+    <div class="downloadCell">
+        <b style="font-size: 1.25em;">Source</b><br />
+        <span class="downloadInfo source"></span>
+    </div>
+</div>
