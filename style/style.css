@@ -1,3 +1,8 @@
+@viewport {
+  width: device-width ;
+  zoom: 1.0 ;
+}
+
 html {
     height: 100%;
 }
@@ -44,7 +49,6 @@ div#header {
 }
 
 div#logo {
-    height: 200px;
     display: inline-block;
     vertical-align: middle;
 }
@@ -130,7 +134,6 @@ div#body_container {
     margin-left: auto;
     margin-right: auto;
     color: #333333;
-    width: 100%;
 }
 
 div#footer_container {
@@ -177,4 +180,33 @@ div.downloadCell {
 
 b {
     font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
+}
+
+@media only screen and (max-width: 767px) {
+
+    div#header_container {
+        height: 100px;
+    }
+
+    div#logo a {
+        height: 100px;
+        width: 100px;
+    }
+    
+    div#header_container h1 {
+        margin: 0;
+        font-size: 2em;
+    }
+
+    div#header_container h2 {
+        display: none;
+    }
+    
+    a#github {
+        display: none;
+    }
+    
+    a.navlink {
+        padding: 0 5px 0 5px;
+    }
 }
