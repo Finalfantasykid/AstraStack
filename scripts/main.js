@@ -12,5 +12,8 @@ $(document).ready(function(){
     $("a[data-page=" + $_GET.page + "]").addClass("selected");
     $.get($_GET.page + ".html", function(response){
         $("#body").html(response);
+        if($_GET.page != "home"){
+            $("title").text($("div#body h1").text() + " - AstraStack");
+        }
     });
 });

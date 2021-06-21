@@ -1,12 +1,18 @@
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'DIN-Regular', 'Helvetica', 'Arial', 'Verdana', sans-serif;
     margin: 0;
     background: #F8F8F8;
+    overflow-x: hidden;
+    height: 100%;
 }
 
 h1, h2, h3, h4, h5, h6, h7 {
     font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
-    margin: 0.5em 0 0.5em 0;
+    margin: 0.5em 0 0.25em 0;
 }
 
 div#header_container {
@@ -31,8 +37,10 @@ div#header_container h2 {
 div#header {
     position: relative;
     max-width: 960px;
+    padding: 0 20px 0 20px;
     margin-left: auto;
     margin-right: auto;
+    white-space: nowrap;
 }
 
 div#logo {
@@ -86,6 +94,7 @@ div#nav_container {
 
 div#nav {
     max-width: 960px;
+    padding: 0 20px 0 20px;
     margin-left: auto;
     margin-right: auto;
     line-height: 50px;
@@ -97,6 +106,10 @@ a.navlink {
     font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
     color: #333333;
     text-decoration: none;
+}
+
+a.navlink:hover {
+    color: #0055aa;
 }
 
 a.navlink.selected {
@@ -111,11 +124,30 @@ a.navlink:last-child {
     padding-right: 0;
 }
 
-div#body {
+div#body_container {
     max-width: 960px;
+    padding: 0 20px 0 20px;
     margin-left: auto;
     margin-right: auto;
     color: #333333;
+    width: 100%;
+}
+
+div#footer_container {
+    height: 50px;
+    width: 100%;
+    color: #333333;
+    border-top: 1px solid #E8E8E8;
+    position: absolute;
+    bottom: 0;
+}
+
+div#footer {
+    max-width: 960px;
+    padding: 0 20px 0 20px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 50px;
 }
 
 a {
