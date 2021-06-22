@@ -286,7 +286,7 @@ class UI:
                 contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
                 obj = json.loads(contents)
                 if(version.parse(obj['name']) > version.parse(UI.VERSION)):
-                    self.newVersionUrl = obj['html_url']
+                    self.newVersionUrl = "https://astrastack.ca/?page=download"
                     button.show()
             except:
                 return

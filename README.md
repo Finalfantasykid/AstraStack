@@ -1,5 +1,6 @@
 # AstraStack
-Astronomy Stacking application - [Manual](https://github.com/Finalfantasykid/AstraStack/blob/master/manual/Manual.pdf)
+Astronomy Stacking application - [Manual](https://github.com/Finalfantasykid/AstraStack/blob/master/manual/Manual.pdf) - [Website](https://astrastack.ca/)
+
 
 # Development Installation
 To install you should first set up a virtual environment

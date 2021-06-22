@@ -8,7 +8,7 @@
     <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">AstraStack</property>
-    <property name="website">https://github.com/Finalfantasykid/AstraStack</property>
+    <property name="website">https://astrastack.ca/</property>
     <property name="authors">David Turner</property>
     <property name="logo">logo_small.png</property>
     <property name="license_type">lgpl-3-0</property>
