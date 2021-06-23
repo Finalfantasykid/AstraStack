@@ -100,7 +100,6 @@ div#nav {
     padding: 0 20px 0 20px;
     margin-left: auto;
     margin-right: auto;
-    line-height: 50px;
 }
 
 a.navlink {
@@ -109,6 +108,8 @@ a.navlink {
     font-family: 'DINPro Medium', 'Helvetica', 'Arial', 'Verdana', sans-serif;
     color: #333333;
     text-decoration: none;
+    display: inline-block;
+    line-height: 50px;
 }
 
 a.navlink:hover {
@@ -141,6 +142,8 @@ div#footer_container {
     margin-top: 1em;
     border-top: 1px solid #E8E8E8;
     background: #f8f8f8;
+    position: absolute;
+    bottom: 0;
 }
 
 div#footer {

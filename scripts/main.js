@@ -4,7 +4,6 @@ document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
     function decode(s) {
         return decodeURIComponent(s.split("+").join(" "));
     }
-
     $_GET[decode(arguments[1])] = decode(arguments[2]);
 });
 
@@ -12,7 +11,8 @@ function resizeBody(){
     var minHeight = $(window).height() - ($("#footer_container").outerHeight(true) + 
                                           $("#nav_container").outerHeight(true) +
                                           $("#header_container").outerHeight(true));
-    $("#body_container").css("min-height", minHeight-parseInt($("#footer_container").css('margin-top')));
+    $("#body_container").css("min-height", minHeight - parseInt($("#footer_container").css('margin-top')));
+    $("#footer_container").css("position", "static");
 }
 
 $(document).ready(function(){
