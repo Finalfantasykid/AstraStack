@@ -283,11 +283,12 @@ class UI:
     def checkNewVersion(self):
         def callUrl():
             try:
-                contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
-                obj = json.loads(contents)
-                if(version.parse(obj['name']) > version.parse(UI.VERSION)):
-                    self.newVersionUrl = "https://astrastack.ca/?page=download"
-                    button.show()
+                if(not g.TESTING):
+                    contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
+                    obj = json.loads(contents)
+                    if(version.parse(obj['name']) > version.parse(UI.VERSION)):
+                        self.newVersionUrl = "https://astrastack.ca/?page=download"
+                        button.show()
             except:
                 return
         button = self.builder.get_object("newVersion")

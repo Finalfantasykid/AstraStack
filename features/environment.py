@@ -24,6 +24,7 @@ def before_all(context):
         pass
     
 def before_scenario(context, scenario):
+    g.TESTING = True
     g.ui = UI()
     g.ui.builder.get_object("wavelets").set_expanded(True)
     g.ui.builder.get_object("deblur").set_expanded(True)
