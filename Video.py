@@ -141,8 +141,8 @@ def loadFramesVideo(file, start, count, conn):
     sharps = []
     for i in range(0, count):
         success,image = vidcap.read()
-        conn.send("Loading Frames")
         if(success):
+            conn.send("Loading Frames")
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
             sharps.append(calculateSharpness(image))
