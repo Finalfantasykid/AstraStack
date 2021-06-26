@@ -698,7 +698,9 @@ class UI:
                 self.progressBox.show()
                 self.progress.set_fraction(i/total)
                 self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
-        GLib.idle_add(update)
+        if(total == 0 or i == 0 or i == total or round((i/max(1, total))*300) != round(((i-1)/max(1, total))*300)):
+            # Only update UI if the change in percent is worth it
+            GLib.idle_add(update)
         
     # Sets the start frame for trimming
     def setStartFrame(self, *args):
