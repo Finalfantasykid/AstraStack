@@ -20,7 +20,7 @@ class Stack:
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
         video = Video()
-        height, width = video.getFrame(g.file, 0).shape[:2]
+        height, width = video.getFrame(g.file, 0, g.colorMode).shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    
@@ -58,7 +58,8 @@ class Stack:
                     ref = None
                 futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
                                              g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
-                                             g.drizzleFactor, g.drizzleInterpolation, g.ui.childConn))
+                                             g.drizzleFactor, g.drizzleInterpolation,
+                                             g.colorMode, g.ui.childConn))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
@@ -89,7 +90,7 @@ class Stack:
     def generateRefBG(self):
         video = Video()
         (frame, M, diff) = self.tmats[0]
-        ref = video.getFrame(g.file, frame).astype(np.float32)
+        ref = video.getFrame(g.file, frame, g.colorMode).astype(np.float32)
         self.refBG = transform(ref, None, np.identity(3),
                                0, 0, 0, 0,
                                g.drizzleFactor, g.drizzleInterpolation)
@@ -106,11 +107,11 @@ class Stack:
             g.ui.childConn.send("Aligning RGB")
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, conn):
+def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, conn):
     video = Video()
     stackedImage = None
     for frame, M, diff in frames:
-        image = video.getFrame(file, frame)
+        image = video.getFrame(file, frame, colorMode)
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY,
                           drizzleFactor, drizzleInterpolation).astype(np.float64)

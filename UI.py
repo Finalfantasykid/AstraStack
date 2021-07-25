@@ -63,6 +63,7 @@ class UI:
         self.openDialog = self.builder.get_object("openDialog")
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
+        self.colorMode = self.builder.get_object("colorMode")
         self.progressBox = self.builder.get_object("progressBox")
         self.progress = self.builder.get_object("progress")
         self.processSpinner = self.builder.get_object("processSpinner")
@@ -136,6 +137,7 @@ class UI:
         self.window.show_all()
         self.checkNewVersion()
         self.setProgress()
+        self.setColorMode()
         self.setNormalize()
         self.setAlignChannels()
         self.setTransformation()
@@ -319,7 +321,7 @@ class UI:
                 # Now try as video
                 if("video/" in mimetypes.guess_type(path)[0]):
                     video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0), cv2.COLOR_BGR2RGB)
+                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB)
                     height, width = img.shape[:2]
                     
                     z = img.tobytes()
@@ -527,7 +529,7 @@ class UI:
             page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             videoIndex = int(self.frameSlider.get_value())
-            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex]), cv2.COLOR_BGR2RGB).astype(np.uint8)
+            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.colorMode), cv2.COLOR_BGR2RGB).astype(np.uint8)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -539,7 +541,7 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex).astype(np.uint8)
+            img = self.video.getFrame(g.file, videoIndex, g.colorMode).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:
@@ -828,6 +830,23 @@ class UI:
     # Sets whether or not to align channels separately
     def setAlignChannels(self, *args):
         g.alignChannels = self.alignChannels.get_active()
+    
+    # Sets the color mode of the input
+    def setColorMode(self, *args):
+        text = self.colorMode.get_active_text()
+        if(text == "RGB"):
+            g.colorMode = Video.COLOR_RGB
+        elif(text == "Grayscale"):
+            g.colorMode = Video.COLOR_GRAYSCALE
+        elif(text == "Bayer RGGB"):
+            g.colorMode = Video.COLOR_RGGB
+        elif(text == "Bayer GRBG"):
+            g.colorMode = Video.COLOR_GRBG
+        elif(text == "Bayer GBRG"):
+            g.colorMode = Video.COLOR_GBRG
+        elif(text == "Bayer BGGR"):
+            g.colorMode = Video.COLOR_BGGR
+        self.updateImage()
     
     # Sets the type of transformation
     def setTransformation(self, *args):

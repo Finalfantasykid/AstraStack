@@ -18,7 +18,7 @@ class Align:
         self.maxX = 0
         self.maxY = 0
         video = Video()
-        self.height, self.width = video.getFrame(g.file, 0).shape[:2]
+        self.height, self.width = video.getFrame(g.file, 0, g.colorMode).shape[:2]
         
     def run(self):
         def progress(msg):
@@ -75,7 +75,7 @@ class Align:
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
-                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.ui.childConn))
+                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.colorMode, g.ui.childConn))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()
@@ -134,14 +134,14 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, conn):
+def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, conn):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
     video = Video()
     
     # Load Reference
-    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference), cv2.COLOR_BGR2GRAY)
+    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference, colorMode), cv2.COLOR_BGR2GRAY)
     h1, w1 = ref.shape[:2]
     
     # Drift
@@ -169,7 +169,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
     for frame in frames:
         try:
             # Load Frame
-            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame), cv2.COLOR_BGR2GRAY)
+            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame, colorMode), cv2.COLOR_BGR2GRAY)
 
             # Drift
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   

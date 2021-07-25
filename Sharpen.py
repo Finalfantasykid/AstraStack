@@ -25,7 +25,7 @@ class Sharpen:
         if(isFile):
             # Single image provided
             video = Video()
-            stackedImage = video.getFrame(None, stackedImage)
+            stackedImage = video.getFrame(None, stackedImage, g.colorMode)
         else:
             # Use the higher bit depth version from the stacking process
             pass

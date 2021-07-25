@@ -2609,6 +2609,20 @@ Note: Drift adjustment will still crop the image.</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkLabel">
+                        <property name="width_request">50</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">10</property>
+                        <property name="label" translatable="yes">Color:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -2661,6 +2675,27 @@ Note: Drift adjustment will still crop the image.</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
                         <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="colorMode">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="0" translatable="yes">RGB</item>
+                          <item id="1" translatable="yes">Grayscale</item>
+                          <item id="2" translatable="yes">Bayer RGGB</item>
+                          <item id="3" translatable="yes">Bayer GRBG</item>
+                          <item id="4" translatable="yes">Bayer GBRG</item>
+                          <item id="5" translatable="yes">Bayer BGGR</item>
+                        </items>
+                        <signal name="changed" handler="setColorMode" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
