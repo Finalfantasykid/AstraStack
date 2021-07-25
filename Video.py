@@ -124,23 +124,24 @@ class Video:
       
     # Changes the color mode of the image
     def colorMode(image, colorMode):
+        h, w = image.shape[:2]
         if(colorMode == Video.COLOR_RGB):
             pass
         elif(colorMode == Video.COLOR_GRAYSCALE):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-        elif(colorMode == Video.COLOR_RGGB):
+        else:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_EA)
-        elif(colorMode == Video.COLOR_GRBG):
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_EA)
-        elif(colorMode == Video.COLOR_GBRG):
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_EA)
-        elif(colorMode == Video.COLOR_BGGR):
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_EA)
+            image = cv2.copyMakeBorder(image, 2, 0, 0, 0, cv2.BORDER_CONSTANT)
+            if(colorMode == Video.COLOR_RGGB):
+                image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_VNG)
+            elif(colorMode == Video.COLOR_GRBG):
+                image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_VNG)
+            elif(colorMode == Video.COLOR_GBRG):
+                image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_VNG)
+            elif(colorMode == Video.COLOR_BGGR):
+                image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_VNG)
+            image = image[0:h,0:w]
         return image
        
 # Returns a number based on how sharp the image is (higher = sharper)
