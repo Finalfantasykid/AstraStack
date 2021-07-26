@@ -100,7 +100,7 @@ class Video:
         g.ui.finishedVideo()
         g.ui.childConn.send("stop")
         
-    def getFrame(self, file, frame, colorMode):
+    def getFrame(self, file, frame, colorMode, fast=False):
         if(isinstance(frame, str)):
             # Specific file
             image = cv2.imread(frame, cv2.IMREAD_UNCHANGED)
@@ -119,11 +119,11 @@ class Video:
                 self.vidcap.set(cv2.CAP_PROP_POS_MSEC, frame)
             success,image = self.vidcap.read()
 
-        image = Video.colorMode(image, colorMode)
+        image = Video.colorMode(image, colorMode, fast)
         return image
       
     # Changes the color mode of the image
-    def colorMode(image, colorMode):
+    def colorMode(image, colorMode, fast=False):
         h, w = image.shape[:2]
         if(colorMode == Video.COLOR_RGB):
             pass
@@ -132,16 +132,26 @@ class Video:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         else:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.copyMakeBorder(image, 2, 0, 0, 0, cv2.BORDER_CONSTANT)
-            if(colorMode == Video.COLOR_RGGB):
-                image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_VNG)
-            elif(colorMode == Video.COLOR_GRBG):
-                image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_VNG)
-            elif(colorMode == Video.COLOR_GBRG):
-                image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_VNG)
-            elif(colorMode == Video.COLOR_BGGR):
-                image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_VNG)
-            image = image[0:h,0:w]
+            if(not fast):
+                image = cv2.copyMakeBorder(image, 2, 0, 0, 0, cv2.BORDER_CONSTANT)
+                if(colorMode == Video.COLOR_RGGB):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_VNG)
+                elif(colorMode == Video.COLOR_GRBG):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_VNG)
+                elif(colorMode == Video.COLOR_GBRG):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_VNG)
+                elif(colorMode == Video.COLOR_BGGR):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_VNG)
+                image = image[0:h,0:w]
+            else:
+                if(colorMode == Video.COLOR_RGGB):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_EA)
+                elif(colorMode == Video.COLOR_GRBG):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_EA)
+                elif(colorMode == Video.COLOR_GBRG):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_EA)
+                elif(colorMode == Video.COLOR_BGGR):
+                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_EA)
         return image
        
 # Returns a number based on how sharp the image is (higher = sharper)
@@ -161,7 +171,7 @@ def loadFramesSequence(files, width, height, colorMode, conn):
             # Only add if dimensions match
             frames.append(file)
             # Calculate sharpness
-            image = Video.colorMode(image, colorMode)
+            image = Video.colorMode(image, colorMode, fast=True)
             sharps.append(calculateSharpness(image))
     return (frames, sharps)
         
@@ -177,7 +187,7 @@ def loadFramesVideo(file, start, count, colorMode, conn):
             conn.send("Loading Frames")
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
-            image = Video.colorMode(image, colorMode)
+            image = Video.colorMode(image, colorMode, fast=True)
             sharps.append(calculateSharpness(image))
     vidcap.release()
     return (frames, sharps)

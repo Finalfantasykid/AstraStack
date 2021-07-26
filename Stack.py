@@ -20,7 +20,7 @@ class Stack:
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
         video = Video()
-        height, width = video.getFrame(g.file, 0, g.colorMode).shape[:2]
+        height, width = video.getFrame(g.file, 0, g.colorMode, fast=True).shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    

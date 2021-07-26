@@ -18,7 +18,7 @@ class Align:
         self.maxX = 0
         self.maxY = 0
         video = Video()
-        self.height, self.width = video.getFrame(g.file, 0, g.colorMode).shape[:2]
+        self.height, self.width = video.getFrame(g.file, 0, g.colorMode, fast=True).shape[:2]
         
     def run(self):
         def progress(msg):
@@ -141,7 +141,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
     video = Video()
     
     # Load Reference
-    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference, colorMode), cv2.COLOR_BGR2GRAY)
+    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference, colorMode, fast=True), cv2.COLOR_BGR2GRAY)
     h1, w1 = ref.shape[:2]
     
     # Drift
@@ -169,7 +169,7 @@ def align(frames, file, reference, referenceIndex, transformation, normalize, to
     for frame in frames:
         try:
             # Load Frame
-            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame, colorMode), cv2.COLOR_BGR2GRAY)
+            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame, colorMode, fast=True), cv2.COLOR_BGR2GRAY)
 
             # Drift
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   

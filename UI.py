@@ -321,7 +321,7 @@ class UI:
                 # Now try as video
                 if("video/" in mimetypes.guess_type(path)[0]):
                     video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB)
+                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, fast=True), cv2.COLOR_BGR2RGB)
                     height, width = img.shape[:2]
                     
                     z = img.tobytes()
@@ -503,6 +503,7 @@ class UI:
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
+        self.colorMode.set_sensitive(True)
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             self.frameSlider.set_value(0)
             self.frameSlider.set_upper(len(self.video.frames)-1)
@@ -518,6 +519,7 @@ class UI:
             self.updateImage(None, page_num)
         elif(page_num == UI.SHARPEN_TAB):
             self.frameScale.hide()
+            self.colorMode.set_sensitive(False)
             self.sharpenImage()
         self.fixFrameSliderBug()
     
@@ -529,7 +531,7 @@ class UI:
             page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             videoIndex = int(self.frameSlider.get_value())
-            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.colorMode), cv2.COLOR_BGR2RGB).astype(np.uint8)
+            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -541,7 +543,7 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex, g.colorMode).astype(np.uint8)
+            img = self.video.getFrame(g.file, videoIndex, g.colorMode, fast=True).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:
