@@ -20,7 +20,7 @@ class Stack:
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
         video = Video()
-        height, width = video.getFrame(g.file, 0, g.colorMode, fast=True).shape[:2]
+        height, width = video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode), fast=True).shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    
@@ -59,7 +59,7 @@ class Stack:
                 futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
                                              g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
                                              g.drizzleFactor, g.drizzleInterpolation,
-                                             g.colorMode, g.ui.childConn))
+                                             (g.colorMode or g.guessedColorMode), g.ui.childConn))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
@@ -90,7 +90,7 @@ class Stack:
     def generateRefBG(self):
         video = Video()
         (frame, M, diff) = self.tmats[0]
-        ref = video.getFrame(g.file, frame, g.colorMode).astype(np.float32)
+        ref = video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode)).astype(np.float32)
         self.refBG = transform(ref, None, np.identity(3),
                                0, 0, 0, 0,
                                g.drizzleFactor, g.drizzleInterpolation)

@@ -8,12 +8,13 @@ from Globals import g
 
 class Video:
 
-    COLOR_RGB = 0
-    COLOR_GRAYSCALE = 1
-    COLOR_RGGB = 2
-    COLOR_GRBG = 3
-    COLOR_GBRG = 4
-    COLOR_BGGR = 5
+    COLOR_AUTO = 0
+    COLOR_RGB = 1
+    COLOR_GRAYSCALE = 2
+    COLOR_RGGB = 3
+    COLOR_GRBG = 4
+    COLOR_GBRG = 5
+    COLOR_BGGR = 6
 
     def __init__(self):
         self.count = 0
@@ -50,13 +51,16 @@ class Video:
         try:
             if(isinstance(g.file, list)):
                 # Image Sequence
-                self.total = len(g.file)
+                self.total = len(g.file) + 1
                 countPerThread = math.ceil(self.total/g.nThreads)
                 g.file = natsorted(g.file, alg=ns.IGNORECASE)
-                height, width = cv2.imread(g.file[0]).shape[:2]
                 
+                g.ui.childConn.send("Guessing Color Mode")
+                g.guessedColorMode = self.guessColorMode(g.file)
+                
+                height, width = cv2.imread(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.colorMode, g.ui.childConn))
+                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, (g.colorMode or g.guessedColorMode), g.ui.childConn))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
@@ -64,11 +68,14 @@ class Video:
             else:
                 # Video
                 vidcap = cv2.VideoCapture(g.file)
-                self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+                self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) + 1
+                
+                g.ui.childConn.send("Guessing Color Mode")
+                g.guessedColorMode = self.guessColorMode(g.file)
+                
                 countPerThread = math.ceil(self.total/g.nThreads)
-
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.colorMode, g.ui.childConn))
+                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, (g.colorMode or g.guessedColorMode), g.ui.childConn))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
@@ -101,13 +108,17 @@ class Video:
         g.ui.childConn.send("stop")
         
     def getFrame(self, file, frame, colorMode, fast=False):
+        if(colorMode == Video.COLOR_AUTO):
+            colorMode = self.guessColorMode(file)
         if(isinstance(frame, str)):
             # Specific file
             image = cv2.imread(frame, cv2.IMREAD_UNCHANGED)
+            image = Video.colorMode(image, colorMode, fast)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         elif(isinstance(file, list)):
             # Image Sequence
             image = cv2.imread(file[frame], cv2.IMREAD_UNCHANGED)
+            image = Video.colorMode(image, colorMode, fast)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         else:
             # Video
@@ -118,41 +129,94 @@ class Video:
             if(not (frame < lastTime + frameTime and frame > lastTime)):
                 self.vidcap.set(cv2.CAP_PROP_POS_MSEC, frame)
             success,image = self.vidcap.read()
-
-        image = Video.colorMode(image, colorMode, fast)
+            image = Video.colorMode(image, colorMode, fast)
         return image
       
+    def guessColorMode(self, file):
+        colorMode = Video.COLOR_RGB
+        if(isinstance(file, list)):
+            # Image Sequence
+            image = cv2.imread(file[0], cv2.IMREAD_UNCHANGED)
+            colorMode = self.guessImageColor(image)
+        else:
+            try:
+                # First try as image
+                image = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+                colorMode = self.guessImageColor(image)
+            except Exception:
+                # Now try as video
+                vidcap = cv2.VideoCapture(file)
+                success,image = vidcap.read()
+                colorMode = self.guessImageColor(image)
+                vidcap.release()
+        return colorMode
+      
+    # Very simple auto-detect of image type (far from perfect)
+    def guessImageColor(self, image):
+        # Assume its color to start with
+        colorMode = Video.COLOR_RGB
+        rgb = Video.colorMode(image, Video.COLOR_RGB, fast=True)
+        if(np.array_equal(rgb[:,:,0],rgb[:,:,1]) and 
+           np.array_equal(rgb[:,:,1],rgb[:,:,2])):
+            # Not a color image
+            colorMode = Video.COLOR_GRAYSCALE
+            
+            # Calculate all bayer options
+            rggb = Video.colorMode(image, Video.COLOR_RGGB, fast=True)
+            grbg = Video.colorMode(image, Video.COLOR_GRBG, fast=True)
+            gbrg = Video.colorMode(image, Video.COLOR_GBRG, fast=True)
+            bggr = Video.colorMode(image, Video.COLOR_BGGR, fast=True)
+            
+            diff1 = np.average(cv2.absdiff(cv2.cvtColor(rggb, cv2.COLOR_BGR2GRAY), cv2.cvtColor(bggr, cv2.COLOR_BGR2GRAY)))
+            diff2 = np.average(cv2.absdiff(cv2.cvtColor(grbg, cv2.COLOR_BGR2GRAY), cv2.cvtColor(gbrg, cv2.COLOR_BGR2GRAY)))
+            diff = 0
+            if(diff1 > 0.0001 and diff2 > 0.0001):
+                diff = abs(diff1 - diff2)/min(diff1, diff2)
+            if(diff > 1):
+                # Uses a bayer pattern, but which one...
+                rggbDiff = np.average(cv2.absdiff(rggb[:,:,0], rggb[:,:,2]))
+                grbgDiff = np.average(cv2.absdiff(grbg[:,:,0], grbg[:,:,2]))
+                if(rggbDiff >= grbgDiff):
+                    # Probably either RGGB or BGGR
+                    colorMode = Video.COLOR_RGGB
+                else:
+                    # Probably either GRBG or GBRG
+                    colorMode = Video.COLOR_GRBG
+        return colorMode
+      
     # Changes the color mode of the image
-    def colorMode(image, colorMode, fast=False):
-        h, w = image.shape[:2]
+    def colorMode(img, colorMode, fast=False):
+        h, w = img.shape[:2]
+        if(len(img.shape) == 2):
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         if(colorMode == Video.COLOR_RGB):
             pass
         elif(colorMode == Video.COLOR_GRAYSCALE):
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         else:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             if(not fast):
-                image = cv2.copyMakeBorder(image, 2, 0, 0, 0, cv2.BORDER_CONSTANT)
+                img = cv2.copyMakeBorder(img, 4, 2, 2, 2, cv2.BORDER_REPLICATE)
                 if(colorMode == Video.COLOR_RGGB):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_VNG)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_VNG)
                 elif(colorMode == Video.COLOR_GRBG):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_VNG)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR_VNG)
                 elif(colorMode == Video.COLOR_GBRG):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_VNG)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR_VNG)
                 elif(colorMode == Video.COLOR_BGGR):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_VNG)
-                image = image[0:h,0:w]
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_VNG)
+                img = img[2:h+2,2:w+2]
             else:
                 if(colorMode == Video.COLOR_RGGB):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_BG2BGR_EA)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_EA)
                 elif(colorMode == Video.COLOR_GRBG):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GB2BGR_EA)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR_EA)
                 elif(colorMode == Video.COLOR_GBRG):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_GR2BGR_EA)
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR_EA)
                 elif(colorMode == Video.COLOR_BGGR):
-                    image = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2BGR_EA)
-        return image
+                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_EA)
+        return img
        
 # Returns a number based on how sharp the image is (higher = sharper)
 def calculateSharpness(image):

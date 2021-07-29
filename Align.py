@@ -18,7 +18,7 @@ class Align:
         self.maxX = 0
         self.maxY = 0
         video = Video()
-        self.height, self.width = video.getFrame(g.file, 0, g.colorMode, fast=True).shape[:2]
+        self.height, self.width = video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode), fast=True).shape[:2]
         
     def run(self):
         def progress(msg):
@@ -75,7 +75,7 @@ class Align:
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
-                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, g.colorMode, g.ui.childConn))
+                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), g.ui.childConn))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()

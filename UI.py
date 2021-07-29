@@ -134,6 +134,8 @@ class UI:
         g.areaOfInterestP1 = (0, 0)
         g.areaOfInterestP2 = (0, 0)
         
+        g.guessedColorMode = Video.COLOR_RGB
+        
         self.window.show_all()
         self.checkNewVersion()
         self.setProgress()
@@ -313,23 +315,31 @@ class UI:
     def updatePreview(self, dialog):
         path = dialog.get_preview_filename()
         pixbuf = None
-        try:
-            # First try as image
-            pixbuf= GdkPixbuf.Pixbuf.new_from_file(path)
-        except Exception:
+        if(path != None and os.path.isfile(path)):
             try:
-                # Now try as video
-                if("video/" in mimetypes.guess_type(path)[0]):
-                    video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, fast=True), cv2.COLOR_BGR2RGB)
-                    height, width = img.shape[:2]
-                    
-                    z = img.tobytes()
-                    Z = GLib.Bytes.new(z)
-                    
-                    pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+                # First try as image
+                video = Video()
+                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                height, width = img.shape[:2]
+                
+                z = img.tobytes()
+                Z = GLib.Bytes.new(z)
+                
+                pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
             except Exception:
-                dialog.set_preview_widget_active(False)
+                try:
+                    # Now try as video
+                    if("video/" in mimetypes.guess_type(path)[0]):
+                        video = Video()
+                        img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                        height, width = img.shape[:2]
+                        
+                        z = img.tobytes()
+                        Z = GLib.Bytes.new(z)
+                        
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+                except Exception:
+                    dialog.set_preview_widget_active(False)
         if(pixbuf is not None):
             # Valid pixbuf
             maxwidth, maxheight = 250, 250
@@ -391,6 +401,7 @@ class UI:
             g.file = self.openDialog.get_filename()
             try:
                 self.video = Video()
+                g.guessedColorMode = self.video.guessColorMode(g.file)
                 img = cv2.imread(g.file)
                 h, w = img.shape[:2]
                 if(not self.checkMemory(w, h)):
@@ -504,20 +515,22 @@ class UI:
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
         self.colorMode.set_sensitive(True)
-        if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
+        if((page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB) and self.video is not None):
             self.frameSlider.set_value(0)
-            self.frameSlider.set_upper(len(self.video.frames)-1)
+            self.frameSlider.set_upper(max(0,len(self.video.frames)-1))
             self.setStartFrame()
             self.setEndFrame()
-            self.frameScale.show()
+            if(len(self.video.frames) > 0):
+                self.frameScale.show()
             self.updateImage(None, page_num)
-        elif(page_num == UI.STACK_TAB):
+        elif(page_num == UI.STACK_TAB and self.align is not None):
             self.frameSlider.set_lower(0)
-            self.frameSlider.set_upper(len(self.align.tmats)-1)
+            self.frameSlider.set_upper(max(0,len(self.align.tmats)-1))
             self.frameSlider.set_value(0)
-            self.frameScale.show()
+            if(len(self.video.frames) > 0):
+                self.frameScale.show()
             self.updateImage(None, page_num)
-        elif(page_num == UI.SHARPEN_TAB):
+        elif(page_num == UI.SHARPEN_TAB and self.sharpen is not None):
             self.frameScale.hide()
             self.colorMode.set_sensitive(False)
             self.sharpenImage()
@@ -531,7 +544,12 @@ class UI:
             page_num = self.tabs.get_current_page()
         if(page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB):
             videoIndex = int(self.frameSlider.get_value())
-            img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
+            if(len(self.video.frames) == 0):
+                # Single Image
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, (g.colorMode or g.guessedColorMode), fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
+            else:
+                # Video/Sequence
+                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], (g.colorMode or g.guessedColorMode), fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -539,11 +557,11 @@ class UI:
             
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
             self.frame.set_from_pixbuf(pixbuf)
-        elif(page_num == UI.STACK_TAB):
+        elif(page_num == UI.STACK_TAB and self.stack is not None):
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex, g.colorMode, fast=True).astype(np.uint8)
+            img = self.video.getFrame(g.file, videoIndex, (g.colorMode or g.guessedColorMode), fast=True).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:
@@ -836,7 +854,9 @@ class UI:
     # Sets the color mode of the input
     def setColorMode(self, *args):
         text = self.colorMode.get_active_text()
-        if(text == "RGB"):
+        if(text == "Auto"):
+            g.colorMode = Video.COLOR_AUTO
+        elif(text == "RGB"):
             g.colorMode = Video.COLOR_RGB
         elif(text == "Grayscale"):
             g.colorMode = Video.COLOR_GRAYSCALE
