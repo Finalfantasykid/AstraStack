@@ -10,8 +10,6 @@ import ssl
 import json
 import math
 import psutil
-import mimetypes
-import psutil
 import time
 from packaging import version
 from threading import Thread
@@ -329,15 +327,14 @@ class UI:
             except Exception:
                 try:
                     # Now try as video
-                    if("video/" in mimetypes.guess_type(path)[0]):
-                        video = Video()
-                        img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
-                        height, width = img.shape[:2]
-                        
-                        z = img.tobytes()
-                        Z = GLib.Bytes.new(z)
-                        
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+                    video = Video()
+                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
+                    height, width = img.shape[:2]
+                    
+                    z = img.tobytes()
+                    Z = GLib.Bytes.new(z)
+                    
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
                 except Exception:
                     pass
         if(pixbuf is not None):
