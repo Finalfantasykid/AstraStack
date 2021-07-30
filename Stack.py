@@ -19,8 +19,7 @@ class Stack:
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
-        video = Video()
-        height, width = video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode), fast=True).shape[:2]
+        height, width = g.ui.video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode)).shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    
@@ -41,10 +40,11 @@ class Stack:
         # Sort the frames so that the likelyhood of it being the 'next' frame
         tmats.sort(key=lambda tmat: tmat[0]) 
         
-        self.total = g.limit
+        self.total = g.limit + 1
         if(g.alignChannels):
             self.total += 4
-            
+        
+        g.ui.childConn.send("Stacking Frames")
         self.generateRefBG()
             
         futures = []
@@ -88,9 +88,8 @@ class Stack:
         
     # Creates the background used for transformed images
     def generateRefBG(self):
-        video = Video()
         (frame, M, diff) = self.tmats[0]
-        ref = video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode)).astype(np.float32)
+        ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode)).astype(np.float32)
         self.refBG = transform(ref, None, np.identity(3),
                                0, 0, 0, 0,
                                g.drizzleFactor, g.drizzleInterpolation)

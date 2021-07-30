@@ -2690,6 +2690,10 @@ Note: Drift adjustment will still crop the image.</property>
                           <item id="4" translatable="yes">Bayer GRBG</item>
                           <item id="5" translatable="yes">Bayer GBRG</item>
                           <item id="6" translatable="yes">Bayer BGGR</item>
+                          <item id="7" translatable="yes">Bayer RGGB (VNG)</item>
+                          <item id="8" translatable="yes">Bayer GRBG (VNG)</item>
+                          <item id="9" translatable="yes">Bayer GBRG (VNG)</item>
+                          <item id="10" translatable="yes">Bayer BGGR (VNG)</item>
                         </items>
                         <signal name="changed" handler="setColorMode" swapped="no"/>
                       </object>

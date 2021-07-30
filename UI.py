@@ -319,7 +319,7 @@ class UI:
             try:
                 # First try as image
                 video = Video()
-                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
                 height, width = img.shape[:2]
                 
                 z = img.tobytes()
@@ -331,7 +331,7 @@ class UI:
                     # Now try as video
                     if("video/" in mimetypes.guess_type(path)[0]):
                         video = Video()
-                        img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, fast=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                        img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
                         height, width = img.shape[:2]
                         
                         z = img.tobytes()
@@ -339,7 +339,7 @@ class UI:
                         
                         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
                 except Exception:
-                    dialog.set_preview_widget_active(False)
+                    pass
         if(pixbuf is not None):
             # Valid pixbuf
             maxwidth, maxheight = 250, 250
@@ -352,6 +352,8 @@ class UI:
             dialog.get_preview_widget().set_size_request(width + 10, height + 10)
             dialog.get_preview_widget().set_from_pixbuf(pixbuf)
             dialog.set_preview_widget_active(True)
+        else:
+            dialog.set_preview_widget_active(False)
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):
@@ -546,10 +548,10 @@ class UI:
             videoIndex = int(self.frameSlider.get_value())
             if(len(self.video.frames) == 0):
                 # Single Image
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, (g.colorMode or g.guessedColorMode), fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2RGB).astype(np.uint8)
             else:
                 # Video/Sequence
-                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], (g.colorMode or g.guessedColorMode), fast=True), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2RGB).astype(np.uint8)
             height, width = img.shape[:2]
             
             z = img.tobytes()
@@ -561,7 +563,7 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex, (g.colorMode or g.guessedColorMode), fast=True).astype(np.uint8)
+            img = self.video.getFrame(g.file, videoIndex, (g.colorMode or g.guessedColorMode)).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:
@@ -853,21 +855,7 @@ class UI:
     
     # Sets the color mode of the input
     def setColorMode(self, *args):
-        text = self.colorMode.get_active_text()
-        if(text == "Auto"):
-            g.colorMode = Video.COLOR_AUTO
-        elif(text == "RGB"):
-            g.colorMode = Video.COLOR_RGB
-        elif(text == "Grayscale"):
-            g.colorMode = Video.COLOR_GRAYSCALE
-        elif(text == "Bayer RGGB"):
-            g.colorMode = Video.COLOR_RGGB
-        elif(text == "Bayer GRBG"):
-            g.colorMode = Video.COLOR_GRBG
-        elif(text == "Bayer GBRG"):
-            g.colorMode = Video.COLOR_GBRG
-        elif(text == "Bayer BGGR"):
-            g.colorMode = Video.COLOR_BGGR
+        g.colorMode = self.colorMode.get_active()
         self.updateImage()
     
     # Sets the type of transformation
