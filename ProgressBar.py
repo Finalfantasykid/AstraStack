@@ -5,12 +5,15 @@ from Globals import g
 
 class ProgressBar:
 
+    manager = None    
+    
     def __init__(self):
-        manager = Manager()
+        if(ProgressBar.manager is None):
+            ProgressBar.manager = Manager()
         self.counters = []
         # Have 1 counter per process to avoid using locks, which kills performance
         for i in range(0, g.nThreads):
-            self.counters.append(manager.Value('i', 0))
+            self.counters.append(ProgressBar.manager.Value('i', 0))
         self.total = 0
         self.message = ""
         self.run()
