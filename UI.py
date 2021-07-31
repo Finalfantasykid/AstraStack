@@ -13,7 +13,7 @@ import psutil
 import time
 from packaging import version
 from threading import Thread
-from multiprocessing import Pipe, active_children, get_start_method
+from multiprocessing import active_children, get_start_method
 from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
@@ -41,7 +41,6 @@ class UI:
     VERSION = "2.1.0"
     
     def __init__(self):
-        self.parentConn, self.childConn = Pipe(duplex=True)
         self.pids = []
         self.newVersionUrl = ""
         self.video = None
@@ -169,23 +168,6 @@ class UI:
         self.builder.get_object("radiusWidget3").set_events(mask)
         self.builder.get_object("radiusWidget4").set_events(mask)
         self.builder.get_object("radiusWidget5").set_events(mask)
-    
-    # Sets up a listener so that processes can communicate with each other
-    def createListener(self, function):
-        def listener(function):
-            while True:
-                try:
-                    msg = self.parentConn.recv()
-                except:
-                    return False
-                if(msg == "stop"):
-                    g.ui.setProgress()
-                    return False
-                function(msg)
-                
-        thread = Thread(target=listener, args=(function,))
-        thread.start()
-        return thread
     
     # Shows the error dialog with the given title and message
     def showErrorDialog(self, message):
@@ -743,9 +725,7 @@ class UI:
                 self.progressBox.show()
                 self.progress.set_fraction(i/total)
                 self.progress.set_text(text + " " + str(round((i/total)*100)) + "%")
-        if(total == 0 or i == 0 or i == total or round((i/max(1, total))*300) != round(((i-1)/max(1, total))*300)):
-            # Only update UI if the change in percent is worth it
-            GLib.idle_add(update)
+        GLib.idle_add(update)
         
     # Sets the start frame for trimming
     def setStartFrame(self, *args):

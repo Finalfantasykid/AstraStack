@@ -6,13 +6,12 @@ from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
+from ProgressBar import ProgressBar
 
 class Stack:
 
     def __init__(self, tmats):
         self.tmats = tmats
-        self.count = 0
-        self.total = 0
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
@@ -24,12 +23,7 @@ class Stack:
             raise MemoryError()
    
     def run(self):
-        def progress(msg):
-            self.count += 1
-            g.ui.setProgress(self.count, self.total, msg)
-            
-        g.ui.createListener(progress)
-        self.count = 0
+        progress = ProgressBar()
         
         self.stackedImage = None
         i = 0
@@ -40,11 +34,11 @@ class Stack:
         # Sort the frames so that the likelyhood of it being the 'next' frame
         tmats.sort(key=lambda tmat: tmat[0]) 
         
-        self.total = g.limit + 1
+        progress.total = g.limit + 1
         if(g.alignChannels):
-            self.total += 4
+            progress.total += 4
         
-        g.ui.childConn.send("Stacking Frames")
+        progress.setMessage("Stacking Frames", True)
         self.generateRefBG()
             
         futures = []
@@ -59,7 +53,7 @@ class Stack:
                 futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
                                              g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
                                              g.drizzleFactor, g.drizzleInterpolation,
-                                             (g.colorMode or g.guessedColorMode), g.ui.childConn))
+                                             (g.colorMode or g.guessedColorMode), progress.counter(i)))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
@@ -69,7 +63,7 @@ class Stack:
                     else:
                         self.stackedImage += result
         except BrokenProcessPool:
-            g.ui.childConn.send("stop")
+            progress.stop()
             return
 
         self.stackedImage /= g.limit
@@ -80,11 +74,11 @@ class Stack:
         self.stackedImage = self.stackedImage.astype(np.float32)
         
         if(g.alignChannels):
-            g.ui.childConn.send("Aligning RGB")
-            self.alignChannels()
+            progress.setMessage("Aligning RGB", True)
+            self.alignChannels(progress)
 
         g.ui.finishedStack()
-        g.ui.childConn.send("stop")
+        progress.stop()
         
     # Creates the background used for transformed images
     def generateRefBG(self):
@@ -95,7 +89,7 @@ class Stack:
                                g.drizzleFactor, g.drizzleInterpolation)
         
     # Aligns the RGB channels to help reduce chromatic aberrations
-    def alignChannels(self):
+    def alignChannels(self, progress):
         h, w = self.stackedImage.shape[:2]
         gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_BGR2GRAY)
         sr = StackReg(StackReg.TRANSLATION)
@@ -103,10 +97,10 @@ class Stack:
         for i, C in enumerate(cv2.split(self.stackedImage)):
             M = sr.register(C, gray)
             self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h), borderMode=cv2.BORDER_REPLICATE)
-            g.ui.childConn.send("Aligning RGB")
+            progress.setMessage("Aligning RGB", True)
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, conn):
+def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, counter):
     video = Video()
     stackedImage = None
     for frame, M, diff in frames:
@@ -118,7 +112,7 @@ def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizz
             stackedImage = image
         else:
             stackedImage += image
-        conn.send("Stacking Frames")
+        counter.value += 1
     return stackedImage
     
 # Multiprocess function to transform and save the images to cache

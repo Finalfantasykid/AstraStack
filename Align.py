@@ -5,14 +5,13 @@ from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
+from ProgressBar import ProgressBar
 
 class Align:
 
     def __init__(self, frames):
         self.frames = frames
         self.tmats = [] # (frame, M, diff)
-        self.count = 0
-        self.total = 0
         self.minX = 0
         self.minY = 0
         self.maxX = 0
@@ -20,12 +19,8 @@ class Align:
         self.height, self.width = g.ui.video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode)).shape[:2]
         
     def run(self):
-        def progress(msg):
-            self.count += 1
-            g.ui.setProgress(self.count, self.total, msg)
-        g.ui.createListener(progress)
-        self.count = 0
-        self.total = len(self.frames)
+        progress = ProgressBar()
+        progress.total = len(self.frames)
         
         #Drifting
         totalFrames = len(self.frames)
@@ -70,12 +65,13 @@ class Align:
             referenceIndex = int(g.reference) - g.startFrame
 
         try:
+            progress.setMessage("Aligning Frames")
             ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2GRAY)
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, g.file, ref, referenceIndex, 
-                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), g.ui.childConn))
+                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), progress.counter(i)))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()
@@ -85,13 +81,13 @@ class Align:
                 self.minY = math.floor(min(self.minY, minY))
                 self.maxY = math.ceil(max(self.maxY, maxY))
         except BrokenProcessPool:
-            g.ui.childConn.send("stop")
+            progress.stop()
             return
             
         self.tmats.sort(key=lambda tup: tup[2], reverse=True)
 
         g.ui.finishedAlign()
-        g.ui.childConn.send("stop")
+        progress.stop()
         
     # returns a list of the delta values for the drift points
     def calcDriftDeltas(dx, dy, i, totalFrames):
@@ -134,7 +130,7 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, conn):
+def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, counter):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
@@ -227,7 +223,7 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
             tmats.append((frame, M, diff))
         except Exception as e:
             print(e)
-        conn.send("Aligning Frames")
+        counter.value += 1
         i += 1
     return (tmats, minX, minY, maxX, maxY)
 
