@@ -68,12 +68,13 @@ class Align:
             referenceIndex = self.frames.index(int(g.reference))
         else:
             referenceIndex = int(g.reference) - g.startFrame
-        
+
         try:
+            ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2GRAY)
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(align, frames, g.file, self.frames[referenceIndex], referenceIndex, 
+                futures.append(g.pool.submit(align, frames, g.file, ref, referenceIndex, 
                                              g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), g.ui.childConn))
             
             for i in range(0, g.nThreads):
@@ -133,14 +134,14 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, reference, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, conn):
+def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, conn):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
     video = Video()
     
     # Load Reference
-    refOrig = ref = cv2.cvtColor(video.getFrame(file, reference, colorMode), cv2.COLOR_BGR2GRAY)
+    refOrig = ref
     h1, w1 = ref.shape[:2]
     
     # Drift

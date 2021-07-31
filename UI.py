@@ -408,6 +408,9 @@ class UI:
                 
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
                 self.saveDialog.set_current_name("")
+                
+                self.updateAutoColorModeText()
+                
                 self.sharpen = Sharpen(g.file, True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
@@ -473,6 +476,7 @@ class UI:
             g.reference = self.video.sharpest
             self.frameSlider.set_value(self.video.sharpest)
 
+            self.updateAutoColorModeText()
             self.setReference()
             self.setStartFrame()
             self.setEndFrame()
@@ -484,6 +488,7 @@ class UI:
             else:
                 self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
             self.saveDialog.set_current_name("")
+
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(False)
             self.builder.get_object("processTab").set_sensitive(False)
@@ -510,6 +515,25 @@ class UI:
             except: # Open Failed
                 self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
             self.sharpenImage(self.builder.get_object("deconvolveCustomFile"))
+       
+    # Updates the Auto color mode text     
+    def updateAutoColorModeText(self):
+        colorMode = self.colorMode.get_active()
+        self.colorMode.remove(0)
+        if(g.guessedColorMode == Video.COLOR_RGB):
+            self.colorMode.prepend_text("Auto (RGB)")
+        elif(g.guessedColorMode == Video.COLOR_GRAYSCALE):
+            self.colorMode.prepend_text("Auto (Grayscale)")
+        elif(g.guessedColorMode == Video.COLOR_RGGB):
+            self.colorMode.prepend_text("Auto (RGGB)")
+        elif(g.guessedColorMode == Video.COLOR_GRBG):
+            self.colorMode.prepend_text("Auto (GRBG)")
+        elif(g.guessedColorMode == Video.COLOR_GBRG):
+            self.colorMode.prepend_text("Auto (GBRG)")
+        elif(g.guessedColorMode == Video.COLOR_BGGR):
+            self.colorMode.prepend_text("Auto (BGGR)")
+        if(colorMode == Video.COLOR_AUTO):
+            self.colorMode.set_active(0)
         
     # Called when the tab is changed.  Updates parts of the UI based on the tab
     def changeTab(self, notebook, page, page_num, user_data=None):
@@ -852,8 +876,9 @@ class UI:
     
     # Sets the color mode of the input
     def setColorMode(self, *args):
-        g.colorMode = self.colorMode.get_active()
-        self.updateImage()
+        if(self.colorMode.is_sensitive()):
+            g.colorMode = self.colorMode.get_active()
+            self.updateImage()
     
     # Sets the type of transformation
     def setTransformation(self, *args):
