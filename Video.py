@@ -71,8 +71,8 @@ class Video:
                     sharps += sharp
             else:
                 # Video
-                vidcap = cv2.VideoCapture(g.file)
-                self.total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) + 1
+                self.vidcap = cv2.VideoCapture(g.file)
+                self.total = int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) + 1
                 
                 g.ui.childConn.send("Guessing Color Mode")
                 g.guessedColorMode = self.guessColorMode(g.file)
@@ -84,7 +84,6 @@ class Video:
                     frames, sharp = futures[i].result()
                     self.frames += frames
                     sharps += sharp
-                vidcap.release()
         except BrokenProcessPool:
             g.ui.childConn.send("stop")
             return
