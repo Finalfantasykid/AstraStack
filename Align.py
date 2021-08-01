@@ -5,7 +5,7 @@ from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
-from ProgressBar import ProgressBar
+from ProgressBar import *
 
 class Align:
 
@@ -63,7 +63,7 @@ class Align:
             referenceIndex = self.frames.index(int(g.reference))
         else:
             referenceIndex = int(g.reference) - g.startFrame
-
+            
         try:
             progress.setMessage("Aligning Frames")
             ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2GRAY)
@@ -71,7 +71,7 @@ class Align:
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, g.file, ref, referenceIndex, 
-                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), progress.counter(i)))
+                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()
@@ -130,7 +130,7 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, counter):
+def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, progress):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
@@ -162,7 +162,7 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
         ref = normalizeImg(ref)
         refOrig = normalizeImg(refOrig)
     
-    for frame in frames:
+    for c, frame in enumerate(frames):
         try:
             # Load Frame
             movOrig = mov = cv2.cvtColor(video.getFrame(file, frame, colorMode), cv2.COLOR_BGR2GRAY)
@@ -223,8 +223,9 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
             tmats.append((frame, M, diff))
         except Exception as e:
             print(e)
-        counter.value += 1
+        progress.count(c, len(frames))
         i += 1
+    progress.countExtra()
     return (tmats, minX, minY, maxX, maxY)
 
 # Crop image for Area of Interest

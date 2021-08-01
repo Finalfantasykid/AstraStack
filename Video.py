@@ -5,7 +5,7 @@ import math
 from concurrent.futures.process import BrokenProcessPool
 from natsort import natsorted, ns
 from Globals import g
-from ProgressBar import ProgressBar
+from ProgressBar import *
 
 class Video:
 
@@ -59,7 +59,7 @@ class Video:
                 progress.setMessage("Loading Frames")
                 height, width = cv2.imread(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, (g.colorMode or g.guessedColorMode), progress.counter(i)))
+                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
@@ -74,7 +74,7 @@ class Video:
                 progress.setMessage("Loading Frames")
                 countPerThread = math.ceil(progress.total/g.nThreads)
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, (g.colorMode or g.guessedColorMode), progress.counter(i)))
+                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
@@ -223,11 +223,11 @@ def calculateSharpness(image):
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
    
 # Multiprocess function to load frames from an image sequence
-def loadFramesSequence(files, width, height, colorMode, counter):
+def loadFramesSequence(files, width, height, colorMode, progress):
     frames = []
     sharps = []
-    for file in files:
-        counter.value += 1
+    for i, file in enumerate(files):
+        progress.count(i, len(files))
         image = cv2.imread(file)
         h, w = image.shape[:2]
         if(h == height and w == width):
@@ -236,10 +236,11 @@ def loadFramesSequence(files, width, height, colorMode, counter):
             # Calculate sharpness
             image = Video.colorMode(image, colorMode)
             sharps.append(calculateSharpness(image))
+    progress.countExtra()
     return (frames, sharps)
         
 # Multiprocess function to load frames from a video source
-def loadFramesVideo(file, start, count, colorMode, counter):
+def loadFramesVideo(file, start, count, colorMode, progress):
     vidcap = cv2.VideoCapture(file)
     vidcap.set(cv2.CAP_PROP_POS_FRAMES, start)
     frames = []
@@ -247,10 +248,11 @@ def loadFramesVideo(file, start, count, colorMode, counter):
     for i in range(0, count):
         success,image = vidcap.read()
         if(success):
-            counter.value += 1
+            progress.count(i, count)
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
             image = Video.colorMode(image, colorMode)
             sharps.append(calculateSharpness(image))
+    progress.countExtra()
     vidcap.release()
     return (frames, sharps)

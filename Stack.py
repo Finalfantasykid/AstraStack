@@ -6,7 +6,7 @@ from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
 from Globals import g
 from Video import Video
-from ProgressBar import ProgressBar
+from ProgressBar import *
 
 class Stack:
 
@@ -53,7 +53,7 @@ class Stack:
                 futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
                                              g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
                                              g.drizzleFactor, g.drizzleInterpolation,
-                                             (g.colorMode or g.guessedColorMode), progress.counter(i)))
+                                             (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
@@ -100,10 +100,10 @@ class Stack:
             progress.setMessage("Aligning RGB", True)
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, counter):
+def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, progress):
     video = Video()
     stackedImage = None
-    for frame, M, diff in frames:
+    for c, (frame, M, diff) in enumerate(frames):
         image = video.getFrame(file, frame, colorMode)
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY,
@@ -112,7 +112,8 @@ def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizz
             stackedImage = image
         else:
             stackedImage += image
-        counter.value += 1
+        progress.count(c, len(frames))
+    progress.countExtra()
     return stackedImage
     
 # Multiprocess function to transform and save the images to cache
