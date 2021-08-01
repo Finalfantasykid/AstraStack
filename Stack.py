@@ -83,7 +83,7 @@ class Stack:
     # Creates the background used for transformed images
     def generateRefBG(self):
         (frame, M, diff) = self.tmats[0]
-        ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode)).astype(np.float32)
+        ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode))
         self.refBG = transform(ref, None, np.identity(3),
                                0, 0, 0, 0,
                                g.drizzleFactor, g.drizzleInterpolation)
