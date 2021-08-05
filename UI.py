@@ -19,7 +19,7 @@ from pystackreg import StackReg
 
 from deconvolution import *
 from Video import Video
-from Align import Align
+from Align import Align, centerOfMass
 from Stack import Stack, transform
 from Sharpen import Sharpen
 from Globals import g
@@ -74,6 +74,7 @@ class UI:
         self.normalize = self.builder.get_object("normalize")
         self.alignChannels = self.builder.get_object("alignChannels")
         self.autoCrop = self.builder.get_object("autoCrop")
+        self.driftType = self.builder.get_object("driftType")
         self.transformation = self.builder.get_object("transformation")
         self.bitDepth = self.builder.get_object("bitDepth")
         self.drizzleFactor = self.builder.get_object("drizzleFactor")
@@ -139,6 +140,7 @@ class UI:
         self.setColorMode()
         self.setNormalize()
         self.setAlignChannels()
+        self.setDriftType()
         self.setTransformation()
         self.setDrizzleFactor()
         self.setDrizzleInterpolation()
@@ -555,7 +557,15 @@ class UI:
             else:
                 # Video/Sequence
                 img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                
             height, width = img.shape[:2]
+            
+            if(g.driftType == Align.DRIFT_GRAVITY):
+                (cx, cy) = centerOfMass(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
+                C = np.float32([[1, 0, int(width/2) - int(cx)], 
+                                [0, 1, int(height/2) - int(cy)]])
+
+                img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
             
             z = img.tobytes()
             Z = GLib.Bytes.new(z)
@@ -859,6 +869,18 @@ class UI:
         if(self.colorMode.is_sensitive()):
             g.colorMode = self.colorMode.get_active()
             self.updateImage()
+    
+    def setDriftType(self, *args):
+        g.driftType = self.driftType.get_active()
+        if(g.driftType == Align.DRIFT_MANUAL):
+            self.builder.get_object("selectDriftPoint1").show()
+            self.builder.get_object("selectDriftPoint2").show()
+        else:
+            g.driftP1 = (0, 0)
+            g.driftP2 = (0, 0)
+            self.builder.get_object("selectDriftPoint1").hide()
+            self.builder.get_object("selectDriftPoint2").hide()
+        self.updateImage()
     
     # Sets the type of transformation
     def setTransformation(self, *args):

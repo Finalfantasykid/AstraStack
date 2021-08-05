@@ -9,6 +9,10 @@ from ProgressBar import *
 
 class Align:
 
+    DRIFT_NONE = 0
+    DRIFT_GRAVITY = 1
+    DRIFT_MANUAL = 2
+
     def __init__(self, frames):
         self.frames = frames
         self.tmats = [] # (frame, M, diff)
@@ -71,7 +75,8 @@ class Align:
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, g.file, ref, referenceIndex, 
-                                             g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
+                                             g.driftType, g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, 
+                                             (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()
@@ -130,7 +135,7 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, ref, referenceIndex, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, progress):
+def align(frames, file, ref, referenceIndex, driftType, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, progress):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
@@ -143,6 +148,15 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
     # Drift
     rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
     ref = ref[int(rfdy1):int(h1-rfdy), int(rfdx1):int(w1-rfdx)]
+    
+    # Center of Mass
+    if(driftType == Align.DRIFT_GRAVITY):
+        (cx, cy) = centerOfMass(ref)
+        C = np.float32([[1, 0, int(w1/2) - int(cx)], 
+                        [0, 1, int(h1/2) - int(cy)]])
+
+        ref = cv2.warpAffine(ref, C, (w1, h1), flags=cv2.INTER_NEAREST)
+        refOrig = cv2.warpAffine(refOrig, C, (w1, h1), flags=cv2.INTER_NEAREST)
         
     # Area of Interest
     ref = cropAreaOfInterest(ref, aoi1, aoi2)
@@ -171,6 +185,13 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
             mov = mov[int(fdy1):int(h1-fdy), int(fdx1):int(w1-fdx)]
             
+            # Center of Mass
+            if(driftType == Align.DRIFT_GRAVITY):
+                (cx, cy) = centerOfMass(mov)
+                C = np.float32([[1, 0, int(w1/2) - int(cx)], 
+                                [0, 1, int(h1/2) - int(cy)]])
+                mov = cv2.warpAffine(mov, C, (w1, h1), flags=cv2.INTER_NEAREST)
+            
             # Area of Interest
             mov = cropAreaOfInterest(mov, aoi1, aoi2)
             
@@ -189,9 +210,15 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
             # Scale back up
             M[0][2] /= scaleFactor # X
             M[1][2] /= scaleFactor # Y
-            
+
             # Shift the matrix origin to the Area of Interest, and then shift back
             M = shiftOrigin(M, aoi1[0], aoi1[1])
+            
+            # Add center of mass transform
+            if(driftType == Align.DRIFT_GRAVITY):
+                M[0][2] += int(w1/2) - int(cx)
+                M[1][2] += int(h1/2) - int(cy)
+                M = shiftOrigin(M, -(int(w1/2) - int(cx)), -(int(h1/2) - int(cy)))
                 
             # Add drift transform
             M[0][2] -= int(fdx1) - int(rfdx1)
@@ -200,7 +227,7 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
             
             # Apply transformation to small version to check similarity to reference
             movOrig = cv2.warpPerspective(movOrig, M, (w1, h1), borderMode=cv2.BORDER_REPLICATE)
-            
+
             if(aoi1 != (0,0) and aoi2 != (0,0)):
                 # Area of Interest
                 movOrig = cropAreaOfInterest(movOrig, aoi1, aoi2, rfdx1, rfdy1)
@@ -227,6 +254,26 @@ def align(frames, file, ref, referenceIndex, transformation, normalize, totalFra
         i += 1
     progress.countExtra()
     return (tmats, minX, minY, maxX, maxY)
+
+# Calculates the center of mass (coordinates) of the image
+def centerOfMass(img):
+    y = range(0, img.shape[0])
+    x = range(0, img.shape[1])
+
+    (X,Y) = np.meshgrid(x,y)
+
+    img = img.astype(np.float32)
+    img -= 15
+    img[img<0] = 0
+    
+    img = img**2
+
+    imgSum = max(1,img.sum())
+
+    x_coord = (X*img).sum() / imgSum
+    y_coord = (Y*img).sum() / imgSum
+    
+    return (x_coord, y_coord)
 
 # Crop image for Area of Interest
 def cropAreaOfInterest(img, aoi1, aoi2, fdx=0, fdy=0):

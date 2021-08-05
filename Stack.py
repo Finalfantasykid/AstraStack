@@ -84,7 +84,7 @@ class Stack:
     def generateRefBG(self):
         (frame, M, diff) = self.tmats[0]
         ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode))
-        self.refBG = transform(ref, None, np.identity(3),
+        self.refBG = transform(ref, None, M,
                                0, 0, 0, 0,
                                g.drizzleFactor, g.drizzleInterpolation)
         

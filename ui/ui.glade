@@ -799,8 +799,14 @@
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to set these points.  The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
-                                        <property name="label" translatable="yes">Drift Adjustment (Optional)</property>
+                                        <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to use one of these options.  This can help get a more accurate alignment.
+
+None: Do no t do any drift adjustments
+
+Center of Gravity: This option is good for planetary objects and will move the object roughly to the center of the frame.  This probably will not work as well if at all for surfaces.
+
+Manual: Two points can be set at the start and end position of the object. The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
+                                        <property name="label" translatable="yes">Drift Adjustment</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
                                         </attributes>
@@ -822,7 +828,7 @@
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
+                                        <property name="top_attach">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -836,7 +842,26 @@
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="driftType">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="active">0</property>
+                                        <items>
+                                          <item id="0" translatable="yes">None</item>
+                                          <item id="1" translatable="yes">Center of Gravity</item>
+                                          <item id="2" translatable="yes">Manual</item>
+                                        </items>
+                                        <signal name="changed" handler="setDriftType" swapped="no"/>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
                                         <property name="top_attach">1</property>
+                                        <property name="width">2</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -858,7 +883,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="tooltip_text" translatable="yes">A rectangle area of interest can be dragged on the starting frame.  Only this area will be used during the alignment.  This step does not crop the image however, the full frame is still stacked.  Right click the button to reset the area.</property>
-                                        <property name="label" translatable="yes">Area of Interest (Optional)</property>
+                                        <property name="label" translatable="yes">Area of Interest</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
                                         </attributes>
@@ -926,27 +951,6 @@ The 4 types of transformation are described below:
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkComboBoxText" id="transformation">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active">2</property>
-                                        <items>
-                                          <item id="0" translatable="yes">None</item>
-                                          <item id="1" translatable="yes">Translation</item>
-                                          <item id="2" translatable="yes">Rigid Body</item>
-                                          <item id="3" translatable="yes">Scaled Rotation</item>
-                                          <item id="4" translatable="yes">Affine</item>
-                                        </items>
-                                        <signal name="changed" handler="setTransformation" swapped="no"/>
-                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                        <property name="width">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
                                       <object class="GtkCheckButton" id="normalize">
                                         <property name="label" translatable="yes">Normalize frames during alignment</property>
                                         <property name="visible">True</property>
@@ -973,6 +977,27 @@ The 4 types of transformation are described below:
                                       <packing>
                                         <property name="left_attach">0</property>
                                         <property name="top_attach">3</property>
+                                        <property name="width">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="transformation">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="active">2</property>
+                                        <items>
+                                          <item id="0" translatable="yes">None</item>
+                                          <item id="1" translatable="yes">Translation</item>
+                                          <item id="2" translatable="yes">Rigid Body</item>
+                                          <item id="3" translatable="yes">Scaled Rotation</item>
+                                          <item id="4" translatable="yes">Affine</item>
+                                        </items>
+                                        <signal name="changed" handler="setTransformation" swapped="no"/>
+                                        <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
                                         <property name="width">2</property>
                                       </packing>
                                     </child>
