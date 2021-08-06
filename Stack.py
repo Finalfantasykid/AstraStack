@@ -77,8 +77,8 @@ class Stack:
             progress.setMessage("Aligning RGB", True)
             self.alignChannels(progress)
 
-        g.ui.finishedStack()
         progress.stop()
+        g.ui.finishedStack()
         
     # Creates the background used for transformed images
     def generateRefBG(self):

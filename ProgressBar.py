@@ -30,12 +30,13 @@ class ProgressBar:
                     return False
                 sleep(1/60)
                 value = 0
-                for counter in self.counters:
-                    value += counter.value
-                # Only update UI if the change in percent is worth it
-                if(value == self.total or round((value/max(1, self.total))*300) != round((lastValue/max(1, self.total))*300)):
-                    g.ui.setProgress(value, self.total, message)
-                lastValue = value
+                if(message != ""):
+                    for counter in self.counters:
+                        value += counter.value
+                    # Only update UI if the change in percent is worth it
+                    if((value == 0 and lastValue != 0) or (value == self.total and lastValue != self.total) or value != lastValue):
+                        g.ui.setProgress(value, self.total, message)
+                    lastValue = value
         thread = Thread(target=run, args=())
         thread.start()
         
@@ -48,6 +49,8 @@ class ProgressBar:
             self.counter().value += 1
         
     def stop(self):
+        sleep(1/30)
+        g.ui.setProgress()
         self.setMessage("stop")
         
 class ProgressCounter:
@@ -58,7 +61,9 @@ class ProgressCounter:
         self.nThreads = nThreads
         
     def count(self, i, size):
-        size = math.ceil(size/(300/self.nThreads))
+        # only increment when the value will actually make a difference visually in the progress bar
+        # the progress bar is probably around 300-320px, so 400 should be a safe number
+        size = math.ceil(size/(400/self.nThreads)) 
         if(i % size == 0 and i != 0):
             self.counter.value += size
             self.counted = 0

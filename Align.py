@@ -91,8 +91,9 @@ class Align:
             
         self.tmats.sort(key=lambda tup: tup[2], reverse=True)
 
-        g.ui.finishedAlign()
         progress.stop()
+        g.ui.finishedAlign()
+        
         
     # returns a list of the delta values for the drift points
     def calcDriftDeltas(dx, dy, i, totalFrames):

@@ -133,7 +133,8 @@ class UI:
         g.areaOfInterestP2 = (0, 0)
         
         g.guessedColorMode = Video.COLOR_RGB
-        
+
+        self.setThreads()
         self.window.show_all()
         self.checkNewVersion()
         self.setProgress()
@@ -145,7 +146,6 @@ class UI:
         self.setDrizzleFactor()
         self.setDrizzleInterpolation()
         self.setAutoCrop()
-        self.setThreads()
         self.frameScale.set_sensitive(False)
         
         g.file = None

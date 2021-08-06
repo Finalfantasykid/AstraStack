@@ -101,8 +101,8 @@ class Video:
         else:
             self.sharpest = 0
 
-        g.ui.finishedVideo()
         progress.stop()
+        g.ui.finishedVideo()
         
     def getFrame(self, file, frame, colorMode):
         if(colorMode == Video.COLOR_AUTO):
