@@ -43,6 +43,22 @@ Feature: Video
         And I choose file "tmp/jupiter2.png" from "saveDialog"
         Then "tmp/jupiter2.png" and "reference/jupiter2.png" should be equal
         
+    Scenario: Stacking Video with center of gravity
+        Given I am on tab "Load"
+        And I async press "openVideo"
+        And I choose file "Jupiter.mp4" from "openDialog"
+        And I wait until active tab is "Align"
+        And I select "Center of Gravity" from "driftType"
+        And I select "Affine" from "transformation"
+        And I press "alignButton"
+        And I wait until active tab is "Stack"
+        And I uncheck "autoCrop"
+        And I press "stackButton"
+        And I wait until active tab is "Process"
+        And I async press "saveButton"
+        And I choose file "tmp/jupiter4.png" from "saveDialog"
+        Then "tmp/jupiter4.png" and "reference/jupiter4.png" should be equal
+        
     Scenario: Stacking Video with drift points and trim
         Given I am on tab "Load"
         And I async press "openVideo"

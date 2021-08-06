@@ -799,7 +799,7 @@
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">If the object drifts accross the frame, then it is best to use one of these options.  This can help get a more accurate alignment.
+                                        <property name="tooltip_text" translatable="yes">If the object drifts across the frame, then this can help get a more accurate alignment.
 
 None: Do no t do any drift adjustments
 
