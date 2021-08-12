@@ -175,6 +175,15 @@ class Sharpen:
     
     # Apply brightness & color sliders
     def processColor(self):
+        def clamp(img, low, high):
+            img[img<low] = low
+            img[img>high] = high
+            return img
+            
+        def colorAdjust(C, adjust):
+            C *= (adjust/100)*(g.value/100)
+            return C
+            
         img = self.debluredImage
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
@@ -182,19 +191,14 @@ class Sharpen:
         # Decompose
         (R, G, B) = cv2.split(img)
         
-        # Red Adjust
-        R *= (g.redAdjust/100)*g.value/100
-        
-        # Green Adjust
-        G *= (g.greenAdjust/100)*g.value/100
-        
-        # Blue Adjust
-        B *= (g.blueAdjust/100)*g.value/100
+        # Color Adjust
+        R = colorAdjust(R, g.redAdjust)
+        G = colorAdjust(G, g.greenAdjust)
+        B = colorAdjust(B, g.blueAdjust)
         
         # Recompose
         img = cv2.merge([R, G, B])
-        img[img<0] = 0
-        img[img>1] = 1
+        img = clamp(img, 0, 1)
         
         # Saturation
         img = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
@@ -205,14 +209,12 @@ class Sharpen:
         img = cv2.cvtColor(img, cv2.COLOR_HLS2RGB)
         
         # Gamma
-        img[img<0] = 0
-        img[img>1] = 1
+        img = clamp(img, 0, 1)
         img = pow(img, 1/(max(1, g.gamma)/100))
         
         # Clip at 0 and 255
         img *= 255
-        img[img>255] = 255
-        img[img<0] = 0
+        img = clamp(img, 0, 255)
         
         self.finalImage = img
         

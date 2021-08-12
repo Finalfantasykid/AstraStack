@@ -67,6 +67,7 @@ class UI:
         self.frame = self.builder.get_object("frame")
         self.overlay = self.builder.get_object("overlay")
         self.psfImage = self.builder.get_object("psfImage")
+        self.histImage = self.builder.get_object("histImage")
         self.frameSlider = self.builder.get_object("frameSlider")
         self.frameScale = self.builder.get_object("frameScale")
         self.startFrame = self.builder.get_object("startFrame")
@@ -720,6 +721,30 @@ class UI:
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, sz, sz, sz*3)
         self.psfImage.set_from_pixbuf(pixbuf)
         
+    def updateHistogram(self):
+        color = ('b','g','r')
+        histImage = np.full((101,257, 3), 225, np.uint8)
+        bins = np.arange(256).reshape(256, 1)
+        
+        # Draw Axis
+        cv2.line(histImage, (0,0), (0,100), (175,175,175), 1)
+        cv2.line(histImage, (0,100), (256,100), (175,175,175), 1)
+        
+        color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        for i, col in enumerate(color):
+            hist = np.log(cv2.calcHist([self.sharpen.finalImage.astype('uint8')],[i],None,[256],[0,256]) + 1)
+            cv2.normalize(hist, hist, 0, 99, cv2.NORM_MINMAX)
+            hist = 99 - hist
+            hist = np.int32(np.around(hist))
+            pts = np.int32(np.column_stack((bins+1,hist)))
+            cv2.polylines(histImage, [pts], False, col)
+            
+        z = histImage.tobytes()
+        Z = GLib.Bytes.new(z)
+        
+        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, 257, 101, 257*3)
+        self.histImage.set_from_pixbuf(pixbuf)
+        
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
         g.reference = str(int(self.frameSlider.get_value()))
@@ -1118,6 +1143,7 @@ class UI:
             Z = GLib.Bytes.new(z)
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, self.sharpen.w, self.sharpen.h, self.sharpen.w*3)
             self.frame.set_from_pixbuf(pixbuf)
+            self.updateHistogram()
             self.processSpinner.stop()
             self.processSpinner.hide()
         GLib.idle_add(update)
