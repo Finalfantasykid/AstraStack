@@ -25,6 +25,7 @@ class Video:
         self.frames = []
         self.sharpest = 0
         self.vidcap = None
+        self.sharps = []
             
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
@@ -100,6 +101,8 @@ class Video:
             self.sharpest = sharps.index(max(sharps))
         else:
             self.sharpest = 0
+            
+        self.sharps = sharps
 
         progress.stop()
         g.ui.finishedVideo()

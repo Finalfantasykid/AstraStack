@@ -10,11 +10,16 @@ from ProgressBar import *
 
 class Stack:
 
+    SORT_DIFF = 0
+    SORT_QUALITY = 1
+    SORT_BOTH = 2
+
     def __init__(self, tmats):
         self.tmats = tmats
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
+        self.sortTmats()
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
@@ -79,10 +84,19 @@ class Stack:
 
         progress.stop()
         g.ui.finishedStack()
+   
+    # Sorts the tmats based on the frameSortMethod
+    def sortTmats(self):
+        if(g.frameSortMethod == Stack.SORT_DIFF):
+            self.tmats.sort(key=lambda tup: tup[2], reverse=True)
+        elif(g.frameSortMethod == Stack.SORT_QUALITY):
+            self.tmats.sort(key=lambda tup: tup[3], reverse=True)
+        elif(g.frameSortMethod == Stack.SORT_BOTH):
+            self.tmats.sort(key=lambda tup: (tup[2] + tup[3])/2, reverse=True)
         
     # Creates the background used for transformed images
     def generateRefBG(self):
-        (frame, M, diff) = self.tmats[0]
+        (frame, M, diff, sharp) = self.tmats[0]
         ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode))
         self.refBG = transform(ref, None, M,
                                0, 0, 0, 0,
@@ -103,7 +117,7 @@ class Stack:
 def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, progress):
     video = Video()
     stackedImage = None
-    for c, (frame, M, diff) in enumerate(frames):
+    for c, (frame, M, diff, sharp) in enumerate(frames):
         image = video.getFrame(file, frame, colorMode)
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY,

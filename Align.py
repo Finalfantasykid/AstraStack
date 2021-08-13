@@ -15,7 +15,7 @@ class Align:
 
     def __init__(self, frames):
         self.frames = frames
-        self.tmats = [] # (frame, M, diff)
+        self.tmats = [] # (frame, M, diff, sharp)
         self.minX = 0
         self.minY = 0
         self.maxX = 0
@@ -88,12 +88,23 @@ class Align:
         except BrokenProcessPool:
             progress.stop()
             return
+        
+        diffs = []
+        for i, tmat in enumerate(self.tmats):
+            diffs.append(tmat[2])
             
-        self.tmats.sort(key=lambda tup: tup[2], reverse=True)
-
+        diffs = np.float32(diffs)
+        cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)  
+            
+        sharps = np.float32(g.ui.video.sharps)
+        cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)    
+            
+        for i, tmat in enumerate(self.tmats):
+            tmat[2] = diffs[i]
+            tmat.append(sharps[i+g.startFrame])
+            
         progress.stop()
         g.ui.finishedAlign()
-        
         
     # returns a list of the delta values for the drift points
     def calcDriftDeltas(dx, dy, i, totalFrames):
@@ -248,7 +259,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
             # Used for auto-crop
             minX, maxX, minY, maxY = Align.calcMinMax(M, minX, maxX, minY, maxY)
             
-            tmats.append((frame, M, diff))
+            tmats.append([frame, M, diff])
         except Exception as e:
             print(e)
         progress.count(c, len(frames))

@@ -66,6 +66,7 @@ class UI:
         self.processSpinner = self.builder.get_object("processSpinner")
         self.frame = self.builder.get_object("frame")
         self.overlay = self.builder.get_object("overlay")
+        self.qualityImage = self.builder.get_object("qualityImage")
         self.psfImage = self.builder.get_object("psfImage")
         self.histImage = self.builder.get_object("histImage")
         self.frameSlider = self.builder.get_object("frameSlider")
@@ -80,6 +81,7 @@ class UI:
         self.bitDepth = self.builder.get_object("bitDepth")
         self.drizzleFactor = self.builder.get_object("drizzleFactor")
         self.drizzleInterpolation = self.builder.get_object("drizzleInterpolation")
+        self.frameSort = self.builder.get_object("frameSort")
         self.limit = self.builder.get_object("limit")
         self.limitPercent = self.builder.get_object("limitPercent")
         self.averageRadio = self.builder.get_object("averageRadio")
@@ -134,6 +136,8 @@ class UI:
         g.areaOfInterestP2 = (0, 0)
         
         g.guessedColorMode = Video.COLOR_RGB
+        
+        g.limit = 0
 
         self.setThreads()
         self.window.show_all()
@@ -146,6 +150,7 @@ class UI:
         self.setTransformation()
         self.setDrizzleFactor()
         self.setDrizzleInterpolation()
+        self.setFrameSortMethod()
         self.setAutoCrop()
         self.frameScale.set_sensitive(False)
         
@@ -593,6 +598,7 @@ class UI:
             
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
             self.frame.set_from_pixbuf(pixbuf)
+            self.updateQualityImage()
             
     # Draws a rectangle where the area of interest is
     def drawOverlay(self, widget, cr):
@@ -676,6 +682,42 @@ class UI:
                 # Draw point on last frame
                 drawPoint(cr, dx2, dy2)
         
+    # Updates the Quality Graph of the aligned images    
+    def updateQualityImage(self):
+        allocation = self.builder.get_object("stackTab").get_allocation()
+        width = max(250, allocation.width-1)
+        qualityImage = np.full((100,width, 3), 225, np.uint8)
+        bins = np.arange(len(self.stack.tmats)).reshape(len(self.stack.tmats), 1)
+        
+        # Draw Axis
+        cv2.line(qualityImage, (0,49), (width,49), (200,200,200), 1)
+        
+        data = []
+        for tmat in self.stack.tmats:
+            if(g.frameSortMethod == Stack.SORT_DIFF):
+                data.append(tmat[2])
+            elif(g.frameSortMethod == Stack.SORT_QUALITY):
+                data.append(tmat[3])
+            elif(g.frameSortMethod == Stack.SORT_BOTH):
+                data.append((tmat[2] + tmat[3])/2)
+            
+        data = np.float32(data)
+        cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
+        data = 99 - data
+        data = np.int32(np.around(data))
+        pts = np.int32(np.column_stack((bins/(len(self.stack.tmats)/width),data)))
+        cv2.polylines(qualityImage, [pts], False, (127,127,127))
+        
+        # Draw Limit line
+        limitPercent = g.limit/len(self.stack.tmats)
+        cv2.line(qualityImage, (math.floor((width-1)*limitPercent),0), (math.floor((width-1)*limitPercent),100), (255,0,0), 1)
+
+        z = qualityImage.tobytes()
+        Z = GLib.Bytes.new(z)
+        
+        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
+        self.qualityImage.set_from_pixbuf(pixbuf)
+        
     # Updates the PSF Image to the current configuration for deblurring        
     def updatePSFImage(self, *args):
         sz = 110
@@ -720,15 +762,14 @@ class UI:
         
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, sz, sz, sz*3)
         self.psfImage.set_from_pixbuf(pixbuf)
-        
+    
+    # Updates the RGB histogram of the final image    
     def updateHistogram(self):
-        color = ('b','g','r')
-        histImage = np.full((101,257, 3), 225, np.uint8)
-        bins = np.arange(256).reshape(256, 1)
+        allocation = self.builder.get_object("processTab").get_allocation()
+        width = max(250, allocation.width-1)
         
-        # Draw Axis
-        cv2.line(histImage, (0,0), (0,100), (175,175,175), 1)
-        cv2.line(histImage, (0,100), (256,100), (175,175,175), 1)
+        histImage = np.full((100,width, 3), 225, np.uint8)
+        bins = np.arange(256).reshape(256, 1)
         
         color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         for i, col in enumerate(color):
@@ -736,13 +777,13 @@ class UI:
             cv2.normalize(hist, hist, 0, 99, cv2.NORM_MINMAX)
             hist = 99 - hist
             hist = np.int32(np.around(hist))
-            pts = np.int32(np.column_stack((bins+1,hist)))
+            pts = np.int32(np.column_stack(((bins/(256/width)),hist)))
             cv2.polylines(histImage, [pts], False, col)
             
         z = histImage.tobytes()
         Z = GLib.Bytes.new(z)
         
-        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, 257, 101, 257*3)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
         self.histImage.set_from_pixbuf(pixbuf)
         
     # Sets the reference frame to the current visible frame
@@ -959,6 +1000,14 @@ class UI:
             self.stack.generateRefBG()
         self.updateImage()
         
+    # Sets the frame sort method
+    def setFrameSortMethod(self, *args):
+        g.frameSortMethod = self.frameSort.get_active()
+        if(self.stack is not None):
+            self.stack.sortTmats()
+            self.updateQualityImage()
+            self.updateImage()
+        
     # Sets whether or not to auto crop
     def setAutoCrop(self, *args):
         g.autoCrop = not self.autoCrop.get_active()
@@ -1005,15 +1054,16 @@ class UI:
     # Sets the number of frames to use in the Stack
     def setLimit(self, *args):
         self.limitPercent.disconnect(self.limitPercentSignal)
-        self.limit.set_upper(len(self.align.tmats))
+        self.limit.set_upper(len(self.stack.tmats))
         g.limit = int(self.limit.get_value())
-        self.limitPercent.set_value(round(g.limit/len(self.align.tmats)*100))
+        self.limitPercent.set_value(round(g.limit/len(self.stack.tmats)*100))
         self.limitPercentSignal = self.limitPercent.connect("value-changed", self.setLimitPercent)
+        self.updateQualityImage()
         
     # Sets the number of frames to use in the Stack
     def setLimitPercent(self, *args):
         limitPercent = self.limitPercent.get_value()/100
-        self.limit.set_value(round(limitPercent*len(self.align.tmats)))
+        self.limit.set_value(round(limitPercent*len(self.stack.tmats)))
             
     # Stack Button clicked
     def clickStack(self, *args):
