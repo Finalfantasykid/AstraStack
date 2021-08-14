@@ -15,7 +15,7 @@ class Stack:
     SORT_BOTH = 2
 
     def __init__(self, tmats):
-        self.tmats = tmats
+        self.tmats = np.array(tmats, dtype=object)
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
@@ -34,7 +34,7 @@ class Stack:
         i = 0
 
         # Limit frames
-        tmats = self.tmats[0:g.limit]
+        tmats = list(self.tmats[0:g.limit])
         
         # Sort the frames so that the likelyhood of it being the 'next' frame
         tmats.sort(key=lambda tmat: tmat[0]) 
@@ -87,12 +87,14 @@ class Stack:
    
     # Sorts the tmats based on the frameSortMethod
     def sortTmats(self):
+        tmats = list(self.tmats)
         if(g.frameSortMethod == Stack.SORT_DIFF):
-            self.tmats.sort(key=lambda tup: tup[2], reverse=True)
+            tmats.sort(key=lambda tup: tup[2], reverse=True)
         elif(g.frameSortMethod == Stack.SORT_QUALITY):
-            self.tmats.sort(key=lambda tup: tup[3], reverse=True)
+            tmats.sort(key=lambda tup: tup[3], reverse=True)
         elif(g.frameSortMethod == Stack.SORT_BOTH):
-            self.tmats.sort(key=lambda tup: (tup[2] + tup[3])/2, reverse=True)
+            tmats.sort(key=lambda tup: (tup[2] + tup[3])/2, reverse=True)
+        self.tmats = np.array(tmats)
         
     # Creates the background used for transformed images
     def generateRefBG(self):

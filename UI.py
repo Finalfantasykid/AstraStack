@@ -684,39 +684,77 @@ class UI:
         
     # Updates the Quality Graph of the aligned images    
     def updateQualityImage(self):
-        allocation = self.builder.get_object("stackTab").get_allocation()
-        width = max(250, allocation.width-1)
-        qualityImage = np.full((100,width, 3), 225, np.uint8)
-        bins = np.arange(len(self.stack.tmats)).reshape(len(self.stack.tmats), 1)
-        
-        # Draw Axis
-        cv2.line(qualityImage, (0,49), (width,49), (200,200,200), 1)
-        
         data = []
-        for tmat in self.stack.tmats:
-            if(g.frameSortMethod == Stack.SORT_DIFF):
-                data.append(tmat[2])
-            elif(g.frameSortMethod == Stack.SORT_QUALITY):
-                data.append(tmat[3])
-            elif(g.frameSortMethod == Stack.SORT_BOTH):
-                data.append((tmat[2] + tmat[3])/2)
-            
-        data = np.float32(data)
-        cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
-        data = 99 - data
-        data = np.int32(np.around(data))
-        pts = np.int32(np.column_stack((bins/(len(self.stack.tmats)/width),data)))
-        cv2.polylines(qualityImage, [pts], False, (127,127,127))
-        
-        # Draw Limit line
-        limitPercent = g.limit/len(self.stack.tmats)
-        cv2.line(qualityImage, (math.floor((width-1)*limitPercent),0), (math.floor((width-1)*limitPercent),100), (255,0,0), 1)
 
-        z = qualityImage.tobytes()
-        Z = GLib.Bytes.new(z)
+        if(g.frameSortMethod == Stack.SORT_DIFF):
+            data = self.stack.tmats[:,2]
+        elif(g.frameSortMethod == Stack.SORT_QUALITY):
+            data = self.stack.tmats[:,3]
+        elif(g.frameSortMethod == Stack.SORT_BOTH):
+            data = self.stack.tmats[:,2] + self.stack.tmats[:,3]
+        lenData = len(data)
         
-        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
-        self.qualityImage.set_from_pixbuf(pixbuf)
+        # The first value is usually an outlier since the reference will match perfectly, so fudge the number
+        if(lenData > 2):
+            data[0] = data[1] + (data[1] - data[2])*2
+        elif(lenData > 1):
+            data[0] = data[1] + 1
+        
+        if(lenData > 1):
+            self.qualityImage.show()
+            allocation = self.builder.get_object("stackTab").get_allocation()
+            
+            width = max(250, allocation.width-1)
+            padding = 5
+            qualityImage = np.full((100+padding*2,width+padding*2, 3), 225, np.uint8)
+            bins = np.arange(lenData).reshape(lenData, 1)
+
+            # Draw Axis
+            cv2.line(qualityImage, (padding,49+padding), (width+padding,49+padding), (200,200,200))
+            framePercent = (self.frameSlider.get_value())/(lenData-1)
+            cv2.line(qualityImage, (math.floor((width-1)*framePercent) + padding, padding), (math.floor((width-1)*framePercent)+padding, 100+padding), (200,200,200), lineType=cv2.LINE_AA)
+            
+            # Create data points
+            data = np.float32(data)
+            smoothen = 5
+            data = np.pad(data, (smoothen//2, smoothen-smoothen//2), mode='edge')
+            data = np.cumsum(data[smoothen:] - data[:-smoothen]) / smoothen
+            cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
+            data = 99 - data
+            
+            data = np.int32(np.around(data))
+            
+            pts = np.int32(np.column_stack((bins/((lenData-1)/(width-1)) + padding,data+padding)))
+
+            # Make sure there are no duplicate x-coordinates
+            pts, idx = np.unique(pts, axis=0, return_index=True)
+            pts = pts[np.argsort(idx), :]  
+            newPts = []
+            lastY = -1
+            for pt in pts:
+                if(pt[1] != lastY):
+                    newPts.append(pt)
+                    lastY = pt[1]
+
+            newPts[-1] = pts[-1]
+            
+            pts = np.int32(newPts)
+            
+            cv2.polylines(qualityImage, [pts], False, (127,127,127), lineType=cv2.LINE_AA)
+            
+            # Draw Limit line
+            limitPercent = (g.limit-1)/(lenData-1)
+            cv2.line(qualityImage, (math.floor((width-1)*limitPercent)+padding,padding), (math.floor((width-1)*limitPercent) + padding, 100+padding), (255,0,0), lineType=cv2.LINE_AA)
+
+            qualityImage = qualityImage[padding:-padding,padding:-padding]
+
+            z = qualityImage.tobytes()
+            Z = GLib.Bytes.new(z)
+            
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
+            self.qualityImage.set_from_pixbuf(pixbuf)
+        else:
+            self.qualityImage.hide()
         
     # Updates the PSF Image to the current configuration for deblurring        
     def updatePSFImage(self, *args):
@@ -767,18 +805,20 @@ class UI:
     def updateHistogram(self):
         allocation = self.builder.get_object("processTab").get_allocation()
         width = max(250, allocation.width-1)
-        
-        histImage = np.full((100,width, 3), 225, np.uint8)
+        padding = 5
+        histImage = np.full((100+padding*2,width+padding*2, 3), 225, np.uint8)
         bins = np.arange(256).reshape(256, 1)
         
         color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         for i, col in enumerate(color):
-            hist = np.log(cv2.calcHist([self.sharpen.finalImage.astype('uint8')],[i],None,[256],[0,256]) + 1)
+            hist = np.log(cv2.calcHist([np.around(self.sharpen.finalImage).astype('uint8')],[i],None,[256],[0,256]) + 1)
             cv2.normalize(hist, hist, 0, 99, cv2.NORM_MINMAX)
             hist = 99 - hist
             hist = np.int32(np.around(hist))
-            pts = np.int32(np.column_stack(((bins/(256/width)),hist)))
-            cv2.polylines(histImage, [pts], False, col)
+            pts = np.int32(np.column_stack(((bins/(256/width))+padding,hist+padding)))
+            cv2.polylines(histImage, [pts], False, col, lineType=cv2.LINE_AA)
+            
+        histImage = histImage[padding:-padding,padding:-padding]
             
         z = histImage.tobytes()
         Z = GLib.Bytes.new(z)
