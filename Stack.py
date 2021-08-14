@@ -16,10 +16,10 @@ class Stack:
 
     def __init__(self, tmats):
         self.tmats = np.array(tmats, dtype=object)
+        self.sortTmats()
         self.stackedImage = None
         self.refBG = None
         self.generateRefBG()
-        self.sortTmats()
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):

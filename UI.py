@@ -536,9 +536,9 @@ class UI:
             if(len(self.video.frames) > 0):
                 self.frameScale.show()
             self.updateImage(None, page_num)
-        elif(page_num == UI.STACK_TAB and self.align is not None):
+        elif(page_num == UI.STACK_TAB and self.stack is not None):
             self.frameSlider.set_lower(0)
-            self.frameSlider.set_upper(max(0,len(self.align.tmats)-1))
+            self.frameSlider.set_upper(max(0,len(self.stack.tmats)-1))
             self.frameSlider.set_value(0)
             if(len(self.video.frames) > 0):
                 self.frameScale.show()
@@ -1084,9 +1084,9 @@ class UI:
             self.builder.get_object("alignTab").set_sensitive(True)
             self.builder.get_object("stackTab").set_sensitive(True)
             self.builder.get_object("processTab").set_sensitive(False)
-            self.limit.set_upper(len(self.align.tmats))
-            self.limit.set_value(int(len(self.align.tmats)/2))
-            self.limitPercent.set_value(round(self.limit.get_value()/len(self.align.tmats)*100))
+            self.limit.set_upper(len(self.stack.tmats))
+            self.limit.set_value(int(len(self.stack.tmats)/2))
+            self.limitPercent.set_value(round(self.limit.get_value()/len(self.stack.tmats)*100))
             self.setLimit()
             self.setLimitPercent()
         GLib.idle_add(update)

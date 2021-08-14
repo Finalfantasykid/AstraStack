@@ -93,10 +93,10 @@ class Align:
         for i, tmat in enumerate(self.tmats):
             diffs.append(tmat[2])
             
-        diffs = np.float32(diffs)
+        diffs = np.float64(diffs)
         cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)  
             
-        sharps = np.float32(g.ui.video.sharps)
+        sharps = np.float64(g.ui.video.sharps)
         cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)    
             
         for i, tmat in enumerate(self.tmats):
