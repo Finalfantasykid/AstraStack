@@ -712,14 +712,12 @@ class UI:
             # Create data points
             data = np.float32(data)
             smoothen = math.ceil(lenData*0.01)
-            if(smoothen >= 5):
-                padType = 'reflect'
-            else:
-                padType = 'edge'
             
-            data = np.pad(data, (smoothen//2, smoothen-smoothen//2), padType)
+            data = np.pad(data, (smoothen//2, smoothen-smoothen//2), 'reflect')
             data = np.cumsum(data[smoothen:] - data[:-smoothen])
             cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
+            data.sort()
+            data = np.flip(data)
             data = 99 - data
             
             data = np.int32(np.around(data))
