@@ -89,29 +89,17 @@ class Align:
             progress.stop()
             return
         
-        diffs = []
-        for i, tmat in enumerate(self.tmats):
-            diffs.append(tmat[2])
-            
-        diffs = np.float64(diffs)
-        sharps = np.float64(g.ui.video.sharps[g.startFrame:g.endFrame+1])
-            
-        newTmats = []
-        for i, tmat in enumerate(self.tmats):
-            if(tmat[2] != False):
-                tmat[2] = diffs[i]
-                tmat.append(sharps[i])
-                newTmats.append(tmat)
-                
-        if(len(newTmats) > 1):
-            newTmats = np.array(newTmats, dtype=object)
-            diffs = np.float64(newTmats[:,2])
-            sharps = np.float64(newTmats[:,3])
-            newTmats[:,2] = cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)
-            newTmats[:,3] = cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)
-            
-        self.tmats = newTmats
-            
+        self.tmats = np.array(self.tmats, dtype=object)
+        self.tmats[:,3] = g.ui.video.sharps[g.startFrame:g.endFrame+1]
+        self.tmats = self.tmats[self.tmats[:,2]!=False]
+        
+        diffs = np.float64(self.tmats[:,2])
+        sharps = np.float64(self.tmats[:,3])
+        
+        if(len(self.tmats) > 1):
+            self.tmats[:,2] = cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)
+            self.tmats[:,3] = cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)
+
         progress.stop()
         g.ui.finishedAlign()
         
@@ -234,7 +222,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
 
             # Only add if the stack registration actually converged
             if(abs(M[0][2]) >= w or abs(M[1][2]) >= h):
-                tmats.append([frame, M, False])
+                tmats.append([frame, M, False, 0])
                 progress.count(c, len(frames))
                 continue
 
@@ -277,7 +265,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
                 # Used for auto-crop
                 minX, maxX, minY, maxY = Align.calcMinMax(M, minX, maxX, minY, maxY)
             
-            tmats.append([frame, M, diff])    
+            tmats.append([frame, M, diff, 0])    
         except Exception as e:
             print(e)
         progress.count(c, len(frames))

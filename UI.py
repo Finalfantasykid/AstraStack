@@ -299,6 +299,13 @@ class UI:
             return (response == Gtk.ResponseType.YES)
         return True
     
+    # Returns a new GdkPixbuf from the given image
+    def createPixbuf(self, img):
+        z = img.tobytes()
+        Z = GLib.Bytes.new(z)
+        height, width = img.shape[:2]
+        return GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+    
     # Shows preview image in file chooser dialog
     def updatePreview(self, dialog):
         path = dialog.get_preview_filename()
@@ -308,23 +315,13 @@ class UI:
                 # First try as image
                 video = Video()
                 img = cv2.cvtColor(video.getFrame(path, path, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
-                height, width = img.shape[:2]
-                
-                z = img.tobytes()
-                Z = GLib.Bytes.new(z)
-                
-                pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+                pixbuf = self.createPixbuf(img)
             except Exception:
                 try:
                     # Now try as video
                     video = Video()
                     img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
-                    height, width = img.shape[:2]
-                    
-                    z = img.tobytes()
-                    Z = GLib.Bytes.new(z)
-                    
-                    pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+                    pixbuf = self.createPixbuf(img)
                 except Exception:
                     pass
         if(pixbuf is not None):
@@ -572,11 +569,8 @@ class UI:
                                 [0, 1, int(height/2) - int(cy)]])
 
                 img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
-            
-            z = img.tobytes()
-            Z = GLib.Bytes.new(z)
-            
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+
+            pixbuf = self.createPixbuf(img)
             self.frame.set_from_pixbuf(pixbuf)
         elif(page_num == UI.STACK_TAB and self.stack is not None):
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
@@ -591,12 +585,8 @@ class UI:
                             self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, 
                             g.drizzleFactor, g.drizzleInterpolation)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            height, width = img.shape[:2]
             
-            z = img.tobytes()
-            Z = GLib.Bytes.new(z)
-            
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
+            pixbuf = self.createPixbuf(img)
             self.frame.set_from_pixbuf(pixbuf)
             self.updateQualityImage()
             
@@ -712,32 +702,24 @@ class UI:
             # Create data points
             data = np.float32(data)
             smoothen = math.ceil(lenData*0.01)
-            
             data = np.pad(data, (smoothen//2, smoothen-smoothen//2), 'reflect')
             data = np.cumsum(data[smoothen:] - data[:-smoothen])
             cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
             data.sort()
-            data = np.flip(data)
-            data = 99 - data
-            
-            data = np.int32(np.around(data))
+            data = np.int32(np.around(np.flip(99 - data)))
             
             pts = np.int32(np.column_stack((bins/((lenData-1)/(width-1)) + padding,data+padding)))
 
-            # Make sure there are no duplicate x-coordinates
-            pts, idx = np.unique(pts, axis=0, return_index=True)
-            pts = pts[np.argsort(idx), :]  
-            newPts = []
-            lastY = -1
-            for pt in pts:
-                if(pt[1] != lastY):
-                    newPts.append(pt)
-                    lastY = pt[1]
-
-            newPts[-1] = pts[-1]
+            # Make sure there are no duplicate x-coordinates, and then the y-coordinates
+            last = pts[-1]
+            ptsx, idx = np.unique(pts[:,0], return_index=True)
+            pts = pts[idx]
+            ptsy, idx = np.unique(pts[:,1], return_index=True)
+            pts = pts[idx]
+            if(pts[-1].all() != last.all()):
+                pts[-1] = last
             
-            pts = np.int32(newPts)
-            
+            # Draw the data point lines
             cv2.polylines(qualityImage, [pts], False, (127,127,127), lineType=cv2.LINE_AA)
             
             # Draw Limit line
@@ -746,10 +728,7 @@ class UI:
 
             qualityImage = qualityImage[padding:-padding,padding:-padding]
 
-            z = qualityImage.tobytes()
-            Z = GLib.Bytes.new(z)
-            
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
+            pixbuf = self.createPixbuf(qualityImage)
             self.qualityImage.set_from_pixbuf(pixbuf)
         else:
             self.qualityImage.hide()
@@ -793,10 +772,7 @@ class UI:
         
         psf = cv2.cvtColor(psf, cv2.COLOR_GRAY2RGB)
         
-        z = psf.tobytes()
-        Z = GLib.Bytes.new(z)
-        
-        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, sz, sz, sz*3)
+        pixbuf = self.createPixbuf(psf)
         self.psfImage.set_from_pixbuf(pixbuf)
     
     # Updates the RGB histogram of the final image    
@@ -818,10 +794,7 @@ class UI:
             
         histImage = histImage[padding:-padding,padding:-padding]
             
-        z = histImage.tobytes()
-        Z = GLib.Bytes.new(z)
-        
-        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, 100, width*3)
+        pixbuf = self.createPixbuf(histImage)
         self.histImage.set_from_pixbuf(pixbuf)
         
     # Sets the reference frame to the current visible frame
@@ -1227,9 +1200,7 @@ class UI:
     # Called when sharpening is complete
     def finishedSharpening(self):
         def update():
-            z = np.around(self.sharpen.finalImage).astype('uint8').tobytes()
-            Z = GLib.Bytes.new(z)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, self.sharpen.w, self.sharpen.h, self.sharpen.w*3)
+            pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
             self.frame.set_from_pixbuf(pixbuf)
             self.updateHistogram()
             self.processSpinner.stop()
