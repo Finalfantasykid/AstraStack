@@ -685,7 +685,6 @@ class UI:
     # Updates the Quality Graph of the aligned images    
     def updateQualityImage(self):
         data = []
-
         if(g.frameSortMethod == Stack.SORT_DIFF):
             data = self.stack.tmats[:,2]
         elif(g.frameSortMethod == Stack.SORT_QUALITY):
@@ -693,12 +692,6 @@ class UI:
         elif(g.frameSortMethod == Stack.SORT_BOTH):
             data = self.stack.tmats[:,2] + self.stack.tmats[:,3]
         lenData = len(data)
-        
-        # The first value is usually an outlier since the reference will match perfectly, so fudge the number
-        if(lenData > 2):
-            data[0] = data[1] + (data[1] - data[2])*2
-        elif(lenData > 1):
-            data[0] = data[1] + 1
         
         if(lenData > 1):
             self.qualityImage.show()
@@ -710,15 +703,22 @@ class UI:
             bins = np.arange(lenData).reshape(lenData, 1)
 
             # Draw Axis
+            cv2.line(qualityImage, (padding,24+padding), (width+padding,24+padding), (200,200,200))
             cv2.line(qualityImage, (padding,49+padding), (width+padding,49+padding), (200,200,200))
+            cv2.line(qualityImage, (padding,74+padding), (width+padding,74+padding), (200,200,200))
             framePercent = (self.frameSlider.get_value())/(lenData-1)
-            cv2.line(qualityImage, (math.floor((width-1)*framePercent) + padding, padding), (math.floor((width-1)*framePercent)+padding, 100+padding), (200,200,200), lineType=cv2.LINE_AA)
+            cv2.line(qualityImage, (math.floor((width-1)*framePercent) + padding, padding), (math.floor((width-1)*framePercent)+padding, 100+padding), (163,163,163), lineType=cv2.LINE_AA)
             
             # Create data points
             data = np.float32(data)
-            smoothen = 5
-            data = np.pad(data, (smoothen//2, smoothen-smoothen//2), mode='edge')
-            data = np.cumsum(data[smoothen:] - data[:-smoothen]) / smoothen
+            smoothen = math.ceil(lenData*0.01)
+            if(smoothen >= 5):
+                padType = 'reflect'
+            else:
+                padType = 'edge'
+            
+            data = np.pad(data, (smoothen//2, smoothen-smoothen//2), padType)
+            data = np.cumsum(data[smoothen:] - data[:-smoothen])
             cv2.normalize(data, data, 0, 99, cv2.NORM_MINMAX)
             data = 99 - data
             

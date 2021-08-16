@@ -94,14 +94,23 @@ class Align:
             diffs.append(tmat[2])
             
         diffs = np.float64(diffs)
-        cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)  
+        sharps = np.float64(g.ui.video.sharps[g.startFrame:g.endFrame+1])
             
-        sharps = np.float64(g.ui.video.sharps)
-        cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)    
-            
+        newTmats = []
         for i, tmat in enumerate(self.tmats):
-            tmat[2] = diffs[i]
-            tmat.append(sharps[i+g.startFrame])
+            if(tmat[2] != False):
+                tmat[2] = diffs[i]
+                tmat.append(sharps[i])
+                newTmats.append(tmat)
+                
+        if(len(newTmats) > 1):
+            newTmats = np.array(newTmats, dtype=object)
+            diffs = np.float64(newTmats[:,2])
+            sharps = np.float64(newTmats[:,3])
+            newTmats[:,2] = cv2.normalize(diffs, diffs, 0, 1, cv2.NORM_MINMAX)
+            newTmats[:,3] = cv2.normalize(sharps, sharps, 0, 1, cv2.NORM_MINMAX)
+            
+        self.tmats = newTmats
             
         progress.stop()
         g.ui.finishedAlign()
@@ -223,6 +232,12 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
             M[0][2] /= scaleFactor # X
             M[1][2] /= scaleFactor # Y
 
+            # Only add if the stack registration actually converged
+            if(abs(M[0][2]) >= w or abs(M[1][2]) >= h):
+                tmats.append([frame, M, False])
+                progress.count(c, len(frames))
+                continue
+
             # Shift the matrix origin to the Area of Interest, and then shift back
             M = shiftOrigin(M, aoi1[0], aoi1[1])
             
@@ -256,10 +271,13 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
             # Similarity
             diff = calculateDiff(refOrig, movOrig, xFactor, yFactor, M, i)
 
-            # Used for auto-crop
-            minX, maxX, minY, maxY = Align.calcMinMax(M, minX, maxX, minY, maxY)
+            # Make sure it isn't going to autocrop to point where the image is too small
+            if((aoi1 == (0,0) and aoi2 == (0,0) and abs(M[0][2]) < w1/3 and abs(M[1][2]) < h1/3) or 
+               (aoi1 != (0,0) and aoi2 != (0,0) and abs(M[0][2]) < min(w1/3, w1/2 - w/2) and abs(M[1][2]) < min(h1/3, h1/2 - h/2))):
+                # Used for auto-crop
+                minX, maxX, minY, maxY = Align.calcMinMax(M, minX, maxX, minY, maxY)
             
-            tmats.append([frame, M, diff])
+            tmats.append([frame, M, diff])    
         except Exception as e:
             print(e)
         progress.count(c, len(frames))
