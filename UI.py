@@ -1016,7 +1016,6 @@ class UI:
         g.frameSortMethod = self.frameSort.get_active()
         if(self.stack is not None):
             self.stack.sortTmats()
-            self.updateQualityImage()
             self.updateImage()
         
     # Sets whether or not to auto crop
