@@ -4,7 +4,7 @@ import numpy as np
 import copy
 from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
-from Globals import g
+from Globals import *
 from Video import Video
 from ProgressBar import *
 
@@ -23,7 +23,7 @@ class Stack:
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
-        height, width = g.ui.video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode)).shape[:2]
+        height, width = g.ui.video.getFrame(g.file, 0, g.actualColor()).shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    
@@ -46,6 +46,7 @@ class Stack:
         progress.setMessage("Stacking Frames", True)
         self.generateRefBG()
             
+        gCopy = cloneGlobals()
         futures = []
         try:
             for i in range(0, g.nThreads):
@@ -55,10 +56,9 @@ class Stack:
                     ref = self.refBG
                 else:
                     ref = None
-                futures.append(g.pool.submit(blendAverage, frames, g.file, ref,
-                                             g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY, 
-                                             g.drizzleFactor, g.drizzleInterpolation,
-                                             (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
+                futures.append(g.pool.submit(blendAverage, frames, ref,
+                                             g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY,
+                                             ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
@@ -99,10 +99,9 @@ class Stack:
     # Creates the background used for transformed images
     def generateRefBG(self):
         (frame, M, diff, sharp) = self.tmats[0]
-        ref = g.ui.video.getFrame(g.file, frame, (g.colorMode or g.guessedColorMode))
+        ref = g.ui.video.getFrame(g.file, frame, g.actualColor())
         self.refBG = transform(ref, None, M,
-                               0, 0, 0, 0,
-                               g.drizzleFactor, g.drizzleInterpolation)
+                               0, 0, 0, 0, g)
         
     # Aligns the RGB channels to help reduce chromatic aberrations
     def alignChannels(self, progress):
@@ -116,14 +115,13 @@ class Stack:
             progress.setMessage("Aligning RGB", True)
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation, colorMode, progress):
+def blendAverage(frames, ref, minX, maxX, minY, maxY, progress, gCopy):
     video = Video()
     stackedImage = None
     for c, (frame, M, diff, sharp) in enumerate(frames):
-        image = video.getFrame(file, frame, colorMode)
+        image = video.getFrame(gCopy.file, frame, gCopy.actualColor())
         image = transform(image, ref, M, 
-                          minX, maxX, minY, maxY,
-                          drizzleFactor, drizzleInterpolation).astype(np.float64)
+                          minX, maxX, minY, maxY, gCopy).astype(np.float64)
         if stackedImage is None:
             stackedImage = image
         else:
@@ -133,7 +131,7 @@ def blendAverage(frames, file, ref, minX, maxX, minY, maxY, drizzleFactor, drizz
     return stackedImage
     
 # Multiprocess function to transform and save the images to cache
-def transform(image, ref, tmat, minX, maxX, minY, maxY, drizzleFactor, drizzleInterpolation):
+def transform(image, ref, tmat, minX, maxX, minY, maxY, gCopy):
     dst = copy.deepcopy(ref)
     if(ref is not None):
         # Full Frame
@@ -146,23 +144,23 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, drizzleFactor, drizzleIn
     h, w = image.shape[:2]
     M = tmat.copy()
     
-    if(drizzleFactor < 1.0):
+    if(gCopy.drizzleFactor < 1.0):
         # Downscale (need to do it as a separate step since warpPerspective seems to force nearest neighbor when downscaling too much)
-        image = cv2.resize(image, (int(w*drizzleFactor), int(h*drizzleFactor)), interpolation=drizzleInterpolation)
-        M[0][2] *= drizzleFactor # X
-        M[1][2] *= drizzleFactor # Y
-    elif(drizzleFactor > 1.0):
+        image = cv2.resize(image, (int(w*gCopy.drizzleFactor), int(h*gCopy.drizzleFactor)), interpolation=gCopy.drizzleInterpolation)
+        M[0][2] *= gCopy.drizzleFactor # X
+        M[1][2] *= gCopy.drizzleFactor # Y
+    elif(gCopy.drizzleFactor > 1.0):
         # Upscale
-        M[0][2] *= drizzleFactor # X
-        M[1][2] *= drizzleFactor # Y
+        M[0][2] *= gCopy.drizzleFactor # X
+        M[1][2] *= gCopy.drizzleFactor # Y
         T = np.identity(3) # Scale Matrix
-        T[0][0] = drizzleFactor
-        T[1][1] = drizzleFactor
+        T[0][0] = gCopy.drizzleFactor
+        T[1][1] = gCopy.drizzleFactor
         M = M.dot(T) # Apply scale to Transformation
 
-    image = cv2.warpPerspective(image, M, (int(w*drizzleFactor), int(h*drizzleFactor)), flags=drizzleInterpolation, borderMode=borderMode, dst=dst)
+    image = cv2.warpPerspective(image, M, (int(w*gCopy.drizzleFactor), int(h*gCopy.drizzleFactor)), flags=gCopy.drizzleInterpolation, borderMode=borderMode, dst=dst)
     if(ref is None):
         # Auto Crop
-        image = image[int(maxY*drizzleFactor):int((h+minY)*drizzleFactor), 
-                      int(maxX*drizzleFactor):int((w+minX)*drizzleFactor)]
+        image = image[int(maxY*gCopy.drizzleFactor):int((h+minY)*gCopy.drizzleFactor), 
+                      int(maxX*gCopy.drizzleFactor):int((w+minX)*gCopy.drizzleFactor)]
     return image

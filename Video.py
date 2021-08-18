@@ -4,7 +4,7 @@ import glob
 import math
 from concurrent.futures.process import BrokenProcessPool
 from natsort import natsorted, ns
-from Globals import g
+from Globals import *
 from ProgressBar import *
 
 class Video:
@@ -60,7 +60,7 @@ class Video:
                 progress.setMessage("Loading Frames")
                 height, width = cv2.imread(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
+                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
@@ -75,7 +75,7 @@ class Video:
                 progress.setMessage("Loading Frames")
                 countPerThread = math.ceil(progress.total/g.nThreads)
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
+                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames

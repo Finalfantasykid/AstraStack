@@ -3,7 +3,7 @@ import math
 import numpy as np
 from concurrent.futures.process import BrokenProcessPool
 from pystackreg import StackReg
-from Globals import g
+from Globals import *
 from Video import Video
 from ProgressBar import *
 
@@ -20,7 +20,7 @@ class Align:
         self.minY = 0
         self.maxX = 0
         self.maxY = 0
-        self.height, self.width = g.ui.video.getFrame(g.file, 0, (g.colorMode or g.guessedColorMode)).shape[:2]
+        self.height, self.width = g.ui.video.getFrame(g.file, 0, g.actualColor()).shape[:2]
         
     def run(self):
         progress = ProgressBar()
@@ -70,13 +70,14 @@ class Align:
             
         try:
             progress.setMessage("Aligning Frames")
-            ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2GRAY)
+            ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], g.actualColor()), cv2.COLOR_BGR2GRAY)
+            gCopy = cloneGlobals()
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(align, frames, g.file, ref, referenceIndex, 
-                                             g.driftType, g.transformation, g.normalize, totalFrames, i*nFrames, dx, dy, aoi1, aoi2, 
-                                             (g.colorMode or g.guessedColorMode), ProgressCounter(progress.counter(i), g.nThreads)))
+                futures.append(g.pool.submit(align, frames, ref, referenceIndex, 
+                                             totalFrames, i*nFrames, dx, dy, aoi1, aoi2, 
+                                             ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()
@@ -144,7 +145,7 @@ class Align:
         return (minX, maxX, minY, maxY)
         
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, file, ref, referenceIndex, driftType, transformation, normalize, totalFrames, startFrame, dx, dy, aoi1, aoi2, colorMode, progress):
+def align(frames, ref, referenceIndex, totalFrames, startFrame, dx, dy, aoi1, aoi2, progress, gCopy):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
@@ -159,7 +160,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
     ref = ref[int(rfdy1):int(h1-rfdy), int(rfdx1):int(w1-rfdx)]
     
     # Center of Mass
-    if(driftType == Align.DRIFT_GRAVITY):
+    if(gCopy.driftType == Align.DRIFT_GRAVITY):
         (cx, cy) = centerOfMass(ref)
         C = np.float32([[1, 0, int(w1/2) - int(cx)], 
                         [0, 1, int(h1/2) - int(cy)]])
@@ -171,8 +172,8 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
     ref = cropAreaOfInterest(ref, aoi1, aoi2)
     refOrig = cropAreaOfInterest(refOrig, aoi1, aoi2, rfdx1, rfdy1)
     
-    if(transformation != -1):
-        sr = StackReg(transformation)
+    if(gCopy.transformation != -1):
+        sr = StackReg(gCopy.transformation)
     else:
         sr = None
         
@@ -181,21 +182,21 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
     ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
     refOrig = cv2.resize(refOrig, (64, 64))
     
-    if(normalize):
+    if(gCopy.normalize):
         ref = normalizeImg(ref)
         refOrig = normalizeImg(refOrig)
     
     for c, frame in enumerate(frames):
         try:
             # Load Frame
-            movOrig = mov = cv2.cvtColor(video.getFrame(file, frame, colorMode), cv2.COLOR_BGR2GRAY)
+            movOrig = mov = cv2.cvtColor(video.getFrame(gCopy.file, frame, gCopy.actualColor()), cv2.COLOR_BGR2GRAY)
 
             # Drift
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
             mov = mov[int(fdy1):int(h1-fdy), int(fdx1):int(w1-fdx)]
             
             # Center of Mass
-            if(driftType == Align.DRIFT_GRAVITY):
+            if(gCopy.driftType == Align.DRIFT_GRAVITY):
                 (cx, cy) = centerOfMass(mov)
                 C = np.float32([[1, 0, int(w1/2) - int(cx)], 
                                 [0, 1, int(h1/2) - int(cy)]])
@@ -207,7 +208,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
             # Resize
             mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
             
-            if(normalize):
+            if(gCopy.normalize):
                 mov = normalizeImg(mov)
 
             # Stack Registration
@@ -230,7 +231,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
             M = shiftOrigin(M, aoi1[0], aoi1[1])
             
             # Add center of mass transform
-            if(driftType == Align.DRIFT_GRAVITY):
+            if(gCopy.driftType == Align.DRIFT_GRAVITY):
                 M[0][2] += int(w1/2) - int(cx)
                 M[1][2] += int(h1/2) - int(cy)
                 M = shiftOrigin(M, -(int(w1/2) - int(cx)), -(int(h1/2) - int(cy)))
@@ -253,7 +254,7 @@ def align(frames, file, ref, referenceIndex, driftType, transformation, normaliz
                 yFactor = 64/movOrig.shape[0]
             movOrig = cv2.resize(movOrig, (64, 64))
             
-            if(normalize): 
+            if(gCopy.normalize): 
                 movOrig = normalizeImg(movOrig)
                 
             # Similarity

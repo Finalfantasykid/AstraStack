@@ -22,7 +22,7 @@ from Video import Video
 from Align import Align, centerOfMass
 from Stack import Stack, transform
 from Sharpen import Sharpen
-from Globals import g
+from Globals import *
 
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -138,6 +138,11 @@ class UI:
         g.guessedColorMode = Video.COLOR_RGB
         
         g.limit = 0
+        
+        g.sharpen = [None]*5
+        g.radius  = [None]*5
+        g.denoise = [None]*5
+        g.level   = [None]*5
 
         self.setThreads()
         self.window.show_all()
@@ -556,10 +561,10 @@ class UI:
             videoIndex = int(self.frameSlider.get_value())
             if(len(self.video.frames) == 0):
                 # Single Image
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.actualColor()), cv2.COLOR_BGR2RGB).astype(np.uint8)
             else:
                 # Video/Sequence
-                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], (g.colorMode or g.guessedColorMode)), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.actualColor()), cv2.COLOR_BGR2RGB).astype(np.uint8)
                 
             height, width = img.shape[:2]
             
@@ -576,14 +581,12 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex, (g.colorMode or g.guessedColorMode)).astype(np.uint8)
+            img = self.video.getFrame(g.file, videoIndex, g.actualColor()).astype(np.uint8)
             if(g.autoCrop):
                 ref = self.stack.refBG.astype(np.uint8)
             else:
                 ref = None
-            img = transform(img, ref, M,
-                            self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, 
-                            g.drizzleFactor, g.drizzleInterpolation)
+            img = transform(img, ref, M, self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, g)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             
             pixbuf = self.createPixbuf(img)
@@ -1102,29 +1105,12 @@ class UI:
             return
         self.processSpinner.start()
         self.processSpinner.show()
-        g.sharpen1 = self.builder.get_object("sharpen1").get_value()
-        g.sharpen2 = self.builder.get_object("sharpen2").get_value()
-        g.sharpen3 = self.builder.get_object("sharpen3").get_value()
-        g.sharpen4 = self.builder.get_object("sharpen4").get_value()
-        g.sharpen5 = self.builder.get_object("sharpen5").get_value()
 
-        g.radius1 = self.builder.get_object("radius1").get_value()
-        g.radius2 = self.builder.get_object("radius2").get_value()
-        g.radius3 = self.builder.get_object("radius3").get_value()
-        g.radius4 = self.builder.get_object("radius4").get_value()
-        g.radius5 = self.builder.get_object("radius5").get_value()
-        
-        g.denoise1 = self.builder.get_object("denoise1").get_value()
-        g.denoise2 = self.builder.get_object("denoise2").get_value()
-        g.denoise3 = self.builder.get_object("denoise3").get_value()
-        g.denoise4 = self.builder.get_object("denoise4").get_value()
-        g.denoise5 = self.builder.get_object("denoise5").get_value()
-        
-        g.level1 = self.builder.get_object("level1").get_active()
-        g.level2 = self.builder.get_object("level2").get_active()
-        g.level3 = self.builder.get_object("level3").get_active()
-        g.level4 = self.builder.get_object("level4").get_active()
-        g.level5 = self.builder.get_object("level5").get_active()
+        for i in range(0,5):
+            g.sharpen[i] = (self.builder.get_object("sharpen" + str(i+1)).get_value())
+            g.radius[i] = (self.builder.get_object("radius" + str(i+1)).get_value())
+            g.denoise[i] = (self.builder.get_object("denoise" + str(i+1)).get_value())
+            g.level[i] = (self.builder.get_object("level" + str(i+1)).get_active())
         
         g.deconvolveCircular = self.builder.get_object("deconvolveCircular").get_active()
         g.deconvolveGaussian = self.builder.get_object("deconvolveGaussian").get_active()
@@ -1219,7 +1205,7 @@ def run():
     # Newer versions of Adwaita scalable icons don't work well with older librsvg.
     # This can be removed when no longer being built with an older librsvg
     Gtk.IconTheme.get_default().prepend_search_path('share_override/icons')
-
+    
     g.ui = UI()
 
     Gtk.main()

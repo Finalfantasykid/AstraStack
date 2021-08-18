@@ -8,7 +8,7 @@ from pywt import swt2, iswt2
 from time import sleep
 from deconvolution import *
 from Video import Video
-from Globals import g
+from Globals import *
 
 pool = ProcessPoolExecutor(3)
 
@@ -25,7 +25,7 @@ class Sharpen:
         if(isFile):
             # Single image provided
             video = Video()
-            stackedImage = video.getFrame(None, stackedImage, (g.colorMode or g.guessedColorMode))
+            stackedImage = video.getFrame(None, stackedImage, g.actualColor())
         else:
             # Use the higher bit depth version from the stacking process
             pass
@@ -84,34 +84,12 @@ class Sharpen:
         
     # Sharpens each channel
     def sharpenLayers(self):
-        gParam = {
-            'level' : [g.level1, 
-                       g.level2,
-                       g.level3,
-                       g.level4,
-                       g.level5],
-            'sharpen': [g.sharpen1,
-                        g.sharpen2,
-                        g.sharpen3,
-                        g.sharpen4,
-                        g.sharpen5],
-            'radius': [g.radius1,
-                       g.radius2,
-                       g.radius3,
-                       g.radius4,
-                       g.radius5],
-            'denoise': [g.denoise1,
-                        g.denoise2,
-                        g.denoise3,
-                        g.denoise4,
-                        g.denoise5]
-        }
+        gCopy = cloneGlobals()
 
         futures = []
-
-        futures.append(pool.submit(sharpenChannelLayers, gParam))
-        futures.append(pool.submit(sharpenChannelLayers, gParam))
-        futures.append(pool.submit(sharpenChannelLayers, gParam))
+        futures.append(pool.submit(sharpenChannelLayers, gCopy))
+        futures.append(pool.submit(sharpenChannelLayers, gCopy))
+        futures.append(pool.submit(sharpenChannelLayers, gCopy))
         
         for future in futures:
             result = future.result()
@@ -134,28 +112,13 @@ class Sharpen:
             # Decompose
             beforeAvg = np.average(img)
             (R, G, B) = cv2.split(img)
-            
-            gParam = {
-                'circular': g.deconvolveCircular,
-                'gaussian': g.deconvolveGaussian,
-                'linear': g.deconvolveLinear,
-                'custom': g.deconvolveCustom,
-                'circularDiameter': g.deconvolveCircularDiameter,
-                'circularAmount': g.deconvolveCircularAmount,
-                'gaussianDiameter': g.deconvolveGaussianDiameter,
-                'gaussianAmount': g.deconvolveGaussianAmount,
-                'gaussianSpread': g.deconvolveGaussianSpread,
-                'linearDiameter': g.deconvolveLinearDiameter,
-                'linearAmount': g.deconvolveLinearAmount,
-                'linearAngle': g.deconvolveLinearAngle,
-                'customFile': g.deconvolveCustomFile,
-                'customAmount': g.deconvolveCustomAmount
-            }
+
+            gCopy = cloneGlobals()
             
             futures = []
-            futures.append(pool.submit(deconvolve, R, gParam))
-            futures.append(pool.submit(deconvolve, G, gParam))
-            futures.append(pool.submit(deconvolve, B, gParam))
+            futures.append(pool.submit(deconvolve, R, gCopy))
+            futures.append(pool.submit(deconvolve, G, gCopy))
+            futures.append(pool.submit(deconvolve, B, gCopy))
             
             R = futures[0].result()
             G = futures[1].result()
@@ -248,38 +211,38 @@ def calculateChannelCoefficients(C, channel, num, lock):
 # Reconstructs the wavelet using varying intensities of coefficients, 
 # as well as unsharp mask for additional sharpening
 # and gaussian denoise
-def sharpenChannelLayers(params):
+def sharpenChannelLayers(gCopy):
     c = g.coeffs
     # Go through each wavelet layer and apply sharpening
     cCopy = []
     for i in range(1, len(c)):
         level = (len(c) - i - 1)
         # Copy the layer if a change is made to the coefficients
-        if(params['level'][level] and (params['radius'][level] > 0 or 
-                                       params['sharpen'][level] > 0 or 
-                                       params['denoise'][level] > 0)):
+        if(gCopy.level[level] and (gCopy.radius[level] > 0 or 
+                                   gCopy.sharpen[level] > 0 or 
+                                   gCopy.denoise[level] > 0)):
             cCopy.append(copy.deepcopy(c[i]))
         else:
             cCopy.append(None)
             
         # Process Layers
-        if(params['level'][level]):
+        if(gCopy.level[level]):
             # Apply Unsharp Mask
-            if(params['radius'][level] > 0):
-                unsharp(c[i][0], params['radius'][level], 2)
-                unsharp(c[i][1], params['radius'][level], 2)
-                unsharp(c[i][2], params['radius'][level], 2)
+            if(gCopy.radius[level] > 0):
+                unsharp(c[i][0], gCopy.radius[level], 2)
+                unsharp(c[i][1], gCopy.radius[level], 2)
+                unsharp(c[i][2], gCopy.radius[level], 2)
             # Multiply the layer to increase intensity
-            if(params['sharpen'][level] > 0):
+            if(gCopy.sharpen[level] > 0):
                 factor = (100 - 10*level)
-                cv2.add(c[i][0], c[i][0]*params['sharpen'][level]*factor, c[i][0])
-                cv2.add(c[i][1], c[i][1]*params['sharpen'][level]*factor, c[i][1])
-                cv2.add(c[i][2], c[i][2]*params['sharpen'][level]*factor, c[i][2])
+                cv2.add(c[i][0], c[i][0]*gCopy.sharpen[level]*factor, c[i][0])
+                cv2.add(c[i][1], c[i][1]*gCopy.sharpen[level]*factor, c[i][1])
+                cv2.add(c[i][2], c[i][2]*gCopy.sharpen[level]*factor, c[i][2])
             # Denoise
-            if(params['denoise'][level] > 0):
-                unsharp(c[i][0], params['denoise'][level], -1)
-                unsharp(c[i][1], params['denoise'][level], -1)
-                unsharp(c[i][2], params['denoise'][level], -1)
+            if(gCopy.denoise[level] > 0):
+                unsharp(c[i][0], gCopy.denoise[level], -1)
+                unsharp(c[i][1], gCopy.denoise[level], -1)
+                unsharp(c[i][2], gCopy.denoise[level], -1)
     
     # Reconstruction
     padding = 2**(Sharpen.LEVEL)

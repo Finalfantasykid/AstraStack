@@ -3,31 +3,31 @@ import numpy as np
 import math
 
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
-def deconvolve(img, params):
+def deconvolve(img, gCopy):
     # Do some initial checks
-    if(not params['circular'] or params['circularDiameter'] <= 1):
-        params['circularDiameter'] = 0
-        params['circular'] = False
-    if(not params['gaussian'] or params['gaussianDiameter'] <= 1):
-        params['gaussianDiameter'] = 0
-        params['gaussian'] = False
-    if(not params['linear'] or params['linearDiameter'] <= 1):
-        params['linearDiameter'] = 0
-        params['linear'] = False
-    if(not params['custom'] or params['customFile'] is None):
-        params['customDiameter'] = 0
-        params['custom'] = False
-    if(params['custom']):
-        params['customDiameter'] = max(params['customFile'].shape)
-    params['circularDiameter'] = int(params['circularDiameter'])
-    params['gaussianDiameter'] = int(params['gaussianDiameter'])
-    params['linearDiameter'] = int(params['linearDiameter'])
+    if(not gCopy.deconvolveCircular or gCopy.deconvolveCircularDiameter <= 1):
+        gCopy.deconvolveCircularDiameter = 0
+        gCopy.deconvolveCircular = False
+    if(not gCopy.deconvolveGaussian or gCopy.deconvolveGaussianDiameter <= 1):
+        gCopy.deconvolveGaussianDiameter = 0
+        gCopy.deconvolveGaussian = False
+    if(not gCopy.deconvolveLinear or gCopy.deconvolveLinearDiameter <= 1):
+        gCopy.deconvolveLinearDiameter = 0
+        gCopy.deconvolveLinear = False
+    if(not gCopy.deconvolveCustom or gCopy.deconvolveCustomFile is None):
+        gCopy.deconvolveCustomDiameter = 0
+        gCopy.deconvolveCustom = False
+    if(gCopy.deconvolveCustom):
+        gCopy.deconvolveCustomDiameter = max(gCopy.deconvolveCustomFile.shape)
+    gCopy.deconvolveCircularDiameter = int(gCopy.deconvolveCircularDiameter)
+    gCopy.deconvolveGaussianDiameter = int(gCopy.deconvolveGaussianDiameter)
+    gCopy.deconvolveLinearDiameter = int(gCopy.deconvolveLinearDiameter)
     
-    d = max(params['circularDiameter'] + params['linearDiameter'] - 1,
-            params['gaussianDiameter'] + params['linearDiameter'] - 1,
-            params['linearDiameter'],
-            params['customDiameter'])
-    if(params['gaussianDiameter'] > 1):
+    d = max(gCopy.deconvolveCircularDiameter + gCopy.deconvolveLinearDiameter - 1,
+            gCopy.deconvolveGaussianDiameter + gCopy.deconvolveLinearDiameter - 1,
+            gCopy.deconvolveLinearDiameter,
+            gCopy.deconvolveCustomDiameter)
+    if(gCopy.deconvolveGaussianDiameter > 1):
         d = max(d, 10)
     d = max(d, 1) # Make sure 'd' is always at least 1
     rows, cols = img.shape
@@ -43,27 +43,27 @@ def deconvolve(img, params):
     
     # Start the deconvolution
     for deconvolveType in ("circular", "gaussian", "linear", "custom"):
-        if(deconvolveType == "circular" and params['circular']):
+        if(deconvolveType == "circular" and gCopy.deconvolveCircular):
             # Circular
-            psf = defocus_kernel(params['circularDiameter'], (params['circularDiameter'] + params['linearDiameter'] - 1)*2) 
-            noise = 10**(-0.1*params['circularAmount'])
-        elif(deconvolveType == "gaussian" and params['gaussian']):
+            psf = defocus_kernel(gCopy.deconvolveCircularDiameter, (gCopy.deconvolveCircularDiameter + gCopy.deconvolveLinearDiameter - 1)*2) 
+            noise = 10**(-0.1*gCopy.deconvolveCircularAmount)
+        elif(deconvolveType == "gaussian" and gCopy.deconvolveGaussian):
             # Gaussian
-            psf = gaussian_kernel(params['gaussianDiameter'], params['gaussianSpread'], max(10, (params['gaussianDiameter'] + params['linearDiameter'] - 1)*2))
-            noise = 10**(-0.1*params['gaussianAmount'])
-        elif(deconvolveType == "custom" and params['custom']):
+            psf = gaussian_kernel(gCopy.deconvolveGaussianDiameter, gCopy.deconvolveGaussianSpread, max(10, (gCopy.deconvolveGaussianDiameter + gCopy.deconvolveLinearDiameter - 1)*2))
+            noise = 10**(-0.1*gCopy.deconvolveGaussianAmount)
+        elif(deconvolveType == "custom" and gCopy.deconvolveCustom):
             # Custom
-            psf = params['customFile']
-            noise = 10**(-0.1*params['customAmount'])
-        elif(deconvolveType == "linear" and params['linear'] and not params['circular'] and not params['gaussian']):
+            psf = gCopy.deconvolveCustomFile
+            noise = 10**(-0.1*gCopy.deconvolveCustomAmount)
+        elif(deconvolveType == "linear" and gCopy.deconvolveLinear and not gCopy.deconvolveCircular and not gCopy.deconvolveGaussian):
             # Linear Only
-            psf = motion_kernel(params['linearAngle'], params['linearDiameter'], (params['linearDiameter'] + params['linearDiameter'] - 1)*2)
-            noise = 10**(-0.1*params['linearAmount'])
+            psf = motion_kernel(gCopy.deconvolveLinearAngle, gCopy.deconvolveLinearDiameter, (gCopy.deconvolveLinearDiameter*2 - 1)*2)
+            noise = 10**(-0.1*gCopy.deconvolveLinearAmount)
         else:
             continue
-        if((deconvolveType == "circular" or deconvolveType == "gaussian") and params['linear']):
+        if((deconvolveType == "circular" or deconvolveType == "gaussian") and gCopy.deconvolveLinear):
             # Stretch&Rotate the Gaussian/Circular
-            psf = stretchPSF(psf, (params['linearDiameter']/max(params['gaussianDiameter'],params['circularDiameter'])), params['linearAngle'])
+            psf = stretchPSF(psf, (gCopy.deconvolveLinearDiameter/max(gCopy.deconvolveGaussianDiameter, gCopy.deconvolveCircularDiameter)), gCopy.deconvolveLinearAngle)
         kh, kw = psf.shape   
         IMG = cv2.dft(img, flags=cv2.DFT_COMPLEX_OUTPUT)
         psf /= psf.sum()
