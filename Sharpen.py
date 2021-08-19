@@ -227,22 +227,17 @@ def sharpenChannelLayers(gCopy):
             
         # Process Layers
         if(gCopy.level[level]):
-            # Apply Unsharp Mask
-            if(gCopy.radius[level] > 0):
-                unsharp(c[i][0], gCopy.radius[level], 2)
-                unsharp(c[i][1], gCopy.radius[level], 2)
-                unsharp(c[i][2], gCopy.radius[level], 2)
-            # Multiply the layer to increase intensity
-            if(gCopy.sharpen[level] > 0):
-                factor = (100 - 10*level)
-                cv2.add(c[i][0], c[i][0]*gCopy.sharpen[level]*factor, c[i][0])
-                cv2.add(c[i][1], c[i][1]*gCopy.sharpen[level]*factor, c[i][1])
-                cv2.add(c[i][2], c[i][2]*gCopy.sharpen[level]*factor, c[i][2])
-            # Denoise
-            if(gCopy.denoise[level] > 0):
-                unsharp(c[i][0], gCopy.denoise[level], -1)
-                unsharp(c[i][1], gCopy.denoise[level], -1)
-                unsharp(c[i][2], gCopy.denoise[level], -1)
+            for ci in c[i]:
+                # Apply Unsharp Mask
+                if(gCopy.radius[level] > 0):
+                    unsharp(ci, gCopy.radius[level], 2)
+                # Multiply the layer to increase intensity
+                if(gCopy.sharpen[level] > 0):
+                    factor = (100 - 10*level)
+                    cv2.add(ci, ci*gCopy.sharpen[level]*factor, ci)
+                # Denoise
+                if(gCopy.denoise[level] > 0):
+                    unsharp(ci, gCopy.denoise[level], -1)
     
     # Reconstruction
     padding = 2**(Sharpen.LEVEL)
