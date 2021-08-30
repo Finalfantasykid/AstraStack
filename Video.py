@@ -172,8 +172,8 @@ class Video:
             diff = 0
             if(diff1 > 0.0001 and diff2 > 0.0001):
                 diff = abs(diff1 - diff2)/min(diff1, diff2)
-            if(diff > 1):
-                # Uses a bayer pattern, but which one...
+            if(diff > 0.2):
+                # Probably uses a bayer pattern, but which one...
                 rggbDiff = np.average(cv2.absdiff(rggb[:,:,0], rggb[:,:,2]))
                 grbgDiff = np.average(cv2.absdiff(grbg[:,:,0], grbg[:,:,2]))
                 if(rggbDiff >= grbgDiff):
