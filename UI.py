@@ -206,6 +206,34 @@ class UI:
         response = dialog.run()
         dialog.hide()
         
+    # Resets the env to a 'clean' version not tainted by pyinstaller
+    def cleanseEnv(self):
+        env = dict(os.environ)  # make a copy of the environment
+        lp_key = 'LD_LIBRARY_PATH'  # for GNU/Linux and *BSD.
+        lp_orig = env.get(lp_key + '_ORIG')
+        if lp_orig is not None:
+            env[lp_key] = lp_orig  # restore the original, unmodified value
+        else:
+            # This happens when LD_LIBRARY_PATH was not set.
+            # Remove the env var as a last resort:
+            env.pop(lp_key, None)
+        # 'Clean' some other variables so they aren't using astrastack paths
+        env.pop("GTK_PATH", None)
+        env.pop("GTK_DATA_PREFIX", None)
+        env.pop("XDG_DATA_DIRS", None)
+        env.pop("GIO_MODULE_DIR", None)
+        env.pop("PANGO_LIBDIR", None)
+        env.pop("GDK_PIXBUF_MODULE_FILE", None)
+        env.pop("GI_TYPELIB_PATH", None)
+        return env
+    
+    # When a link in the about dialog is clicked
+    def clickAboutLink(self, dialog, url):
+        if os.name == 'posix': # For Linux
+            subprocess.Popen(('xdg-open', url), env=self.cleanseEnv())
+            return True
+        return False
+        
     # Opens the user manual in the default pdf application
     def showManual(self, *args):
         if sys.platform.startswith('darwin'):
@@ -213,25 +241,8 @@ class UI:
         elif os.name == 'nt': # For Windows
             os.startfile("manual\Manual.pdf")
         elif os.name == 'posix': # For Linux
-            env = dict(os.environ)  # make a copy of the environment
-            lp_key = 'LD_LIBRARY_PATH'  # for GNU/Linux and *BSD.
-            lp_orig = env.get(lp_key + '_ORIG')
-            if lp_orig is not None:
-                env[lp_key] = lp_orig  # restore the original, unmodified value
-            else:
-                # This happens when LD_LIBRARY_PATH was not set.
-                # Remove the env var as a last resort:
-                env.pop(lp_key, None)
-            # 'Clean' some other variables so they aren't using astrastack paths
-            env.pop("GTK_PATH", None)
-            env.pop("GTK_DATA_PREFIX", None)
-            env.pop("XDG_DATA_DIRS", None)
-            env.pop("GIO_MODULE_DIR", None)
-            env.pop("PANGO_LIBDIR", None)
-            env.pop("GDK_PIXBUF_MODULE_FILE", None)
-            env.pop("GI_TYPELIB_PATH", None)
             # Now open the file
-            subprocess.Popen(('xdg-open', "manual/Manual.pdf"), env=env)
+            subprocess.Popen(('xdg-open', "manual/Manual.pdf"), env=self.cleanseEnv())
         
     # Disable inputs
     def disableUI(self):
@@ -295,7 +306,11 @@ class UI:
         
     # Opens the GitHub releases page in a browser
     def clickNewVersion(self, *args):
-        webbrowser.open(self.newVersionUrl)
+        if os.name == 'posix': # For Linux
+            # Now open the file
+            subprocess.Popen(('xdg-open', self.newVersionUrl), env=self.cleanseEnv())
+        else:
+            webbrowser.open(self.newVersionUrl)
     
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self, w=0, h=0):

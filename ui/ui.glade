@@ -12,6 +12,7 @@
     <property name="authors">David Turner</property>
     <property name="logo">logo_small.png</property>
     <property name="license_type">lgpl-3-0</property>
+    <signal name="activate-link" handler="clickAboutLink" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
