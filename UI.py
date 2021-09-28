@@ -38,7 +38,7 @@ class UI:
     SHARPEN_TAB = 3
     
     TITLE = "AstraStack"
-    VERSION = "2.3.0"
+    VERSION = "2.3.1"
     
     def __init__(self):
         self.pids = []
