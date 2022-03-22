@@ -29,12 +29,13 @@ class Sharpen:
         else:
             # Use the higher bit depth version from the stacking process
             pass
-        stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
+        self.stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
         self.h, self.w = stackedImage.shape[:2]
-        self.sharpenedImage = stackedImage
-        self.debluredImage = stackedImage
-        self.finalImage = stackedImage
-        self.calculateCoefficients(stackedImage)
+        self.mask = None
+        self.sharpenedImage = self.stackedImage
+        self.debluredImage = self.stackedImage
+        self.finalImage = self.stackedImage
+        self.calculateCoefficients(self.stackedImage)
         self.processAgain = False
         self.processDeblurAgain = False
         self.processColorAgain = False
@@ -51,6 +52,7 @@ class Sharpen:
                 self.processColorAgain = False
                 self.sharpenLayers()
                 self.deblur()
+                self.dering()
                 self.processColor()
             elif(self.processDeblurAgain):
                 # Process deblur and color
@@ -58,12 +60,14 @@ class Sharpen:
                 self.processDeblurAgain = False
                 self.processColorAgain = False
                 self.deblur()
+                self.dering()
                 self.processColor()
             else:
                 # Only process color
                 self.processAgain = False
                 self.processDeblurAgain = False
                 self.processColorAgain = False
+                self.dering()
                 self.processColor()
             g.ui.finishedSharpening()
         
@@ -135,6 +139,36 @@ class Sharpen:
                 pass
            
         self.debluredImage = img
+        
+    # Apply dering/star mask to sharpened image
+    def dering(self):
+        gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_RGB2GRAY)
+
+        # Calculate Dark & Bright thresholds and merge them
+        threshDark = np.zeros((self.h, self.w), dtype = "uint8")
+        threshBright = np.zeros((self.h, self.w), dtype = "uint8")
+        if(g.showDark and g.deringDark > 0):
+            ret,threshDark   = cv2.threshold(gray, g.deringDark-1, 255, cv2.THRESH_BINARY_INV)
+        if(g.showBright and g.deringBright > 0):
+            threshBright = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 25-g.deringBright)
+            #ret,threshBright = cv2.threshold(gray, 255-g.deringBright, 255, cv2.THRESH_BINARY)
+        thresh = np.maximum(threshDark, threshBright)
+        
+        # Dialate the threshold
+        if(g.deringSize > 0):
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (g.deringSize*2+1,g.deringSize*2+1))
+            thresh = cv2.dilate(thresh, kernel)
+        
+        # Blur the thresholds
+        if(g.deringBlend > 0):
+            thresh = cv2.GaussianBlur(thresh, (0,0), g.deringBlend)
+        
+        self.thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+        mask = self.thresh.astype(np.float32)/255
+        inv_mask = 1 - mask
+        orig = self.stackedImage.astype(np.float32)/255 * mask
+        processed = self.debluredImage * inv_mask
+        self.debluredImage = orig + processed
     
     # Apply brightness & color sliders
     def processColor(self):

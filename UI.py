@@ -86,6 +86,7 @@ class UI:
         self.limitPercent = self.builder.get_object("limitPercent")
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
+        self.showMask = self.builder.get_object("showMask")
         
         self.openDialog.set_preview_widget(Gtk.Image())
         self.saveDialog.set_preview_widget(Gtk.Image())
@@ -102,6 +103,10 @@ class UI:
         self.builder.get_object("deconvolveLinearAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveLinearAngleWidget").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveCustomAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deringDark").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deringBright").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deringSize").add_mark(0, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deringBlend").add_mark(1, Gtk.PositionType.TOP, None)
         self.builder.get_object("blackLevel").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("gamma").add_mark(100, Gtk.PositionType.TOP, None)
         self.builder.get_object("value").add_mark(100, Gtk.PositionType.TOP, None)
@@ -1142,6 +1147,13 @@ class UI:
         g.deconvolveLinearAngle = self.builder.get_object("deconvolveLinearAngle").get_value()
         g.deconvolveCustomAmount = self.builder.get_object("deconvolveCustomAmount").get_value()
         
+        g.showDark = self.builder.get_object("showDark").get_active()
+        g.showBright = self.builder.get_object("showBright").get_active()
+        g.deringDark = int(self.builder.get_object("deringDarkAdjust").get_value())
+        g.deringBright = int(self.builder.get_object("deringBrightAdjust").get_value())
+        g.deringSize = int(self.builder.get_object("deringSizeAdjust").get_value())
+        g.deringBlend = int(self.builder.get_object("deringBlendAdjust").get_value())
+        
         g.gamma = self.builder.get_object("gammaAdjust").get_value()
         g.blackLevel = self.builder.get_object("blackLevelAdjust").get_value()
         g.value = self.builder.get_object("valueAdjust").get_value()
@@ -1198,9 +1210,12 @@ class UI:
         self.updatePSFImage(args)
     
     # Called when sharpening is complete
-    def finishedSharpening(self):
+    def finishedSharpening(self, *args):
         def update():
-            pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
+            if(self.showMask.get_active()):
+                pixbuf = self.createPixbuf(np.around(self.sharpen.thresh).astype('uint8'))
+            else:
+                pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
             self.frame.set_from_pixbuf(pixbuf)
             self.updateHistogram()
             self.processSpinner.stop()

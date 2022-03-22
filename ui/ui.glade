@@ -140,6 +140,27 @@
     <property name="step_increment">0.10000000000000001</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="deringBlendAdjust">
+    <property name="upper">50</property>
+    <property name="value">1</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deringBrightAdjust">
+    <property name="upper">50</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deringDarkAdjust">
+    <property name="upper">50</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="deringSizeAdjust">
+    <property name="upper">50</property>
+    <property name="step_increment">1</property>
+    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="endFrame">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -2293,6 +2314,183 @@ Note: Drift adjustment will still crop the image.</property>
                                   </packing>
                                 </child>
                                 <child>
+                                  <object class="GtkExpander" id="dering">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="margin_bottom">10</property>
+                                    <child>
+                                      <object class="GtkGrid">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="margin_top">5</property>
+                                        <property name="column_spacing">5</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Controls the mid-tones of the image.</property>
+                                            <property name="label" translatable="yes">Size:</property>
+                                            <property name="xalign">1</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deringSize">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deringSizeAdjust</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deringDark">
+                                            <property name="width_request">275</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deringDarkAdjust</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="tooltip_text" translatable="yes">Adjusts the brightness of the image.</property>
+                                            <property name="label" translatable="yes">Blend:</property>
+                                            <property name="width_chars">12</property>
+                                            <property name="xalign">1</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deringBlend">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deringBlendAdjust</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkScale" id="deringBright">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="adjustment">deringBrightAdjust</property>
+                                            <property name="round_digits">0</property>
+                                            <property name="digits">0</property>
+                                            <property name="value_pos">left</property>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">1</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCheckButton" id="showMask">
+                                            <property name="label" translatable="yes">Only show mask</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="finishedSharpening" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">4</property>
+                                            <property name="width">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCheckButton" id="showDark">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <child>
+                                              <object class="GtkLabel">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="halign">end</property>
+                                                <property name="label" translatable="yes">Dark:</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCheckButton" id="showBright">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <child>
+                                              <object class="GtkLabel">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="halign">end</property>
+                                                <property name="label" translatable="yes">Bright:</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child type="label">
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Dering</property>
+                                        <attributes>
+                                          <attribute name="weight" value="bold"/>
+                                        </attributes>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkExpander" id="colors">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -2322,6 +2520,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="can_focus">False</property>
                                             <property name="tooltip_text" translatable="yes">Controls the where the black level is.  Increasing this value darkens the overall image.</property>
                                             <property name="label" translatable="yes">Black Level:</property>
+                                            <property name="width_chars">12</property>
                                             <property name="xalign">1</property>
                                           </object>
                                           <packing>
@@ -2346,7 +2545,7 @@ Note: Drift adjustment will still crop the image.</property>
                                         </child>
                                         <child>
                                           <object class="GtkScale" id="blackLevel">
-                                            <property name="width_request">283</property>
+                                            <property name="width_request">275</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="adjustment">blackLevelAdjust</property>
@@ -2529,7 +2728,7 @@ Note: Drift adjustment will still crop the image.</property>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">2</property>
+                                    <property name="position">3</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2543,7 +2742,7 @@ Note: Drift adjustment will still crop the image.</property>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">3</property>
+                                    <property name="position">4</property>
                                   </packing>
                                 </child>
                               </object>
