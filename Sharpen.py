@@ -34,21 +34,25 @@ class Sharpen:
         self.mask = None
         self.sharpenedImage = self.stackedImage
         self.debluredImage = self.stackedImage
+        self.deringedImage = self.stackedImage
         self.finalImage = self.stackedImage
         self.calculateCoefficients(self.stackedImage)
         self.processAgain = False
         self.processDeblurAgain = False
+        self.processDeringAgain = False
         self.processColorAgain = False
         
-    def run(self, processAgain=True, processDeblurAgain=False, processColorAgain=False):
+    def run(self, processAgain=True, processDeblurAgain=False, processDeringAgain=False, processColorAgain=False):
         self.processAgain = processAgain
         self.processDeblurAgain = processDeblurAgain
+        self.processDeringAgain = processDeringAgain
         self.processColorAgain = processColorAgain
-        while(self.processAgain or self.processDeblurAgain or self.processColorAgain):
+        while(self.processAgain or self.processDeblurAgain or self.processDeringAgain or self.processColorAgain):
             if(self.processAgain):
                 # Process sharpening, deblur and color
                 self.processAgain = False
                 self.processDeblurAgain = False
+                self.processDeringAgain = False
                 self.processColorAgain = False
                 self.sharpenLayers()
                 self.deblur()
@@ -58,16 +62,25 @@ class Sharpen:
                 # Process deblur and color
                 self.processAgain = False
                 self.processDeblurAgain = False
+                self.processDeringAgain = False
                 self.processColorAgain = False
                 self.deblur()
+                self.dering()
+                self.processColor()
+            elif(self.processDeringAgain):
+                # Only process color
+                self.processAgain = False
+                self.processDeblurAgain = False
+                self.processDeringAgain = False
+                self.processColorAgain = False
                 self.dering()
                 self.processColor()
             else:
                 # Only process color
                 self.processAgain = False
                 self.processDeblurAgain = False
+                self.processDeringAgain = False
                 self.processColorAgain = False
-                self.dering()
                 self.processColor()
             g.ui.finishedSharpening()
         
@@ -168,7 +181,7 @@ class Sharpen:
         inv_mask = 1 - mask
         orig = self.stackedImage.astype(np.float32)/255 * mask
         processed = self.debluredImage * inv_mask
-        self.debluredImage = orig + processed
+        self.deringedImage = orig + processed
     
     # Apply brightness & color sliders
     def processColor(self):
@@ -181,7 +194,7 @@ class Sharpen:
             C *= (adjust/100)*(g.value/100)
             return C
             
-        img = self.debluredImage
+        img = self.deringedImage
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
 

@@ -1172,7 +1172,18 @@ class UI:
                               self.builder.get_object("valueAdjust") == args[0])):
             processAgain = self.sharpen.processAgain
             processDeblur = self.sharpen.processDeblurAgain
+            processDering = self.sharpen.processDeringAgain
             processColor = True
+        elif(len(args) > 0 and (self.builder.get_object("deringDarkAdjust") == args[0] or
+                                self.builder.get_object("deringBrightAdjust") == args[0] or
+                                self.builder.get_object("deringSizeAdjust") == args[0] or
+                                self.builder.get_object("deringBlendAdjust") == args[0] or
+                                self.builder.get_object("showDark") == args[0] or
+                                self.builder.get_object("showBright") == args[0])):
+            processAgain = self.sharpen.processAgain
+            processDeblur = self.sharpen.processDeblurAgain
+            processDering = True
+            processColor = False
         elif(len(args) > 0 and (self.builder.get_object("deconvolveCircular") == args[0] or
                                 self.builder.get_object("deconvolveGaussian") == args[0] or
                                 self.builder.get_object("deconvolveLinear") == args[0] or
@@ -1189,10 +1200,12 @@ class UI:
                                 self.builder.get_object("deconvolveCustomAmount") == args[0])):
             processAgain = self.sharpen.processAgain
             processDeblur = True
+            processDering = False
             processColor = False
         else:
             processAgain = True
             processDeblur = False
+            processDering = False
             processColor = False
         
         if(self.sharpen is None):
@@ -1203,9 +1216,10 @@ class UI:
         if(self.processThread != None and self.processThread.is_alive()):
             self.sharpen.processAgain = processAgain
             self.sharpen.processDeblurAgain = processDeblur
+            self.sharpen.processDeringAgain = processDering
             self.sharpen.processColorAgain = processColor
         else:
-            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processDeblur, processColor))
+            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processDeblur, processDering, processColor))
             self.processThread.start()
         self.updatePSFImage(args)
     
