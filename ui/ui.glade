@@ -1774,6 +1774,7 @@ Note: Drift adjustment will still crop the image.</property>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Apply wavelet sharpening to the image.</property>
                                         <property name="label" translatable="yes">Wavelets</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
@@ -2328,7 +2329,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">Controls the mid-tones of the image.</property>
+                                            <property name="tooltip_text" translatable="yes">Grows the area ignored by the dark/bright thresholds</property>
                                             <property name="label" translatable="yes">Size:</property>
                                             <property name="xalign">1</property>
                                           </object>
@@ -2372,7 +2373,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">Adjusts the brightness of the image.</property>
+                                            <property name="tooltip_text" translatable="yes">How much to blend the mask</property>
                                             <property name="label" translatable="yes">Blend:</property>
                                             <property name="width_chars">12</property>
                                             <property name="xalign">1</property>
@@ -2418,6 +2419,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Show the resulting mask in the image frame.</property>
                                             <property name="draw_indicator">True</property>
                                             <signal name="toggled" handler="finishedSharpening" swapped="no"/>
                                           </object>
@@ -2432,6 +2434,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Dark threshold.  Raise this value to ignore dark areas when sharpening.</property>
                                             <property name="active">True</property>
                                             <property name="draw_indicator">True</property>
                                             <signal name="toggled" handler="sharpenImage" swapped="no"/>
@@ -2454,6 +2457,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Bright threshold / Star Mask.  Raise this value to ignore relative bright areas when sharpening.</property>
                                             <property name="active">True</property>
                                             <property name="draw_indicator">True</property>
                                             <signal name="toggled" handler="sharpenImage" swapped="no"/>
@@ -2477,6 +2481,7 @@ Note: Drift adjustment will still crop the image.</property>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Helps to remove ringing or haloing from the wavelets and deblur.  </property>
                                         <property name="label" translatable="yes">Dering</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>
@@ -2718,6 +2723,7 @@ Note: Drift adjustment will still crop the image.</property>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="tooltip_text" translatable="yes">Adjust the colors and brightness of the image.</property>
                                         <property name="label" translatable="yes">Colors &amp; Brightness</property>
                                         <attributes>
                                           <attribute name="weight" value="bold"/>

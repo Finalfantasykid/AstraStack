@@ -1212,7 +1212,7 @@ class UI:
     # Called when sharpening is complete
     def finishedSharpening(self, *args):
         def update():
-            if(self.showMask.get_active()):
+            if(self.showMask.get_active() and self.sharpen.thresh is not None):
                 pixbuf = self.createPixbuf(np.around(self.sharpen.thresh).astype('uint8'))
             else:
                 pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
