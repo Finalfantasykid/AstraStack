@@ -164,7 +164,6 @@ class Sharpen:
             ret,threshDark   = cv2.threshold(gray, g.deringDark-1, 255, cv2.THRESH_BINARY_INV)
         if(g.showBright and g.deringBright > 0):
             threshBright = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 25-g.deringBright)
-            #ret,threshBright = cv2.threshold(gray, 255-g.deringBright, 255, cv2.THRESH_BINARY)
         thresh = np.maximum(threshDark, threshBright)
         
         # Dialate the threshold
