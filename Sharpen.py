@@ -155,32 +155,34 @@ class Sharpen:
         
     # Apply dering/star mask to sharpened image
     def dering(self):
-        gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_RGB2GRAY)
-
-        # Calculate Dark & Bright thresholds and merge them
-        threshDark = np.zeros((self.h, self.w), dtype = "uint8")
-        threshBright = np.zeros((self.h, self.w), dtype = "uint8")
-        if(g.showDark and g.deringDark > 0):
-            ret,threshDark   = cv2.threshold(gray, g.deringDark-1, 255, cv2.THRESH_BINARY_INV)
-        if(g.showBright and g.deringBright > 0):
-            threshBright = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 25-g.deringBright)
-        thresh = np.maximum(threshDark, threshBright)
-        
-        # Dialate the threshold
-        if(g.deringSize > 0):
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (g.deringSize*2+1,g.deringSize*2+1))
-            thresh = cv2.dilate(thresh, kernel)
-        
-        # Blur the thresholds
-        if(g.deringBlend > 0):
-            thresh = cv2.GaussianBlur(thresh, (0,0), g.deringBlend)
-        
-        self.thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
-        mask = self.thresh.astype(np.float32)/255
-        inv_mask = 1 - mask
-        orig = self.stackedImage.astype(np.float32)/255 * mask
-        processed = self.debluredImage * inv_mask
-        self.deringedImage = orig + processed
+        if((g.showDark and g.deringDark > 0) or (g.showBright and g.deringBright > 0)):
+            gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_RGB2GRAY)
+            # Calculate Dark & Bright thresholds and merge them
+            threshDark = np.zeros((self.h, self.w), dtype = "uint8")
+            threshBright = np.zeros((self.h, self.w), dtype = "uint8")
+            if(g.showDark and g.deringDark > 0):
+                ret,threshDark   = cv2.threshold(gray, g.deringDark-1, 255, cv2.THRESH_BINARY_INV)
+            if(g.showBright and g.deringBright > 0):
+                threshBright = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 25-g.deringBright)
+            thresh = np.maximum(threshDark, threshBright)
+            
+            # Dialate the threshold
+            if(g.deringSize > 0):
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (g.deringSize*2+1,g.deringSize*2+1))
+                thresh = cv2.dilate(thresh, kernel)
+            
+            # Blur the thresholds
+            if(g.deringBlend > 0):
+                thresh = cv2.GaussianBlur(thresh, (0,0), g.deringBlend)
+            
+            self.thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+            mask = self.thresh.astype(np.float32)/255
+            inv_mask = 1 - mask
+            orig = self.stackedImage.astype(np.float32)/255 * mask
+            processed = self.debluredImage * inv_mask
+            self.deringedImage = orig + processed
+        else:
+            self.deringedImage = self.debluredImage
     
     # Apply brightness & color sliders
     def processColor(self):
