@@ -182,6 +182,7 @@ class Sharpen:
             processed = self.debluredImage * inv_mask
             self.deringedImage = orig + processed
         else:
+            self.thresh = cv2.cvtColor(np.zeros((self.h, self.w), dtype = "uint8"), cv2.COLOR_GRAY2RGB)
             self.deringedImage = self.debluredImage
     
     # Apply brightness & color sliders
