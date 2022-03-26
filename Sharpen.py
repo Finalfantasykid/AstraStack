@@ -155,16 +155,21 @@ class Sharpen:
         
     # Apply dering/star mask to sharpened image
     def dering(self):
-        if((g.showDark and g.deringDark > 0) or (g.showBright and g.deringBright > 0)):
+        if((g.showAdaptive and g.deringAdaptive > 0) or 
+           (g.showDark and g.deringDark > 0) or 
+           (g.showBright and g.deringBright > 0)):
             gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_RGB2GRAY)
             # Calculate Dark & Bright thresholds and merge them
+            threshAdaptive = np.zeros((self.h, self.w), dtype = "uint8")
             threshDark = np.zeros((self.h, self.w), dtype = "uint8")
             threshBright = np.zeros((self.h, self.w), dtype = "uint8")
+            if(g.showAdaptive and g.deringAdaptive > 0):
+                threshAdaptive = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 30-g.deringAdaptive)
             if(g.showDark and g.deringDark > 0):
-                ret,threshDark   = cv2.threshold(gray, g.deringDark-1, 255, cv2.THRESH_BINARY_INV)
+                ret,threshDark = cv2.threshold(gray, (g.deringDark*2)-1, 255, cv2.THRESH_BINARY_INV)
             if(g.showBright and g.deringBright > 0):
-                threshBright = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 25-g.deringBright)
-            thresh = np.maximum(threshDark, threshBright)
+                ret,threshBright = cv2.threshold(gray, 255-(g.deringBright*2), 255, cv2.THRESH_BINARY)
+            thresh = np.maximum(np.maximum(threshAdaptive, threshDark), threshBright)
             
             # Dialate the threshold
             if(g.deringSize > 0):

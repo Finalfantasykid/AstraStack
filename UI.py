@@ -103,6 +103,7 @@ class UI:
         self.builder.get_object("deconvolveLinearAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveLinearAngleWidget").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deconvolveCustomAmountWidget").add_mark(25, Gtk.PositionType.TOP, None)
+        self.builder.get_object("deringAdaptive").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deringDark").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deringBright").add_mark(0, Gtk.PositionType.TOP, None)
         self.builder.get_object("deringSize").add_mark(0, Gtk.PositionType.TOP, None)
@@ -1147,8 +1148,10 @@ class UI:
         g.deconvolveLinearAngle = self.builder.get_object("deconvolveLinearAngle").get_value()
         g.deconvolveCustomAmount = self.builder.get_object("deconvolveCustomAmount").get_value()
         
+        g.showAdaptive = self.builder.get_object("showAdaptive").get_active()
         g.showDark = self.builder.get_object("showDark").get_active()
         g.showBright = self.builder.get_object("showBright").get_active()
+        g.deringAdaptive = int(self.builder.get_object("deringAdaptiveAdjust").get_value())
         g.deringDark = int(self.builder.get_object("deringDarkAdjust").get_value())
         g.deringBright = int(self.builder.get_object("deringBrightAdjust").get_value())
         g.deringSize = int(self.builder.get_object("deringSizeAdjust").get_value())
@@ -1174,10 +1177,12 @@ class UI:
             processDeblur = self.sharpen.processDeblurAgain
             processDering = self.sharpen.processDeringAgain
             processColor = True
-        elif(len(args) > 0 and (self.builder.get_object("deringDarkAdjust") == args[0] or
+        elif(len(args) > 0 and (self.builder.get_object("deringAdaptiveAdjust") == args[0] or
+                                self.builder.get_object("deringDarkAdjust") == args[0] or
                                 self.builder.get_object("deringBrightAdjust") == args[0] or
                                 self.builder.get_object("deringSizeAdjust") == args[0] or
                                 self.builder.get_object("deringBlendAdjust") == args[0] or
+                                self.builder.get_object("showAdaptive") == args[0] or
                                 self.builder.get_object("showDark") == args[0] or
                                 self.builder.get_object("showBright") == args[0])):
             processAgain = self.sharpen.processAgain
