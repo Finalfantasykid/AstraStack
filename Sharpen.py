@@ -150,7 +150,7 @@ class Sharpen:
                 img *= factor
             except:
                 pass
-           
+        img[img<0] = 0
         self.debluredImage = img
         
     # Apply dering/star mask to sharpened image
