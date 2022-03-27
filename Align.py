@@ -70,13 +70,42 @@ class Align:
             
         try:
             progress.setMessage("Aligning Frames")
+            # Load Reference
             ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], g.actualColor()), cv2.COLOR_BGR2GRAY)
+            refOrig = ref
+            
+            # Drift
+            rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
+            ref = ref[int(rfdy1):int(self.height-rfdy), int(rfdx1):int(self.width-rfdx)]
+            
+            # Center of Mass
+            if(g.driftType == Align.DRIFT_GRAVITY):
+                (cx, cy) = centerOfMass(ref)
+                C = np.float32([[1, 0, int(self.width/2) - int(cx)], 
+                                [0, 1, int(self.height/2) - int(cy)]])
+
+                ref = cv2.warpAffine(ref, C, (self.width, self.height), flags=cv2.INTER_NEAREST)
+                refOrig = cv2.warpAffine(refOrig, C, (self.width, self.height), flags=cv2.INTER_NEAREST)
+                
+            # Area of Interest
+            ref = cropAreaOfInterest(ref, aoi1, aoi2)
+            refOrig = cropAreaOfInterest(refOrig, aoi1, aoi2, rfdx1, rfdy1)
+                
+            h, w = ref.shape[:2]
+            scaleFactor = min(1.0, (100/h))
+            ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
+            refOrig = cv2.resize(refOrig, (64, 64))
+            
+            if(g.normalize):
+                ref = normalizeImg(ref)
+                refOrig = normalizeImg(refOrig)
+            
             gCopy = cloneGlobals()
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(align, frames, ref, referenceIndex, 
-                                             totalFrames, i*nFrames, dx, dy, aoi1, aoi2, 
+                futures.append(g.pool.submit(align, frames, ref, refOrig, self.width, self.height, w, h, scaleFactor,
+                                             totalFrames, i*nFrames, dx, dy, rfdx1, rfdy1, aoi1, aoi2, 
                                              ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
@@ -143,48 +172,18 @@ class Align:
         else:
             maxY = max(maxY, M[1][2])
         return (minX, maxX, minY, maxY)
-        
+
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, ref, referenceIndex, totalFrames, startFrame, dx, dy, aoi1, aoi2, progress, gCopy):
+def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFrame, dx, dy, rfdx1, rfdy1, aoi1, aoi2, progress, gCopy):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
     video = Video()
     
-    # Load Reference
-    refOrig = ref
-    h1, w1 = ref.shape[:2]
-    
-    # Drift
-    rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
-    ref = ref[int(rfdy1):int(h1-rfdy), int(rfdx1):int(w1-rfdx)]
-    
-    # Center of Mass
-    if(gCopy.driftType == Align.DRIFT_GRAVITY):
-        (cx, cy) = centerOfMass(ref)
-        C = np.float32([[1, 0, int(w1/2) - int(cx)], 
-                        [0, 1, int(h1/2) - int(cy)]])
-
-        ref = cv2.warpAffine(ref, C, (w1, h1), flags=cv2.INTER_NEAREST)
-        refOrig = cv2.warpAffine(refOrig, C, (w1, h1), flags=cv2.INTER_NEAREST)
-        
-    # Area of Interest
-    ref = cropAreaOfInterest(ref, aoi1, aoi2)
-    refOrig = cropAreaOfInterest(refOrig, aoi1, aoi2, rfdx1, rfdy1)
-    
     if(gCopy.transformation != -1):
         sr = StackReg(gCopy.transformation)
     else:
         sr = None
-        
-    h, w = ref.shape[:2]
-    scaleFactor = min(1.0, (100/h))
-    ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
-    refOrig = cv2.resize(refOrig, (64, 64))
-    
-    if(gCopy.normalize):
-        ref = normalizeImg(ref)
-        refOrig = normalizeImg(refOrig)
     
     for c, frame in enumerate(frames):
         try:
