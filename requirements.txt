@@ -1,6 +1,6 @@
 natsort==8.1.0
 numpy==1.22.3
-opencv-python-headless==4.4.0.46
+opencv-python-headless==4.2.0.34
 packaging==20.4
 psutil==5.7.0
 pycairo==1.19.1
