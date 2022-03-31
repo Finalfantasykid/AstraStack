@@ -46,7 +46,6 @@ class Video:
     # Returns a list of file paths for the frames of the given video fileName
     def run(self):
         progress = ProgressBar()
-        sharps = []
         futures = []
         try:
             if(isinstance(g.file, list)):
@@ -64,11 +63,12 @@ class Video:
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
-                    sharps += sharp
+                    self.sharps += sharp
             else:
                 # Video
                 self.vidcap = cv2.VideoCapture(g.file)
                 progress.total = int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+                frameTime = (1000/self.vidcap.get(cv2.CAP_PROP_FPS))
 
                 g.guessedColorMode = self.guessColorMode(g.file)
                 
@@ -79,30 +79,31 @@ class Video:
                 for i in range(0, g.nThreads):
                     frames, sharp = futures[i].result()
                     self.frames += frames
-                    sharps += sharp
+                    self.sharps += sharp
+                    
+                # Some videos are weird with their frame timings, so get rid of possible duplicates
+                framesDict = dict()
+                tmpFrames = []
+                tmpSharps = []
+                for i, frame in enumerate(self.frames):
+                    # Work-around for https://github.com/opencv/opencv/issues/20550
+                    if(i > 0 and frame == 0):
+                        frame = tmpFrames[-1] + frameTime
+                    
+                    if(frame not in framesDict):
+                        framesDict[frame] = True
+                        tmpFrames.append(frame)
+                        tmpSharps.append(self.sharps[i])
+                self.sharps = tmpSharps
+                self.frames = tmpFrames
         except BrokenProcessPool:
             progress.stop()
             return
-            
-        # Some videos are weird with their frame timings, so get rid of possible duplicates
-        framesDict = dict()
-        tmpFrames = []
-        tmpSharps = []
-        for i, frame in enumerate(self.frames):
-            if(frame not in framesDict):
-                framesDict[frame] = True
-                tmpFrames.append(frame)
-                tmpSharps.append(sharps[i])
-        
-        sharps = tmpSharps
-        self.frames = tmpFrames
 
-        if(len(sharps) > 0):
-            self.sharpest = sharps.index(max(sharps))
+        if(len(self.sharps) > 0):
+            self.sharpest = self.sharps.index(max(self.sharps))
         else:
             self.sharpest = 0
-            
-        self.sharps = sharps
 
         progress.stop()
         g.ui.finishedVideo()
