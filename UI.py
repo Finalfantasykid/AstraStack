@@ -11,6 +11,7 @@ import json
 import math
 import psutil
 import time
+import pyglet
 from packaging import version
 from threading import Thread
 from multiprocessing import active_children, get_start_method
@@ -18,6 +19,7 @@ from concurrent.futures import ProcessPoolExecutor
 from pystackreg import StackReg
 
 from deconvolution import *
+from Preferences import Preferences
 from Video import Video
 from Align import Align, centerOfMass
 from Stack import Stack, transform
@@ -41,6 +43,7 @@ class UI:
     VERSION = "2.3.1"
     
     def __init__(self):
+        self.preferences = Preferences()
         self.pids = []
         self.newVersionUrl = ""
         self.video = None
@@ -119,7 +122,7 @@ class UI:
         self.disableScroll()
 
         self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
-        self.cpus.set_value(min(61, math.ceil(cpu_count()/2)))
+        self.cpus.set_value(min(61, math.ceil(self.preferences.get("cpus", cpu_count()/2))))
         g.pool = None
 
         self.processThread = None
@@ -271,6 +274,7 @@ class UI:
             if(method == "spawn"):
                 GLib.idle_add(self.disableUI)
             g.nThreads = int(self.cpus.get_value())
+            self.preferences.set("cpus", g.nThreads)
             if(g.pool is not None):
                 g.pool.shutdown()
             g.pool = ProcessPoolExecutor(g.nThreads)
@@ -374,6 +378,11 @@ class UI:
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
             try:
+                # For some reason respawning the pool after loading drastically speeds up execution 
+                # maybe because the preview image 'preloads' the video and then the processes are re-forked?  May only work on Linux...
+                if os.name == 'posix':
+                    self.setThreads()
+                
                 g.file = self.openDialog.get_filename()
                 self.video = Video()
                 self.video.checkMemory()
@@ -545,6 +554,14 @@ class UI:
             self.colorMode.prepend_text("Auto (GBRG)")
         elif(g.guessedColorMode == Video.COLOR_BGGR):
             self.colorMode.prepend_text("Auto (BGGR)")
+        elif(g.guessedColorMode == Video.COLOR_RGGB_VNG):
+            self.colorMode.prepend_text("Auto (RGGB VNG)")
+        elif(g.guessedColorMode == Video.COLOR_GRBG_VNG):
+            self.colorMode.prepend_text("Auto (GRBG VNG)")
+        elif(g.guessedColorMode == Video.COLOR_GBRG_VNG):
+            self.colorMode.prepend_text("Auto (GBRG VNG)")
+        elif(g.guessedColorMode == Video.COLOR_BGGR_VNG):
+            self.colorMode.prepend_text("Auto (BGGR VNG)")
         if(colorMode == Video.COLOR_AUTO):
             self.colorMode.set_active(0)
         
@@ -969,6 +986,15 @@ class UI:
     def setColorMode(self, *args):
         if(self.colorMode.is_sensitive()):
             g.colorMode = self.colorMode.get_active()
+            if(g.colorMode == Video.COLOR_RGGB or
+               g.colorMode == Video.COLOR_GRBG or
+               g.colorMode == Video.COLOR_GRBG or
+               g.colorMode == Video.COLOR_BGGR or
+               g.colorMode == Video.COLOR_RGGB_VNG or
+               g.colorMode == Video.COLOR_GRBG_VNG or
+               g.colorMode == Video.COLOR_GRBG_VNG or
+               g.colorMode == Video.COLOR_BGGR_VNG):
+                self.preferences.set("bayerGuess", g.colorMode)
             self.updateImage()
     
     def setDriftType(self, *args):

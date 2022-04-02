@@ -81,7 +81,6 @@ class Video:
                     self.frames += frames
                     self.sharps += sharp
                     
-                # Some videos are weird with their frame timings, so get rid of possible duplicates
                 framesDict = dict()
                 tmpFrames = []
                 tmpSharps = []
@@ -90,6 +89,7 @@ class Video:
                     if(i > 0 and frame == 0):
                         frame = tmpFrames[-1] + frameTime
                     
+                    # Some videos are weird with their frame timings, so get rid of possible duplicates
                     if(frame not in framesDict):
                         framesDict[frame] = True
                         tmpFrames.append(frame)
@@ -183,6 +183,7 @@ class Video:
                 else:
                     # Probably either GRBG or GBRG
                     colorMode = Video.COLOR_GRBG
+                colorMode = g.ui.preferences.get("bayerGuess", colorMode)
         return colorMode
       
     # Changes the color mode of the image
