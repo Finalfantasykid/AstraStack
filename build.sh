@@ -28,7 +28,6 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --hidden-import "packaging.requirements" \
                 --hidden-import "pkg_resources.py2_warn" \
                 --hidden-import "cairo" \
-                --add-binary "/mingw64/bin/opencv_videoio_ffmpeg420_64.dll:." \
                 --exclude-module "FixTk" \
                 --exclude-module "tcl" \
                 --exclude-module "tk" \
@@ -36,7 +35,11 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --exclude-module "tkinter" \
                 --exclude-module "Tkinter" \
                 AstraStack.py
+    rm -fr dist/AstraStack/setuptools*
+    rm -fr dist/AstraStack/pyinstaller*
+    rm -fr dist/AstraStack/altgraph*
     rm -fr dist/AstraStack/share/locale/
+    rm -fr dist/AstraStack/site-packages/
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
