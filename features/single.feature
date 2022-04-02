@@ -22,6 +22,19 @@ Feature: Single Image
         And I choose file "tmp/test.png" from "saveDialog"
         Then "tmp/test.png" and "reference/test.png" should be equal
         
+    Scenario: Test dering
+        Given I am on tab "Load"
+        And I async press "openImage"
+        And I choose file "dso.jpg" from "openDialog"
+        And I wait until active tab is "Process"
+        And I set "sharpen2" to "0.100"
+        And I set "deringAdaptiveAdjust" to "24"
+        And I set "deringSizeAdjust" to "1"
+        And I set "deringBlendAdjust" to "2"
+        And I async press "saveButton"
+        And I choose file "tmp/dso.png" from "saveDialog"
+        Then "tmp/dso.png" and "reference/dso.png" should be equal
+        
     Scenario: Test processing 16bit image
         Given I am on tab "Load"
         And I async press "openImage"
