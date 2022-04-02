@@ -8,6 +8,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     pyinstaller --add-binary "$LIBXCB:." \
                 --hidden-import "cairo" \
                 AstraStack.py
+    rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/
     mkdir -p dist/AstraStack/share_override/icons/Adwaita/
     cp -r share_override/icons/Adwaita dist/AstraStack/share_override/icons/
@@ -20,7 +21,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     cp scripts/astrastack.desktop dist/AstraStack
     cp scripts/install.sh dist/
     cd dist
-    tar cjf ../AstraStack.tar.bz2 *
+    echo "Compressing..."
+    tar cf - . -P | pv -s $(du -sb . | awk '{print $1}') | xz > ../AstraStack.tar.xz
 elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist
     pyinstaller --windowed \
@@ -28,7 +30,6 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --hidden-import "packaging.requirements" \
                 --hidden-import "pkg_resources.py2_warn" \
                 --hidden-import "cairo" \
-                --add-binary "/mingw64/bin/opencv_videoio_ffmpeg420_64.dll:." \
                 --exclude-module "FixTk" \
                 --exclude-module "tcl" \
                 --exclude-module "tk" \
@@ -36,7 +37,11 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --exclude-module "tkinter" \
                 --exclude-module "Tkinter" \
                 AstraStack.py
+    rm -fr dist/AstraStack/setuptools*
+    rm -fr dist/AstraStack/pyinstaller*
+    rm -fr dist/AstraStack/altgraph*
     rm -fr dist/AstraStack/share/locale/
+    rm -fr dist/AstraStack/site-packages/
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
