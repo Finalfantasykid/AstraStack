@@ -241,6 +241,9 @@ class UI:
         if os.name == 'posix': # For Linux
             subprocess.Popen(('xdg-open', url), env=self.cleanseEnv())
             return True
+        else:
+            webbrowser.open(url)
+            return True
         return False
         
     # Opens the user manual in the default pdf application

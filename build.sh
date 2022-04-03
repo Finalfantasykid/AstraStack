@@ -37,9 +37,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --exclude-module "tkinter" \
                 --exclude-module "Tkinter" \
                 AstraStack.py
-    rm -fr dist/AstraStack/setuptools*
-    rm -fr dist/AstraStack/pyinstaller*
-    rm -fr dist/AstraStack/altgraph*
+    rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/locale/
     rm -fr dist/AstraStack/site-packages/
     cp -r ui dist/AstraStack/
