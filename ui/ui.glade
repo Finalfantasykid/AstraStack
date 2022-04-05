@@ -2334,7 +2334,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">Grows the area ignored by the dark/bright thresholds</property>
+                                            <property name="tooltip_text" translatable="yes">Grows the area ignored by the dark/bright thresholds.</property>
                                             <property name="label" translatable="yes">Size:</property>
                                             <property name="xalign">1</property>
                                           </object>
@@ -2378,7 +2378,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="tooltip_text" translatable="yes">How much to blend the mask</property>
+                                            <property name="tooltip_text" translatable="yes">How much to blend the mask.</property>
                                             <property name="label" translatable="yes">Blend:</property>
                                             <property name="width_chars">12</property>
                                             <property name="xalign">1</property>
