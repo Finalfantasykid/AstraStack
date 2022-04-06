@@ -20,7 +20,7 @@ class Align:
         self.minY = 0
         self.maxX = 0
         self.maxY = 0
-        self.height, self.width = g.ui.video.getFrame(g.file, 0, g.actualColor()).shape[:2]
+        self.height, self.width = g.ui.reference.shape[:2]
         
     def run(self):
         progress = ProgressBar()
@@ -71,7 +71,7 @@ class Align:
         try:
             progress.setMessage("Aligning Frames")
             # Load Reference
-            ref = cv2.cvtColor(g.ui.video.getFrame(g.file, self.frames[referenceIndex], g.actualColor()), cv2.COLOR_BGR2GRAY)
+            ref = cv2.cvtColor(g.ui.reference, cv2.COLOR_BGR2GRAY)
             refOrig = ref
             
             # Drift

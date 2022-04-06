@@ -23,7 +23,7 @@ class Stack:
         
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
-        height, width = g.ui.video.getFrame(g.file, 0, g.actualColor()).shape[:2]
+        height, width = g.ui.reference.shape[:2]
         if(not g.ui.checkMemory(w=width*g.drizzleFactor,h=height*g.drizzleFactor)):
             raise MemoryError()
    
@@ -99,7 +99,7 @@ class Stack:
     # Creates the background used for transformed images
     def generateRefBG(self):
         (frame, M, diff, sharp) = self.tmats[0]
-        ref = g.ui.video.getFrame(g.file, frame, g.actualColor())
+        ref = g.ui.reference
         self.refBG = transform(ref, None, M,
                                0, 0, 0, 0, g)
         

@@ -90,6 +90,7 @@ class UI:
         self.averageRadio = self.builder.get_object("averageRadio")
         self.medianRadio = self.builder.get_object("medianRadio")
         self.showMask = self.builder.get_object("showMask")
+        self.reference = None
         
         self.openDialog.set_preview_widget(Gtk.Image())
         self.saveDialog.set_preview_widget(Gtk.Image())
@@ -844,6 +845,7 @@ class UI:
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
         g.reference = str(int(self.frameSlider.get_value()))
+        self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
         self.builder.get_object("referenceLabel").set_text(g.reference)
         self.builder.get_object("alignButton").set_sensitive(True)
         
