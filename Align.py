@@ -241,7 +241,8 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
             M = shiftOrigin(M, int(fdx1), int(fdy1))
             
             # Apply transformation to small version to check similarity to reference
-            movOrig = cv2.warpPerspective(movOrig, M, (w1, h1), borderMode=cv2.BORDER_REPLICATE)
+            M = np.delete(M, 2, 0)
+            movOrig = cv2.warpAffine(movOrig, M, (w1, h1), borderMode=cv2.BORDER_REPLICATE)
 
             if(aoi1 != (0,0) and aoi2 != (0,0)):
                 # Area of Interest

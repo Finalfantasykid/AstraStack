@@ -111,7 +111,8 @@ class Stack:
         
         for i, C in enumerate(cv2.split(self.stackedImage)):
             M = sr.register(C, gray)
-            self.stackedImage[:,:,i] = cv2.warpPerspective(self.stackedImage[:,:,i], M, (w, h), borderMode=cv2.BORDER_REPLICATE)
+            M = np.delete(M, 2, 0)
+            self.stackedImage[:,:,i] = cv2.warpAffine(self.stackedImage[:,:,i], M, (w, h), borderMode=cv2.BORDER_REPLICATE)
             progress.setMessage("Aligning RGB", True)
         
 # Multiprocess function which sums the given images
@@ -145,7 +146,7 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, gCopy):
     M = tmat.copy()
     
     if(gCopy.drizzleFactor < 1.0):
-        # Downscale (need to do it as a separate step since warpPerspective seems to force nearest neighbor when downscaling too much)
+        # Downscale (need to do it as a separate step since warpAffine seems to force nearest neighbor when downscaling too much)
         image = cv2.resize(image, (int(w*gCopy.drizzleFactor), int(h*gCopy.drizzleFactor)), interpolation=gCopy.drizzleInterpolation)
         M[0][2] *= gCopy.drizzleFactor # X
         M[1][2] *= gCopy.drizzleFactor # Y
@@ -158,7 +159,7 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, gCopy):
         T[1][1] = gCopy.drizzleFactor
         M = M.dot(T) # Apply scale to Transformation
 
-    image = cv2.warpPerspective(image, M, (int(w*gCopy.drizzleFactor), int(h*gCopy.drizzleFactor)), flags=gCopy.drizzleInterpolation, borderMode=borderMode, dst=dst)
+    image = cv2.warpAffine(image, M, (int(w*gCopy.drizzleFactor), int(h*gCopy.drizzleFactor)), flags=gCopy.drizzleInterpolation, borderMode=borderMode, dst=dst)
     if(ref is None):
         # Auto Crop
         image = image[int(maxY*gCopy.drizzleFactor):int((h+minY)*gCopy.drizzleFactor), 
