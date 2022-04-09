@@ -258,6 +258,8 @@ def loadFramesVideo(file, start, count, colorMode, progress):
             # Calculate sharpness
             image = Video.colorMode(image, colorMode)
             sharps.append(calculateSharpness(image))
+        else:
+            progress.count(i, count)
     progress.countExtra()
     vidcap.release()
     return (frames, sharps)

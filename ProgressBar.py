@@ -35,6 +35,7 @@ class ProgressBar:
                         value += counter.value
                     # Only update UI if the change in percent is worth it
                     if((value == 0 and lastValue != 0) or (value == self.total and lastValue != self.total) or value != lastValue):
+                        value = min(value, self.total)
                         g.ui.setProgress(value, self.total, message)
                     lastValue = value
         thread = Thread(target=run, args=())

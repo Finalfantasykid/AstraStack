@@ -77,6 +77,7 @@ class UI:
         self.startFrame = self.builder.get_object("startFrame")
         self.endFrame = self.builder.get_object("endFrame")
         self.normalize = self.builder.get_object("normalize")
+        self.dilate = self.builder.get_object("dilate")
         self.alignChannels = self.builder.get_object("alignChannels")
         self.autoCrop = self.builder.get_object("autoCrop")
         self.driftType = self.builder.get_object("driftType")
@@ -160,6 +161,7 @@ class UI:
         self.setProgress()
         self.setColorMode()
         self.setNormalize()
+        self.setDilate()
         self.setAlignChannels()
         self.setDriftType()
         self.setTransformation()
@@ -982,6 +984,10 @@ class UI:
     # Sets whether or not to normalize the frames during alignment
     def setNormalize(self, *args):
         g.normalize = self.normalize.get_active()
+        
+    # Sets whether or not to dilate the frames during alignment
+    def setDilate(self, *args):
+        g.dilate = self.dilate.get_active()
         
     # Sets whether or not to align channels separately
     def setAlignChannels(self, *args):

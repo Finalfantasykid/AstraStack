@@ -74,6 +74,11 @@ class Align:
             ref = cv2.cvtColor(g.ui.reference, cv2.COLOR_BGR2GRAY)
             refOrig = ref
             
+            if(g.dilate):
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
+                ref = cv2.medianBlur(ref, 5)
+                ref = cv2.dilate(ref, kernel)
+            
             # Drift
             rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
             ref = ref[int(rfdy1):int(self.height-rfdy), int(rfdx1):int(self.width-rfdx)]
@@ -179,7 +184,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
     tmats = []
     minX = minY = maxX = maxY = 0
     video = Video()
-    
+
     if(gCopy.transformation != -1):
         sr = StackReg(gCopy.transformation)
     else:
@@ -189,6 +194,11 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
         try:
             # Load Frame
             movOrig = mov = cv2.cvtColor(video.getFrame(gCopy.file, frame, gCopy.actualColor()), cv2.COLOR_BGR2GRAY)
+
+            if(gCopy.dilate):
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
+                mov = cv2.medianBlur(mov, 5)
+                mov = cv2.dilate(mov, kernel)
 
             # Drift
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
