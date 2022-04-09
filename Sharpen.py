@@ -172,9 +172,12 @@ class Sharpen:
             thresh = np.maximum(np.maximum(threshAdaptive, threshDark), threshBright)
             
             # Dialate the threshold
-            if(g.deringSize > 0):
-                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (g.deringSize*2+1,g.deringSize*2+1))
-                thresh = cv2.dilate(thresh, kernel)
+            if(g.deringSize != 0):
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (abs(g.deringSize)*2+1,abs(g.deringSize)*2+1))
+                if(g.deringSize > 0):
+                    thresh = cv2.dilate(thresh, kernel)
+                else:
+                    thresh = cv2.erode(thresh, kernel)
             
             # Blur the thresholds
             if(g.deringBlend > 0):
