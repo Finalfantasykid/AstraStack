@@ -152,12 +152,12 @@
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBrightAdjust">
-    <property name="upper">50</property>
+    <property name="upper">75</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringDarkAdjust">
-    <property name="upper">50</property>
+    <property name="upper">75</property>
     <property name="step_increment">1</property>
     <signal name="value-changed" handler="sharpenImage" swapped="no"/>
   </object>
