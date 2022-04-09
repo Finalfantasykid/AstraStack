@@ -74,10 +74,9 @@ class Align:
             ref = cv2.cvtColor(g.ui.reference, cv2.COLOR_BGR2GRAY)
             refOrig = ref
             
+            # Dilate 
             if(g.dilate):
-                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
-                ref = cv2.medianBlur(ref, 5)
-                ref = cv2.dilate(ref, kernel)
+                ref = dilateImg(ref)
             
             # Drift
             rfdx, rfdy, rfdx1, rfdy1 = Align.calcDriftDeltas(dx, dy, referenceIndex, totalFrames)   
@@ -101,6 +100,7 @@ class Align:
             ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
             refOrig = cv2.resize(refOrig, (64, 64))
             
+            # Normalize
             if(g.normalize):
                 ref = normalizeImg(ref)
                 refOrig = normalizeImg(refOrig)
@@ -195,10 +195,9 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
             # Load Frame
             movOrig = mov = cv2.cvtColor(video.getFrame(gCopy.file, frame, gCopy.actualColor()), cv2.COLOR_BGR2GRAY)
 
+            # Dilate
             if(gCopy.dilate):
-                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
-                mov = cv2.medianBlur(mov, 5)
-                mov = cv2.dilate(mov, kernel)
+                mov = dilateImg(mov)
 
             # Drift
             fdx, fdy, fdx1, fdy1 = Align.calcDriftDeltas(dx, dy, i, totalFrames)   
@@ -217,6 +216,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
             # Resize
             mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
             
+            # Normalize
             if(gCopy.normalize):
                 mov = normalizeImg(mov)
 
@@ -264,6 +264,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
                 yFactor = 64/movOrig.shape[0]
             movOrig = cv2.resize(movOrig, (64, 64))
             
+            # Normalize
             if(gCopy.normalize): 
                 movOrig = normalizeImg(movOrig)
                 
@@ -318,6 +319,11 @@ def shiftOrigin(M, x, y):
         t2 = np.array([1, 0,  x, 0, 1,  y, 0, 0, 1]).reshape((3,3))
         M = t2.dot(M.dot(t1))
     return M
+
+# Dilates image
+def dilateImg(img):
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
+    return cv2.dilate(cv2.medianBlur(img, 5), kernel)
 
 # Nomalizes pixel values between 0 and 255
 def normalizeImg(img):

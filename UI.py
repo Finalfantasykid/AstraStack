@@ -21,7 +21,7 @@ from pystackreg import StackReg
 from deconvolution import *
 from Preferences import Preferences
 from Video import Video
-from Align import Align, centerOfMass
+from Align import Align, centerOfMass, dilateImg, normalizeImg
 from Stack import Stack, transform
 from Sharpen import Sharpen
 from Globals import *
@@ -612,6 +612,13 @@ class UI:
                 
             height, width = img.shape[:2]
             
+            # Dilate
+            if(g.dilate):
+                img = dilateImg(img)
+            # Normalize
+            if(g.normalize):
+                img = normalizeImg(img)
+            # Center of Gravity
             if(g.driftType == Align.DRIFT_GRAVITY):
                 (cx, cy) = centerOfMass(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
                 C = np.float32([[1, 0, int(width/2) - int(cx)], 
@@ -984,10 +991,12 @@ class UI:
     # Sets whether or not to normalize the frames during alignment
     def setNormalize(self, *args):
         g.normalize = self.normalize.get_active()
+        self.updateImage()
         
     # Sets whether or not to dilate the frames during alignment
     def setDilate(self, *args):
         g.dilate = self.dilate.get_active()
+        self.updateImage()
         
     # Sets whether or not to align channels separately
     def setAlignChannels(self, *args):
