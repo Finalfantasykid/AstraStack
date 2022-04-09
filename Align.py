@@ -330,5 +330,8 @@ def calculateDiff(ref, mov, xFactor, yFactor, M, i):
     h, w = ref.shape[:2]
 
     # Modified Means Squared Difference
-    diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32)/255, ref.astype(np.float32)/255)) ** 2)/(h*w)
+    try:
+        diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32)/255, ref.astype(np.float32)/255)) ** 2)/(h*w)
+    except:
+        diff = 0
     return diff
