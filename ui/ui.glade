@@ -1035,7 +1035,7 @@ The 4 types of transformation are described below:
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
-                                        <property name="tooltip_text" translatable="yes">Frame brightness be dilated.  Useful for deep sky images where stars may be the only reference points.</property>
+                                        <property name="tooltip_text" translatable="yes">Frame brightness will be dilated.  Useful for deep sky images where stars may be the only reference points.</property>
                                         <property name="draw_indicator">True</property>
                                         <signal name="toggled" handler="setDilate" swapped="no"/>
                                       </object>
