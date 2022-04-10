@@ -414,7 +414,10 @@ class UI:
                 thread.start()
                 self.disableUI()
             except MemoryError as error:
-                self.enableUI()
+                pass
+            except: # Open Failed
+                self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
+            self.enableUI()
             
     # Opens the file chooser to open load a file
     def openImage(self, *args):
