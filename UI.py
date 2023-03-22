@@ -370,7 +370,7 @@ class UI:
                 pixbuf= pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
             dialog.get_preview_widget().set_size_request(width + 10, height + 10)
-            dialog.get_preview_widget().set_from_pixbuf(pixbuf)
+            dialog.get_preview_widget().set_from_pixbuf(pixbuf.copy())
             dialog.set_preview_widget_active(True)
         else:
             dialog.set_preview_widget_active(False)
@@ -630,7 +630,7 @@ class UI:
                 img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
 
             pixbuf = self.createPixbuf(img)
-            self.frame.set_from_pixbuf(pixbuf)
+            self.frame.set_from_pixbuf(pixbuf.copy())
         elif(page_num == UI.STACK_TAB and self.stack is not None):
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
@@ -644,7 +644,7 @@ class UI:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             
             pixbuf = self.createPixbuf(img)
-            self.frame.set_from_pixbuf(pixbuf)
+            self.frame.set_from_pixbuf(pixbuf.copy())
             self.updateQualityImage()
             
     # Draws a rectangle where the area of interest is
@@ -786,7 +786,7 @@ class UI:
             qualityImage = qualityImage[padding:-padding,padding:-padding]
 
             pixbuf = self.createPixbuf(qualityImage)
-            self.qualityImage.set_from_pixbuf(pixbuf)
+            self.qualityImage.set_from_pixbuf(pixbuf.copy())
         else:
             self.qualityImage.hide()
         
@@ -830,7 +830,7 @@ class UI:
         psf = cv2.cvtColor(psf, cv2.COLOR_GRAY2RGB)
         
         pixbuf = self.createPixbuf(psf)
-        self.psfImage.set_from_pixbuf(pixbuf)
+        self.psfImage.set_from_pixbuf(pixbuf.copy())
     
     # Updates the RGB histogram of the final image    
     def updateHistogram(self):
@@ -852,7 +852,7 @@ class UI:
         histImage = histImage[padding:-padding,padding:-padding]
             
         pixbuf = self.createPixbuf(histImage)
-        self.histImage.set_from_pixbuf(pixbuf)
+        self.histImage.set_from_pixbuf(pixbuf.copy())
         
     # Sets the reference frame to the current visible frame
     def setReference(self, *args):
@@ -1284,7 +1284,7 @@ class UI:
                 pixbuf = self.createPixbuf(np.around(self.sharpen.thresh).astype('uint8'))
             else:
                 pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
-            self.frame.set_from_pixbuf(pixbuf)
+            self.frame.set_from_pixbuf(pixbuf.copy())
             self.updateHistogram()
             self.processSpinner.stop()
             self.processSpinner.hide()
