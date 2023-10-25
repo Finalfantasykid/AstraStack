@@ -2,4 +2,4 @@
 
 export LD_PRELOAD=libgdk-3.so.0 # Workaround TLS error on old Ubuntu
 cd /usr/lib/astrastack
-GDK_BACKEND=x11 astrastack ./AstraStack
+GDK_BACKEND=x11 ./AstraStack
