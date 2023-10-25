@@ -40,7 +40,7 @@ class UI:
     SHARPEN_TAB = 3
     
     TITLE = "AstraStack"
-    VERSION = "2.4.1"
+    VERSION = "2.4.2"
     
     def __init__(self):
         self.preferences = Preferences()
