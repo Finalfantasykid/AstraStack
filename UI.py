@@ -63,7 +63,6 @@ class UI:
         self.window = self.builder.get_object("mainWindow")
         self.saveDialog = self.builder.get_object("saveDialog")
         self.openDialog = self.builder.get_object("openDialog")
-        print(self.openDialog.list_shortcut_folder_uris())
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
         self.colorMode = self.builder.get_object("colorMode")
