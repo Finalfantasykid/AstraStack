@@ -41,8 +41,14 @@ class UI:
     
     TITLE = "AstraStack"
     VERSION = "2.4.2"
+    SNAP_DIR = ""
+    HOME_DIR = "~"
     
     def __init__(self):
+        if('SNAP' in os.environ):
+            UI.SNAP_DIR = os.environ['SNAP'] + '/'
+            UI.HOME_DIR = os.environ['SNAP_REAL_HOME']
+            
         self.preferences = Preferences()
         self.pids = []
         self.newVersionUrl = ""
@@ -56,11 +62,12 @@ class UI:
         self.clickedAreaOfInterest = False
         
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("ui/ui.glade")
+        self.builder.add_from_file(UI.SNAP_DIR + "ui/ui.glade")
         
         self.window = self.builder.get_object("mainWindow")
         self.saveDialog = self.builder.get_object("saveDialog")
         self.openDialog = self.builder.get_object("openDialog")
+        print(self.openDialog.list_shortcut_folder_uris())
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
         self.colorMode = self.builder.get_object("colorMode")
@@ -257,7 +264,7 @@ class UI:
             os.startfile("manual\Manual.pdf")
         elif os.name == 'posix': # For Linux
             # Now open the file
-            subprocess.Popen(('xdg-open', "manual/Manual.pdf"), env=self.cleanseEnv())
+            subprocess.Popen(('xdg-open', UI.SNAP_DIR + "manual/Manual.pdf"), env=self.cleanseEnv())
         
     # Disable inputs
     def disableUI(self):
@@ -377,7 +384,7 @@ class UI:
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):
-        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("videoFilter"))
         response = self.openDialog.run()
@@ -400,7 +407,7 @@ class UI:
             
     # Opens the file chooser to open load a file
     def openImageSequence(self, *args):
-        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(True)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
@@ -421,7 +428,7 @@ class UI:
             
     # Opens the file chooser to open load a file
     def openImage(self, *args):
-        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
@@ -456,7 +463,7 @@ class UI:
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
-        self.saveDialog.set_current_folder(path.expanduser("~"))
+        self.saveDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         if(self.saveDialog.get_current_name() == ""):
             # Set default file to save if empty
             if(isinstance(g.file, list)):
@@ -528,7 +535,7 @@ class UI:
         
     # Opens the file chooser to open load a psf file (g.deconvolveCustomFile)
     def openPSF(self, *args):
-        self.openDialog.set_current_folder(path.expanduser("~"))
+        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AstraStack
+Comment=Astronomy Stacking Application
+Exec=astrastack
+Terminal=false
+Categories=Application;
+Icon=ui/logo.png

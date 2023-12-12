@@ -10,3 +10,4 @@ ui/ui.glade~
 AstraStack.spec
 AstraStack.tar.*
 AstraStack_Setup.exe
+*.snap

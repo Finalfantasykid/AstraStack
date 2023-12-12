@@ -1,0 +1,45 @@
+name: astrastack # you probably want to 'snapcraft register <name>'
+base: core22 # the base snap is the execution environment for this snap
+version: '2.4.2' # just for humans, typically '1.2+git' or '1.3.2'
+summary: Astronomy Stacking application # 79 char long summary
+description: |
+  AstraStack is an easy to use application used to stack videos or images 
+  of planets, the sun, moon, deep sky objects and more. Stacking is a 
+  technique used to improve the quality of the image by aligning each frame 
+  and then averaging the best frames to create a low noise version of the 
+  image which can then be sharpened.
+icon: ui/logo.png
+website: https://astrastack.ca/
+source-code: https://github.com/Finalfantasykid/AstraStack
+issues: https://github.com/Finalfantasykid/AstraStack/issues
+license: LGPL-3.0
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+parts:
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/
+    build-packages:
+      - on amd64:
+        - gcc-multilib
+        - g++-multilib
+  my-part:
+    plugin: dump
+    source: dist/AstraStack/
+    
+apps:
+  astrastack:
+    command: bin/snapcraft-preload $SNAP/AstraStack
+    desktop: ui/AstraStack.desktop
+    extensions: [gnome]
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - home
+      - network

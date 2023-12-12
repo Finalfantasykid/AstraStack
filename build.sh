@@ -19,10 +19,18 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm dist/AstraStack/manual/Manual.odt
     cp scripts/astrastack dist/AstraStack/
     cp scripts/astrastack.desktop dist/AstraStack
-    cp scripts/install.sh dist/
-    cd dist
-    echo "Compressing..."
-    tar cf - . -P | pv -s $(du -sb . | awk '{print $1}') | xz > ../AstraStack.tar.xz
+    
+    if [[ "$1" != "snap" ]]; then
+        # Normal Linux build
+        cp scripts/install.sh dist/
+        cd dist
+        echo "Compressing..."
+        tar cf - . -P | pv -s $(du -sb . | awk '{print $1}') | xz > ../AstraStack.tar.xz
+    else
+        # Snap build
+        cp scripts/astrastack.snap.desktop dist/AstraStack/ui/AstraStack.desktop
+        snapcraft
+    fi
 elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist
     pyinstaller --windowed \
