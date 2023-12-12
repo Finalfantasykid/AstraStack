@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=AstraStack
+StartupWMClass=AstraStack
 Comment=Astronomy Stacking Application
 Exec=astrastack
 Terminal=false
