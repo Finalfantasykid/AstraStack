@@ -10,8 +10,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
                 AstraStack.py
     rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/
-    mkdir -p dist/AstraStack/share_override/icons/Adwaita/
-    cp -r share_override/icons/Adwaita dist/AstraStack/share_override/icons/
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
@@ -22,6 +20,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     
     if [[ "$1" != "snap" ]]; then
         # Normal Linux build
+        mkdir -p dist/AstraStack/share_override/icons/Adwaita/
+        cp -r share_override/icons/Adwaita dist/AstraStack/share_override/icons/
         cp scripts/install.sh dist/
         cd dist
         echo "Compressing..."

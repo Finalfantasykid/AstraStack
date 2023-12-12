@@ -45,10 +45,6 @@ class UI:
     HOME_DIR = "~"
     
     def __init__(self):
-        if('SNAP' in os.environ):
-            UI.SNAP_DIR = os.environ['SNAP'] + '/'
-            UI.HOME_DIR = os.environ['SNAP_REAL_HOME']
-            
         self.preferences = Preferences()
         self.pids = []
         self.newVersionUrl = ""
@@ -1307,9 +1303,13 @@ def dummy(*args):
     return True
 
 def run():
-    # Newer versions of Adwaita scalable icons don't work well with older librsvg.
-    # This can be removed when no longer being built with an older librsvg
-    Gtk.IconTheme.get_default().prepend_search_path('share_override/icons')
+    if('SNAP' in os.environ):
+        UI.SNAP_DIR = os.environ['SNAP'] + '/'
+        UI.HOME_DIR = os.environ['SNAP_REAL_HOME']
+    else:
+        # Newer versions of Adwaita scalable icons don't work well with older librsvg.
+        # This can be removed when no longer being built with an older librsvg
+        Gtk.IconTheme.get_default().prepend_search_path('share_override/icons')
     
     g.ui = UI()
 
