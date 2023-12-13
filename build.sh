@@ -7,6 +7,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm -fr dist
     pyinstaller --add-binary "$LIBXCB:." \
                 --hidden-import "cairo" \
+                --exclude-module "gi.repository.Gst" \
                 AstraStack.py
     rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/
