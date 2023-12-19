@@ -5,10 +5,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     LIBXCB=`ldconfig -p | grep libxcb.so.1 | grep x86-64 | sed 's/^.*=> //'`
 
     rm -fr dist
-    pyinstaller --add-binary "$LIBXCB:." \
-                --hidden-import "cairo" \
-                --exclude-module "gi.repository.Gst" \
-                AstraStack.py
+    python3 -m PyInstaller --add-binary "$LIBXCB:." \
+                           --hidden-import "cairo" \
+                           --exclude-module "gi.repository.Gst" \
+                           AstraStack.py
     rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/
     cp -r ui dist/AstraStack/
@@ -30,7 +30,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     else
         # Snap build
         cp scripts/astrastack.snap.desktop dist/AstraStack/ui/AstraStack.desktop
-        snapcraft
     fi
 elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist

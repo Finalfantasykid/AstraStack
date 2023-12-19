@@ -1305,6 +1305,7 @@ def run():
     if('SNAP' in os.environ):
         UI.SNAP_DIR = os.environ['SNAP'] + '/'
         UI.HOME_DIR = os.environ['SNAP_REAL_HOME']
+        os.environ['HOME'] = UI.HOME_DIR # This might be bad, but it works
     else:
         # Newer versions of Adwaita scalable icons don't work well with older librsvg.
         # This can be removed when no longer being built with an older librsvg

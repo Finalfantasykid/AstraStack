@@ -27,9 +27,24 @@ parts:
       - on amd64:
         - gcc-multilib
         - g++-multilib
-  my-part:
-    plugin: dump
-    source: dist/AstraStack/
+  astrastack:
+    plugin: nil
+    source: .
+    override-build: |
+        rm -fr env
+        rm -fr build
+        rm -fr dist
+        pip install -r requirements.txt
+        pip install -r requirements_dev.txt
+        ./build.sh snap
+        cp -r dist/AstraStack/* $SNAPCRAFT_PART_INSTALL
+    build-packages:
+      - libgtk-3-dev
+      - python3-numpy
+      - libcairo2-dev
+      - pkg-config
+      - python3-dev
+      - libgirepository1.0-dev
     
 apps:
   astrastack:
