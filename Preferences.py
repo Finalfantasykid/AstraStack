@@ -1,6 +1,6 @@
 import json
 import os
-import pyglet
+from appdirs import user_config_dir
 from Globals import *
 
 class Preferences:
@@ -10,7 +10,7 @@ class Preferences:
     def __init__(self):
         from UI import UI
         self.json = {}
-        self.dir = pyglet.resource.get_settings_path(UI.TITLE) + "/"
+        self.dir = user_config_dir() + "/" + UI.TITLE + "/"
         self.file = self.dir + Preferences.FILE
         if(not g.TESTING):
             try:

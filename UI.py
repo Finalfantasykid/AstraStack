@@ -11,7 +11,6 @@ import json
 import math
 import psutil
 import time
-import pyglet
 from packaging import version
 from threading import Thread
 from multiprocessing import active_children, get_start_method
