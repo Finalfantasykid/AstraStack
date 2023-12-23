@@ -4,6 +4,7 @@ import glob
 import math
 from concurrent.futures.process import BrokenProcessPool
 from natsort import natsorted, ns
+from pystackreg import StackReg
 from Globals import *
 from ProgressBar import *
 
@@ -26,6 +27,7 @@ class Video:
         self.sharpest = 0
         self.vidcap = None
         self.sharps = []
+        self.deltas = []
             
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
@@ -61,9 +63,10 @@ class Video:
                 for i in range(0, g.nThreads):
                     futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
-                    frames, sharp = futures[i].result()
+                    frames, sharp, deltas = futures[i].result()
                     self.frames += frames
                     self.sharps += sharp
+                    self.deltas += deltas
             else:
                 # Video
                 self.vidcap = cv2.VideoCapture(g.file)
@@ -77,13 +80,15 @@ class Video:
                 for i in range(0, g.nThreads):
                     futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
-                    frames, sharp = futures[i].result()
+                    frames, sharp, deltas, wScaleFactor, hScaleFactor = futures[i].result()
                     self.frames += frames
                     self.sharps += sharp
+                    self.deltas += deltas
                     
                 framesDict = dict()
                 tmpFrames = []
                 tmpSharps = []
+                tmpDeltas = []
                 for i, frame in enumerate(self.frames):
                     # Work-around for https://github.com/opencv/opencv/issues/20550
                     if(i > 0 and frame == 0):
@@ -94,8 +99,11 @@ class Video:
                         framesDict[frame] = True
                         tmpFrames.append(frame)
                         tmpSharps.append(self.sharps[i])
+                        tmpDeltas.append(self.deltas[i])
                 self.sharps = tmpSharps
                 self.frames = tmpFrames
+                self.deltas = tmpDeltas
+                
         except BrokenProcessPool:
             progress.stop()
             return
@@ -227,6 +235,14 @@ def calculateSharpness(image):
     h, w = image.shape[:2]
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
    
+def resize(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    h, w = image.shape[:2]
+    hScaleFactor = min(1.0, (256/h))
+    wScaleFactor = (int(w*hScaleFactor))/w
+    image = cv2.resize(image, (int(w*hScaleFactor), int(h*hScaleFactor)), interpolation=cv2.INTER_LINEAR)
+    return (image, wScaleFactor, hScaleFactor)
+   
 # Multiprocess function to load frames from an image sequence
 def loadFramesSequence(files, width, height, colorMode, progress):
     frames = []
@@ -246,10 +262,19 @@ def loadFramesSequence(files, width, height, colorMode, progress):
         
 # Multiprocess function to load frames from a video source
 def loadFramesVideo(file, start, count, colorMode, progress):
+    beforeStart = max(0, start-1)
     vidcap = cv2.VideoCapture(file)
-    vidcap.set(cv2.CAP_PROP_POS_FRAMES, start)
+    vidcap.set(cv2.CAP_PROP_POS_FRAMES, beforeStart)
     frames = []
     sharps = []
+    deltas = []
+    
+    prevImage = None
+    if(beforeStart < start):
+        success,prevImage = vidcap.read()
+        prevImage = Video.colorMode(prevImage, colorMode)
+        prevImage, wScaleFactor, hScaleFactor = resize(prevImage)
+        
     for i in range(0, count):
         success,image = vidcap.read()
         if(success):
@@ -258,8 +283,27 @@ def loadFramesVideo(file, start, count, colorMode, progress):
             # Calculate sharpness
             image = Video.colorMode(image, colorMode)
             sharps.append(calculateSharpness(image))
+            
+            image, wScaleFactor, hScaleFactor = resize(image)
+            if(prevImage is not None):
+                try:
+                    T = np.eye(2, 3, dtype=np.float32)
+                    
+                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10,  1e-10)
+                    (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria);
+                    
+                    M = np.float64(np.identity(3))
+                    M[0][2] = T[0][2]/wScaleFactor # X
+                    M[1][2] = T[1][2]/hScaleFactor # Y
+                except Exception as e:
+                    M = np.identity(3)
+            else:
+                M = np.identity(3)
+            deltas.append(M)
+            
+            prevImage = image
         else:
             progress.count(i, count)
     progress.countExtra()
     vidcap.release()
-    return (frames, sharps)
+    return (frames, sharps, deltas, wScaleFactor, hScaleFactor)

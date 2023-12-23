@@ -629,6 +629,19 @@ class UI:
                                 [0, 1, int(height/2) - int(cy)]])
 
                 img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
+            # Frame Deltas
+            if(g.driftType == Align.DRIFT_DELTA):
+                C = np.identity(3, dtype=np.float64)
+                for i, M in enumerate(self.video.deltas):
+                    if((i > videoIndex and i <= int(g.reference)) or
+                       (i > int(g.reference) and i <= videoIndex)):
+                        C = C.dot(M)
+                C = np.float32([[1, 0, C[0][2]], 
+                                [0, 1, C[1][2]]])
+                if(int(g.reference) > videoIndex):
+                    C[0][2] = -C[0][2]
+                    C[1][2] = -C[1][2]
+                img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
 
             pixbuf = self.createPixbuf(img)
             self.frame.set_from_pixbuf(pixbuf.copy())

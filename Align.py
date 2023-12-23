@@ -11,7 +11,8 @@ class Align:
 
     DRIFT_NONE = 0
     DRIFT_GRAVITY = 1
-    DRIFT_MANUAL = 2
+    DRIFT_DELTA = 2
+    DRIFT_MANUAL = 3
 
     def __init__(self, frames):
         self.frames = frames
