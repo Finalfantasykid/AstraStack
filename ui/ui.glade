@@ -823,7 +823,9 @@
 
 None: Do no t do any drift adjustments
 
-Center of Gravity: This option is good for planetary objects and will move the object roughly to the center of the frame.  This probably will not work as well if at all for surfaces.
+Center of Gravity:  This option is good for planetary objects and will move the object roughly to the center of the frame.  This probably will not work as well if at all for surfaces.
+
+Frame Deltas: Uses frame by frame transformation deltas.  This option is good for larger surfaces like lunar and deep space objects.  It may also work on planetary objects, but probably not as good as center of gravity.
 
 Manual: Two points can be set at the start and end position of the object. The points don't need to be exact, only an estimate.  Right click the button to reset the point.</property>
                                         <property name="label" translatable="yes">Drift Adjustment</property>
