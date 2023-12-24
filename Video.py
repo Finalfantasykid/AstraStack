@@ -4,7 +4,6 @@ import glob
 import math
 from concurrent.futures.process import BrokenProcessPool
 from natsort import natsorted, ns
-from pystackreg import StackReg
 from Globals import *
 from ProgressBar import *
 
@@ -58,7 +57,7 @@ class Video:
                 
                 g.guessedColorMode = self.guessColorMode(g.file)
                 
-                progress.setMessage("Loading Frames")
+                progress.setMessage("Preprocessing Frames")
                 height, width = cv2.imread(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
                     futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
@@ -75,7 +74,7 @@ class Video:
 
                 g.guessedColorMode = self.guessColorMode(g.file)
                 
-                progress.setMessage("Loading Frames")
+                progress.setMessage("Preprocessing Frames")
                 countPerThread = math.ceil(progress.total/g.nThreads)
                 for i in range(0, g.nThreads):
                     futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
@@ -229,19 +228,22 @@ class Video:
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_EA)
                 img = img[2:h+2,2:w+2]
         return img
-       
-# Returns a number based on how sharp the image is (higher = sharper)
-def calculateSharpness(image):
-    h, w = image.shape[:2]
-    return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
-   
+      
+# Resize image so it does things faster
 def resize(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    from Align import dilateImg
+    image = dilateImg(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
     h, w = image.shape[:2]
-    hScaleFactor = min(1.0, (256/h))
+    hScaleFactor = min(1.0, (100/h))
     wScaleFactor = (int(w*hScaleFactor))/w
     image = cv2.resize(image, (int(w*hScaleFactor), int(h*hScaleFactor)), interpolation=cv2.INTER_LINEAR)
     return (image, wScaleFactor, hScaleFactor)
+       
+# Returns a number based on how sharp the image is (higher = sharper)
+def calculateSharpness(image):
+    return cv2.Laplacian(image, cv2.CV_8U).var()
+    #h, w = image.shape[:2]
+    #return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
    
 # Multiprocess function to load frames from an image sequence
 def loadFramesSequence(files, width, height, colorMode, progress):
@@ -282,9 +284,9 @@ def loadFramesVideo(file, start, count, colorMode, progress):
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
             # Calculate sharpness
             image = Video.colorMode(image, colorMode)
-            sharps.append(calculateSharpness(image))
-            
+
             image, wScaleFactor, hScaleFactor = resize(image)
+            sharps.append(calculateSharpness(image))
             if(prevImage is not None):
                 try:
                     T = np.eye(2, 3, dtype=np.float32)
@@ -292,7 +294,7 @@ def loadFramesVideo(file, start, count, colorMode, progress):
                     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10,  1e-10)
                     (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria);
                     
-                    M = np.float64(np.identity(3))
+                    M = np.identity(3, dtype=np.float64)
                     M[0][2] = T[0][2]/wScaleFactor # X
                     M[1][2] = T[1][2]/hScaleFactor # Y
                 except Exception as e:

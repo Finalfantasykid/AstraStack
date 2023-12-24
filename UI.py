@@ -579,8 +579,6 @@ class UI:
     def changeTab(self, notebook, page, page_num, user_data=None):
         self.colorMode.set_sensitive(True)
         if((page_num == UI.LOAD_TAB or page_num == UI.ALIGN_TAB) and self.video is not None):
-            self.frameSlider.set_value(0)
-            self.frameSlider.set_upper(max(0,len(self.video.frames)-1))
             self.setStartFrame()
             self.setEndFrame()
             if(len(self.video.frames) > 0):
@@ -646,6 +644,8 @@ class UI:
             pixbuf = self.createPixbuf(img)
             self.frame.set_from_pixbuf(pixbuf.copy())
         elif(page_num == UI.STACK_TAB and self.stack is not None):
+            if(int(self.frameSlider.get_value()) >= len(self.stack.tmats)):
+                return
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
@@ -874,6 +874,8 @@ class UI:
         self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
         self.builder.get_object("referenceLabel").set_text(g.reference)
         self.builder.get_object("alignButton").set_sensitive(True)
+        if(self.tabs.get_current_page() == UI.ALIGN_TAB):
+            self.updateImage()
         
     # Updates the progress bar
     def setProgress(self, i=0, total=0, text=""):
@@ -896,7 +898,10 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.startFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
+            self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
         self.fixFrameSliderBug()
+        if(self.tabs.get_current_page() == UI.ALIGN_TAB):
+            self.updateImage()
         
     # Sets the end frame for trimming
     def setEndFrame(self, *args):
@@ -908,7 +913,10 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.endFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
+            self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
         self.fixFrameSliderBug()
+        if(self.tabs.get_current_page() == UI.ALIGN_TAB):
+            self.updateImage()
         
     # Drift Point 1 Button Clicked
     def clickDriftP1(self, *args):

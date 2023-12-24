@@ -91,6 +91,22 @@ class Align:
 
                 ref = cv2.warpAffine(ref, C, (self.width, self.height), flags=cv2.INTER_NEAREST)
                 refOrig = cv2.warpAffine(refOrig, C, (self.width, self.height), flags=cv2.INTER_NEAREST)
+            
+            # Frame Deltas
+            deltas = []
+            if(g.driftType == Align.DRIFT_DELTA):
+                for videoIndex, M1 in enumerate(g.ui.video.deltas[g.startFrame:g.endFrame+1]):
+                    C = np.identity(3, dtype=np.float64)
+                    for i, M in enumerate(g.ui.video.deltas[g.startFrame:g.endFrame+1]):
+                        if((i > videoIndex and i <= int(g.reference) - g.startFrame) or
+                           (i > int(g.reference) - g.startFrame and i <= videoIndex)):
+                            C = C.dot(M)
+                    C = np.float32([[1, 0, C[0][2]], 
+                                    [0, 1, C[1][2]]])
+                    if(int(g.reference) - g.startFrame > videoIndex):
+                        C[0][2] = -C[0][2]
+                        C[1][2] = -C[1][2]
+                    deltas.append(C)
                 
             # Area of Interest
             ref = cropAreaOfInterest(ref, aoi1, aoi2)
@@ -98,6 +114,7 @@ class Align:
                 
             h, w = ref.shape[:2]
             scaleFactor = min(1.0, (100/h))
+            
             ref = cv2.resize(ref, (int(w*scaleFactor), int(h*scaleFactor)))
             refOrig = cv2.resize(refOrig, (64, 64))
             
@@ -111,7 +128,7 @@ class Align:
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
                 futures.append(g.pool.submit(align, frames, ref, refOrig, self.width, self.height, w, h, scaleFactor,
-                                             totalFrames, i*nFrames, dx, dy, rfdx1, rfdy1, aoi1, aoi2, 
+                                             totalFrames, i*nFrames, dx, dy, rfdx1, rfdy1, aoi1, aoi2, deltas,
                                              ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
@@ -180,11 +197,14 @@ class Align:
         return (minX, maxX, minY, maxY)
 
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFrame, dx, dy, rfdx1, rfdy1, aoi1, aoi2, progress, gCopy):
+def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFrame, dx, dy, rfdx1, rfdy1, aoi1, aoi2, deltas, progress, gCopy):
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
     video = Video()
+    
+    # Calculate specific scaleFactor for width since it is likely *slightly* different than the height
+    wScaleFactor = (int(w*scaleFactor))/w
 
     if(gCopy.transformation != -1):
         sr = StackReg(gCopy.transformation)
@@ -210,10 +230,17 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
                 C = np.float32([[1, 0, int(w1/2) - int(cx)], 
                                 [0, 1, int(h1/2) - int(cy)]])
                 mov = cv2.warpAffine(mov, C, (w1, h1), flags=cv2.INTER_NEAREST)
+                
+            # Frame Deltas
+            if(gCopy.driftType == Align.DRIFT_DELTA):
+                C = deltas[c + startFrame]
+                C = np.float32([[1, 0, int(C[0][2])], 
+                                [0, 1, int(C[1][2])]])
+                mov = cv2.warpAffine(mov, C, (w1, h1), flags=cv2.INTER_NEAREST)
             
             # Area of Interest
             mov = cropAreaOfInterest(mov, aoi1, aoi2)
-            
+
             # Resize
             mov = cv2.resize(mov, (int(w*scaleFactor), int(h*scaleFactor)))
             
@@ -228,7 +255,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
                 M = np.identity(3)
             
             # Scale back up
-            M[0][2] /= scaleFactor # X
+            M[0][2] /= wScaleFactor # X
             M[1][2] /= scaleFactor # Y
 
             # Only add if the stack registration actually converged
@@ -245,6 +272,13 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
                 M[0][2] += int(w1/2) - int(cx)
                 M[1][2] += int(h1/2) - int(cy)
                 M = shiftOrigin(M, -(int(w1/2) - int(cx)), -(int(h1/2) - int(cy)))
+                
+            # Add frame delta transform
+            if(gCopy.driftType == Align.DRIFT_DELTA):
+                C = deltas[c + startFrame]
+                M[0][2] += int(C[0][2])
+                M[1][2] += int(C[1][2])
+                M = shiftOrigin(M, -int(C[0][2]), -int(C[1][2]))
                 
             # Add drift transform
             M[0][2] -= int(fdx1) - int(rfdx1)
