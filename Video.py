@@ -290,9 +290,8 @@ def loadFramesVideo(file, start, count, colorMode, progress):
             if(prevImage is not None):
                 try:
                     T = np.eye(2, 3, dtype=np.float32)
-                    
                     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10,  1e-10)
-                    (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria);
+                    (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria)
                     
                     M = np.identity(3, dtype=np.float64)
                     M[0][2] = T[0][2]/wScaleFactor # X
