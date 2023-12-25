@@ -30,7 +30,7 @@ class Preferences:
                 with open(self.file, "w") as f:
                     f.write(json.dumps(self.json))
         except:
-            print("Error saving preferences");
+            print("Error saving preferences")
     
     # Returns the value of the specified field.
     def get(self, field, default=""):
