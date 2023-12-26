@@ -356,9 +356,9 @@ def shiftOrigin(M, x, y):
     return M
 
 # Dilates image
-def dilateImg(img):
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
-    return cv2.dilate(cv2.medianBlur(img, 5), kernel)
+def dilateImg(img, kSize=25, blurSize=5):
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kSize, kSize))
+    return cv2.dilate(cv2.medianBlur(img, blurSize), kernel)
 
 # Nomalizes pixel values between 0 and 255
 def normalizeImg(img):

@@ -232,7 +232,7 @@ class Video:
 # Resize image so it does things faster
 def resize(image):
     from Align import dilateImg
-    image = dilateImg(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
+    image = dilateImg(image, 9, 3)
     h, w = image.shape[:2]
     hScaleFactor = min(1.0, (100/h))
     wScaleFactor = (int(w*hScaleFactor))/w
@@ -241,9 +241,8 @@ def resize(image):
        
 # Returns a number based on how sharp the image is (higher = sharper)
 def calculateSharpness(image):
-    return cv2.Laplacian(image, cv2.CV_8U).var()
-    #h, w = image.shape[:2]
-    #return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
+    h, w = image.shape[:2]
+    return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
    
 # Multiprocess function to load frames from an image sequence
 def loadFramesSequence(files, width, height, colorMode, progress):
@@ -274,7 +273,7 @@ def loadFramesVideo(file, start, count, colorMode, progress):
     prevImage = None
     if(beforeStart < start):
         success,prevImage = vidcap.read()
-        prevImage = Video.colorMode(prevImage, colorMode)
+        prevImage = cv2.cvtColor(Video.colorMode(prevImage, colorMode), cv2.COLOR_BGR2GRAY)
         prevImage, wScaleFactor, hScaleFactor = resize(prevImage)
         
     for i in range(0, count):
@@ -282,11 +281,13 @@ def loadFramesVideo(file, start, count, colorMode, progress):
         if(success):
             progress.count(i, count)
             frames.append(vidcap.get(cv2.CAP_PROP_POS_MSEC))
+            
             # Calculate sharpness
-            image = Video.colorMode(image, colorMode)
-
-            image, wScaleFactor, hScaleFactor = resize(image)
             sharps.append(calculateSharpness(image))
+
+            # Calculate Frame Deltas
+            image = cv2.cvtColor(Video.colorMode(image, colorMode), cv2.COLOR_BGR2GRAY)
+            image, wScaleFactor, hScaleFactor = resize(image)
             if(prevImage is not None):
                 try:
                     T = np.eye(2, 3, dtype=np.float32)
