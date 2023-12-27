@@ -60,7 +60,7 @@ class Video:
                 progress.setMessage("Preprocessing Frames")
                 height, width = cv2.imread(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesSequence, g.file[i*countPerThread:(i+1)*countPerThread], width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
+                    futures.append(g.pool.submit(loadFramesSequence, g.file[max(0, (i*countPerThread)-1):(i+1)*countPerThread], i, width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp, deltas = futures[i].result()
                     self.frames += frames
@@ -238,6 +238,23 @@ def resize(image):
     wScaleFactor = (int(w*hScaleFactor))/w
     image = cv2.resize(image, (int(w*hScaleFactor), int(h*hScaleFactor)), interpolation=cv2.INTER_LINEAR)
     return (image, wScaleFactor, hScaleFactor)
+    
+# Calculates frame to frame an approximate translation matrix
+def calculateDelta(image, prevImage, wScaleFactor, hScaleFactor):
+    if(prevImage is not None):
+        try:
+            T = np.eye(2, 3, dtype=np.float32)
+            criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10,  1e-10)
+            (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria)
+            
+            M = np.identity(3, dtype=np.float64)
+            M[0][2] = T[0][2]/wScaleFactor # X
+            M[1][2] = T[1][2]/hScaleFactor # Y
+        except Exception as e:
+            M = np.identity(3)
+    else:
+        M = np.identity(3)
+    return M
        
 # Returns a number based on how sharp the image is (higher = sharper)
 def calculateSharpness(image):
@@ -245,9 +262,17 @@ def calculateSharpness(image):
     return cv2.Laplacian(cv2.resize(image, (int(max(100, w*0.1)), int(max(100, h*0.1)))), cv2.CV_8U).var()
    
 # Multiprocess function to load frames from an image sequence
-def loadFramesSequence(files, width, height, colorMode, progress):
+def loadFramesSequence(files, thread, width, height, colorMode, progress):
     frames = []
     sharps = []
+    deltas = []
+    
+    prevImage = None
+    if(thread > 0 and len(files) > 0):
+        prevImage = cv2.imread(files.pop(0))
+        prevImage = cv2.cvtColor(Video.colorMode(prevImage, colorMode), cv2.COLOR_BGR2GRAY)
+        prevImage, wScaleFactor, hScaleFactor = resize(prevImage)
+    
     for i, file in enumerate(files):
         progress.count(i, len(files))
         image = cv2.imread(file)
@@ -255,11 +280,20 @@ def loadFramesSequence(files, width, height, colorMode, progress):
         if(h == height and w == width):
             # Only add if dimensions match
             frames.append(file)
-            # Calculate sharpness
             image = Video.colorMode(image, colorMode)
+
+            # Calculate sharpness
             sharps.append(calculateSharpness(image))
+            
+            # Calculate Frame Deltas
+            image = cv2.cvtColor(Video.colorMode(image, colorMode), cv2.COLOR_BGR2GRAY)
+            image, wScaleFactor, hScaleFactor = resize(image)
+            M = calculateDelta(image, prevImage, wScaleFactor, hScaleFactor)
+            deltas.append(M)
+            
+            prevImage = image
     progress.countExtra()
-    return (frames, sharps)
+    return (frames, sharps, deltas)
         
 # Multiprocess function to load frames from a video source
 def loadFramesVideo(file, start, count, colorMode, progress):
@@ -288,19 +322,7 @@ def loadFramesVideo(file, start, count, colorMode, progress):
             # Calculate Frame Deltas
             image = cv2.cvtColor(Video.colorMode(image, colorMode), cv2.COLOR_BGR2GRAY)
             image, wScaleFactor, hScaleFactor = resize(image)
-            if(prevImage is not None):
-                try:
-                    T = np.eye(2, 3, dtype=np.float32)
-                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10,  1e-10)
-                    (cc, T) = cv2.findTransformECC(image, prevImage, T, cv2.MOTION_TRANSLATION, criteria)
-                    
-                    M = np.identity(3, dtype=np.float64)
-                    M[0][2] = T[0][2]/wScaleFactor # X
-                    M[1][2] = T[1][2]/hScaleFactor # Y
-                except Exception as e:
-                    M = np.identity(3)
-            else:
-                M = np.identity(3)
+            M = calculateDelta(image, prevImage, wScaleFactor, hScaleFactor)
             deltas.append(M)
             
             prevImage = image
