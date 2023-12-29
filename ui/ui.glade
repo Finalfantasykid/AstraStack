@@ -3228,7 +3228,8 @@ Note: Drift adjustment will still crop the image.</property>
       <mime-type>video/x-ms-wmv</mime-type>
     </mime-types>
     <patterns>
-      <pattern>.ser</pattern>
+      <pattern>*.ser</pattern>
+      <pattern>*.SER</pattern>
     </patterns>
   </object>
   <object class="GtkMessageDialog" id="warningDialog">
