@@ -3357,15 +3357,23 @@ Note: Drift adjustment will still crop the image.</property>
   </object>
   <object class="GtkFileFilter" id="videoFilter">
     <mime-types>
-      <mime-type>video/*</mime-type>
       <mime-type>video/quicktime</mime-type>
       <mime-type>video/x-msvideo</mime-type>
+	  <mime-type>video/avi</mime-type>
       <mime-type>video/mp4</mime-type>
+	  <mime-type>video/mpeg</mime-type>
+	  <mime-type>video/ogg</mime-type>
+	  <mime-type>video/webm</mime-type>
+	  <mime-type>video/3gpp</mime-type>
+	  <mime-type>video/3gpp2</mime-type>
       <mime-type>video/x-ms-wmv</mime-type>
     </mime-types>
     <patterns>
       <pattern>*.ser</pattern>
       <pattern>*.SER</pattern>
+	  <pattern>*.avi</pattern>
+	  <pattern>*.mov</pattern>
+	  <pattern>*.mp4</pattern>
     </patterns>
   </object>
   <object class="GtkMessageDialog" id="warningDialog">
