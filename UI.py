@@ -59,9 +59,14 @@ class UI:
         self.builder = Gtk.Builder()
         self.builder.add_from_file(UI.SNAP_DIR + "ui/ui.glade")
         
+        if(self.preferences.get('darkTheme')):
+            self.builder.get_object("theme2").set_active(True)
+            self.changeTheme()
+        
         self.window = self.builder.get_object("mainWindow")
         self.saveDialog = self.builder.get_object("saveDialog")
         self.openDialog = self.builder.get_object("openDialog")
+        self.preferencesDialog = self.builder.get_object("preferencesDialog")
         self.tabs = self.builder.get_object("tabs")
         self.cpus = self.builder.get_object("cpus")
         self.colorMode = self.builder.get_object("colorMode")
@@ -303,6 +308,19 @@ class UI:
             thread.start()
         else:
             initPool()
+            
+    # Change the theme of the application
+    def changeTheme(self, *args):
+        theme1 = self.builder.get_object("theme1")
+        theme2 = self.builder.get_object("theme2")
+        theme3 = self.builder.get_object("theme3")
+        settings = Gtk.Settings.get_default()
+        if(theme1.get_active()):
+            settings.set_property("gtk-application-prefer-dark-theme", False)
+            self.preferences.set("darkTheme", False)
+        elif(theme2.get_active()):
+            settings.set_property("gtk-application-prefer-dark-theme", True)
+            self.preferences.set("darkTheme", True)
         
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
@@ -1311,6 +1329,11 @@ class UI:
             self.processSpinner.stop()
             self.processSpinner.hide()
         GLib.idle_add(update)
+
+    # Opens the preferences dialog
+    def openPreferences(self, *args):
+        self.preferencesDialog.run()
+        self.preferencesDialog.hide()
 
     # Closes the application
     def close(self, *args):
