@@ -1,10 +1,11 @@
-import cv2
-import numpy as np
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
+pywt = lazy("pywt")
 import math
 import copy
 from concurrent.futures import ProcessPoolExecutor, wait
 from multiprocessing import Manager, Lock
-from pywt import swt2, iswt2
 from time import sleep
 from deconvolution import *
 from Video import Video
@@ -256,7 +257,7 @@ def calculateChannelCoefficients(C, channel, num, lock):
     C /= 255
 
     # Compute coefficients
-    g.coeffs = list(swt2(C, 'haar', level=Sharpen.LEVEL, trim_approx=True))
+    g.coeffs = list(pywt.swt2(C, 'haar', level=Sharpen.LEVEL, trim_approx=True))
     g.channel = channel
     
     # Make sure that the other processes have completed as well
@@ -298,7 +299,7 @@ def sharpenChannelLayers(gCopy):
     
     # Reconstruction
     padding = 2**(Sharpen.LEVEL)
-    img=iswt2(c, 'haar')
+    img=pywt.iswt2(c, 'haar')
     
     # Reset coefficients
     for i in range(1, len(c)):

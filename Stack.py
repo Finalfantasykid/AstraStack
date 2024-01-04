@@ -1,9 +1,10 @@
-import cv2
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
+pystackreg = lazy("pystackreg")
 import math
-import numpy as np
 import copy
 from concurrent.futures.process import BrokenProcessPool
-from pystackreg import StackReg
 from Globals import *
 from Video import Video
 from ProgressBar import *
@@ -107,7 +108,7 @@ class Stack:
     def alignChannels(self, progress):
         h, w = self.stackedImage.shape[:2]
         gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_BGR2GRAY)
-        sr = StackReg(StackReg.TRANSLATION)
+        sr = pystackreg.StackReg(Align.TRANSLATION)
         
         for i, C in enumerate(cv2.split(self.stackedImage)):
             M = sr.register(C, gray)

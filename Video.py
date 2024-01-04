@@ -1,9 +1,8 @@
-import cv2
-import numpy as np
-import glob
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
 import math
 from concurrent.futures.process import BrokenProcessPool
-from natsort import natsorted, ns
 from Globals import *
 from ProgressBar import *
 
@@ -46,6 +45,7 @@ class Video:
 
     # Returns a list of file paths for the frames of the given video fileName
     def run(self):
+        from natsort import natsorted, ns
         progress = ProgressBar()
         futures = []
         try:

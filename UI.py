@@ -1,23 +1,22 @@
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
+pystackreg = lazy("pystackreg")
+webbrowser = lazy("webbrowser")
+psutil = lazy("psutil")
 from os import cpu_count, rmdir, scandir, unlink, path
 import subprocess, os, sys
-from pathlib import Path
 import math
-import cv2
-import numpy as np
-import webbrowser
 import urllib.request
 import ssl
 import json
 import math
-import psutil
 import time
 from packaging import version
 from threading import Thread
 from multiprocessing import active_children, get_start_method
 from concurrent.futures import ProcessPoolExecutor
-from pystackreg import StackReg
 
-from deconvolution import *
 from Preferences import Preferences
 from Video import Video
 from Align import Align, centerOfMass, dilateImg, normalizeImg
@@ -128,7 +127,7 @@ class UI:
         self.builder.get_object("saturation").add_mark(100, Gtk.PositionType.TOP, None)
 
         self.disableScroll()
-
+        
         self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
         self.cpus.set_value(min(61, math.ceil(self.preferences.get("cpus", cpu_count()/2))))
         g.pool = None
@@ -161,8 +160,8 @@ class UI:
         g.denoise = [None]*5
         g.level   = [None]*5
 
-        self.setThreads()
         self.window.show_all()
+        self.setThreads()
         self.checkNewVersion()
         self.setProgress()
         self.setColorMode()
@@ -475,6 +474,7 @@ class UI:
             
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
+        from pathlib import Path
         self.saveDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
         if(self.saveDialog.get_current_name() == ""):
             # Set default file to save if empty
@@ -1078,13 +1078,13 @@ class UI:
         if(text == "None"):
             g.transformation = -1
         elif(text == "Translation"):
-            g.transformation = StackReg.TRANSLATION
+            g.transformation = Align.TRANSLATION
         elif(text == "Rigid Body"):
-            g.transformation = StackReg.RIGID_BODY
+            g.transformation = Align.RIGID_BODY
         elif(text == "Scaled Rotation"):
-            g.transformation = StackReg.SCALED_ROTATION
+            g.transformation = Align.SCALED_ROTATION
         elif(text == "Affine"):
-            g.transformation = StackReg.AFFINE
+            g.transformation = Align.AFFINE
             
     # Sets the drizzle scaling factor
     def setDrizzleFactor(self, *args):
@@ -1113,13 +1113,13 @@ class UI:
     def setDrizzleInterpolation(self, *args):
         text = self.drizzleInterpolation.get_active_text()
         if(text == "Nearest Neighbor"):
-            g.drizzleInterpolation = cv2.INTER_NEAREST
+            g.drizzleInterpolation = 0 # cv2.INTER_NEAREST
         elif(text == "Bilinear"):
-            g.drizzleInterpolation = cv2.INTER_LINEAR
+            g.drizzleInterpolation = 1 # cv2.INTER_LINEAR
         elif(text == "Bicubic"):
-            g.drizzleInterpolation = cv2.INTER_CUBIC
+            g.drizzleInterpolation = 2 # cv2.INTER_CUBIC
         elif(text == "Lanczos"):
-            g.drizzleInterpolation = cv2.INTER_LANCZOS4
+            g.drizzleInterpolation = 4 # cv2.INTER_LANCZOS4
         if(self.stack is not None):
             self.stack.generateRefBG()
         self.updateImage()

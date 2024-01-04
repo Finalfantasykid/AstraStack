@@ -7,6 +7,13 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm -fr dist
     python3 -m PyInstaller --add-binary "$LIBXCB:." \
                            --hidden-import "cairo" \
+                           --hidden-import "numpy" \
+                           --hidden-import "cv2" \
+                           --hidden-import "pystackreg" \
+                           --hidden-import "pywt" \
+                           --hidden-import "webbrowser" \
+                           --hidden-import "psutil" \
+                           --hidden-import "importlib" \
                            --exclude-module "gi.repository.Gst" \
                            AstraStack.py
     rm -fr dist/AstraStack/*.dist-info
@@ -38,6 +45,13 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --hidden-import "packaging.requirements" \
                 --hidden-import "pkg_resources.py2_warn" \
                 --hidden-import "cairo" \
+                --hidden-import "numpy" \
+                --hidden-import "cv2" \
+                --hidden-import "pystackreg" \
+                --hidden-import "pywt" \
+                --hidden-import "webbrowser" \
+                --hidden-import "psutil" \
+                --hidden-import "importlib" \
                 --exclude-module "FixTk" \
                 --exclude-module "tcl" \
                 --exclude-module "tk" \

@@ -1,8 +1,9 @@
-import cv2
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
+pystackreg = lazy("pystackreg")
 import math
-import numpy as np
 from concurrent.futures.process import BrokenProcessPool
-from pystackreg import StackReg
 from Globals import *
 from Video import Video
 from ProgressBar import *
@@ -13,6 +14,11 @@ class Align:
     DRIFT_GRAVITY = 1
     DRIFT_DELTA = 2
     DRIFT_MANUAL = 3
+    
+    TRANSLATION = 2
+    RIGID_BODY = 3
+    SCALED_ROTATION = 4
+    AFFINE = 6
 
     def __init__(self, frames):
         self.frames = frames
@@ -207,7 +213,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
     wScaleFactor = (int(w*scaleFactor))/w
 
     if(gCopy.transformation != -1):
-        sr = StackReg(gCopy.transformation)
+        sr = pystackreg.StackReg(gCopy.transformation)
     else:
         sr = None
     

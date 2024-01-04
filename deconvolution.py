@@ -1,5 +1,6 @@
-import cv2
-import numpy as np
+from lazy import lazy
+cv2 = lazy("cv2")
+np = lazy("numpy")
 import math
 
 # Deconvolution adapted from https://github.com/opencv/opencv/blob/master/samples/python/deconvolution.py
