@@ -4,12 +4,10 @@ np = lazy("numpy")
 pystackreg = lazy("pystackreg")
 webbrowser = lazy("webbrowser")
 psutil = lazy("psutil")
-from os import cpu_count, rmdir, scandir, unlink, path
+urllib = lazy("urllib")
+json = lazy("json")
 import subprocess, os, sys
 import math
-import urllib.request
-import ssl
-import json
 import math
 import time
 from packaging import version
@@ -27,8 +25,6 @@ from Globals import *
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
-
-ssl._create_default_https_context = ssl._create_unverified_context
 
 class UI:
     
@@ -128,8 +124,8 @@ class UI:
 
         self.disableScroll()
         
-        self.cpus.set_upper(min(61, cpu_count())) # 61 is the maximum that Windows allows
-        self.cpus.set_value(min(61, math.ceil(self.preferences.get("cpus", cpu_count()/2))))
+        self.cpus.set_upper(min(61, os.cpu_count())) # 61 is the maximum that Windows allows
+        self.cpus.set_value(min(61, math.ceil(self.preferences.get("cpus", os.cpu_count()/2))))
         g.pool = None
 
         self.processThread = None
@@ -280,7 +276,7 @@ class UI:
         self.frameScale.set_value_pos(Gtk.PositionType.RIGHT)
         self.frameScale.set_value_pos(Gtk.PositionType.LEFT)
         
-    # Loads opencv asyncronously
+    # Loads opencv asynchronously
     def loadOpenCV(self):
         def load():
             time.sleep(0.5)
@@ -334,6 +330,8 @@ class UI:
     # Checks github to see if there is a new version available
     def checkNewVersion(self):
         def callUrl():
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
             try:
                 if(not g.TESTING):
                     contents = urllib.request.urlopen("https://api.github.com/repos/Finalfantasykid/AstraStack/releases/latest").read()
@@ -405,7 +403,7 @@ class UI:
     
     # Opens the file chooser to open load a file
     def openVideo(self, *args):
-        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
+        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("videoFilter"))
         response = self.openDialog.run()
@@ -428,7 +426,7 @@ class UI:
             
     # Opens the file chooser to open load a file
     def openImageSequence(self, *args):
-        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
+        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(True)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
@@ -449,7 +447,7 @@ class UI:
             
     # Opens the file chooser to open load a file
     def openImage(self, *args):
-        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
+        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
@@ -465,7 +463,7 @@ class UI:
                 if(not self.checkMemory(w, h)):
                     raise MemoryError()
                 
-                self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
+                self.window.set_title(os.path.split(g.file)[1] + " - " + UI.TITLE)
                 self.saveDialog.set_current_name("")
                 
                 self.updateAutoColorModeText()
@@ -485,7 +483,7 @@ class UI:
     # Opens the file chooser to save the final image
     def saveFileDialog(self, *args):
         from pathlib import Path
-        self.saveDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
+        self.saveDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         if(self.saveDialog.get_current_name() == ""):
             # Set default file to save if empty
             if(isinstance(g.file, list)):
@@ -544,9 +542,9 @@ class UI:
             self.enableUI()
             if(isinstance(g.file, list)):
                 sList = g.file
-                self.window.set_title(path.split(sList[0])[1] + " ... " + path.split(sList[-1])[1] +  " - " + UI.TITLE)
+                self.window.set_title(os.path.split(sList[0])[1] + " ... " + os.path.split(sList[-1])[1] +  " - " + UI.TITLE)
             else:
-                self.window.set_title(path.split(g.file)[1] + " - " + UI.TITLE)
+                self.window.set_title(os.path.split(g.file)[1] + " - " + UI.TITLE)
             self.saveDialog.set_current_name("")
 
             self.builder.get_object("alignTab").set_sensitive(True)
@@ -557,7 +555,7 @@ class UI:
         
     # Opens the file chooser to open load a psf file (g.deconvolveCustomFile)
     def openPSF(self, *args):
-        self.openDialog.set_current_folder(path.expanduser(UI.HOME_DIR))
+        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
