@@ -161,6 +161,7 @@ class UI:
         g.level   = [None]*5
 
         self.window.show_all()
+        self.loadOpenCV()
         self.setThreads()
         self.checkNewVersion()
         self.setProgress()
@@ -278,6 +279,15 @@ class UI:
     def fixFrameSliderBug(self):
         self.frameScale.set_value_pos(Gtk.PositionType.RIGHT)
         self.frameScale.set_value_pos(Gtk.PositionType.LEFT)
+        
+    # Loads opencv asyncronously
+    def loadOpenCV(self):
+        def load():
+            time.sleep(0.5)
+            import cv2
+            return
+        thread = Thread(target=load, args=())
+        thread.start()
         
     # Sets the number of threads to use
     def setThreads(self, *args):
