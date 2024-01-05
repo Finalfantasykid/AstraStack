@@ -7,6 +7,7 @@ import copy
 from concurrent.futures.process import BrokenProcessPool
 from Globals import *
 from Video import Video
+from Align import Align
 from ProgressBar import *
 
 class Stack:
