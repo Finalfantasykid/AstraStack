@@ -41,7 +41,6 @@ def after_scenario(context, scenario):
     
 def after_all(context):
     try:
-        pass
-        #shutil.rmtree("features/testFiles/tmp/")
+        shutil.rmtree("features/testFiles/tmp/")
     except:
         pass
