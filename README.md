@@ -3,6 +3,8 @@ Astronomy Stacking application - [Manual](https://github.com/Finalfantasykid/Ast
 
 AstraStack is an easy to use application used to stack videos or images of planets, the sun, moon, deep sky objects and more. Stacking is a technique used to improve the quality of the image by aligning each frame and then averaging the best frames to create a low noise version of the image which can then be sharpened.
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/astrastack)
+
 # Development Installation
 To install you should first set up a virtual environment
 
