@@ -5,17 +5,17 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     LIBXCB=`ldconfig -p | grep libxcb.so.1 | grep x86-64 | sed 's/^.*=> //'`
 
     rm -fr dist
-    python3 -m PyInstaller --add-binary "$LIBXCB:." \
-                           --hidden-import "cairo" \
-                           --hidden-import "numpy" \
-                           --hidden-import "cv2" \
-                           --hidden-import "pystackreg" \
-                           --hidden-import "pywt" \
-                           --hidden-import "webbrowser" \
-                           --hidden-import "psutil" \
-                           --hidden-import "importlib" \
-                           --exclude-module "gi.repository.Gst" \
-                           AstraStack.py
+    python3 -OO -m PyInstaller --add-binary "$LIBXCB:." \
+                               --hidden-import "cairo" \
+                               --hidden-import "numpy" \
+                               --hidden-import "cv2" \
+                               --hidden-import "pystackreg" \
+                               --hidden-import "pywt" \
+                               --hidden-import "webbrowser" \
+                               --hidden-import "psutil" \
+                               --hidden-import "importlib" \
+                               --exclude-module "gi.repository.Gst" \
+                               AstraStack.py
     rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/
     cp -r ui dist/AstraStack/
