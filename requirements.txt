@@ -2,9 +2,9 @@ natsort==8.4.0
 numpy==1.26.2
 opencv-python-headless==4.9.0.80
 packaging
-psutil==5.9.7
-pycairo==1.25.1
+psutil==6.0.0
+pycairo==1.27.0
 appdirs==1.4.4
-PyGObject==3.46.0
+PyGObject==3.50.0
 pystackreg==0.2.7
-PyWavelets==1.5.0
+PyWavelets==1.7.0

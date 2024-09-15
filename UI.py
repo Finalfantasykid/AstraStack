@@ -21,6 +21,7 @@ from Align import Align, centerOfMass, dilateImg, normalizeImg
 from Stack import Stack, transform
 from Sharpen import Sharpen
 from Globals import *
+from deconvolution import *
 
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -253,10 +254,11 @@ class UI:
         
     # Opens the user manual in the default pdf application
     def showManual(self, *args):
+        print(sys.platform)
         if sys.platform.startswith('darwin'):
             subprocess.call(('open', "manual/Manual.pdf"))
         elif os.name == 'nt': # For Windows
-            os.startfile("manual\Manual.pdf")
+            os.startfile("manual\\Manual.pdf")
         elif os.name == 'posix': # For Linux
             # Now open the file
             subprocess.Popen(('xdg-open', UI.SNAP_DIR + "manual/Manual.pdf"), env=self.cleanseEnv())
