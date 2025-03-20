@@ -544,6 +544,8 @@ class UI:
             self.enableUI()
             if(isinstance(g.file, list)):
                 sList = g.file
+                if(len(sList) != len(self.video.frames)):
+                    self.showErrorDialog("Not all images were added to the stack.  Make sure they are all the same dimensions.")
                 self.window.set_title(os.path.split(sList[0])[1] + " ... " + os.path.split(sList[-1])[1] +  " - " + UI.TITLE)
             else:
                 self.window.set_title(os.path.split(g.file)[1] + " - " + UI.TITLE)
@@ -752,10 +754,10 @@ class UI:
             if(px1 != 0 and py1 != 0 and
                px2 != 0 and py2 != 0):
                 # Draw Area of Interest Rectangle
-                drawRect(cr, px1 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
-                             py1 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame), 
-                             px2 + (dx/(g.endFrame - g.startFrame))*(current-g.startFrame), 
-                             py2 + (dy/(g.endFrame - g.startFrame))*(current-g.startFrame))
+                drawRect(cr, px1 + (dx/max(1, g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             py1 + (dy/max(1, g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             px2 + (dx/max(1, g.endFrame - g.startFrame))*(current-g.startFrame), 
+                             py2 + (dy/max(1, g.endFrame - g.startFrame))*(current-g.startFrame))
                 
             if(dx1 != 0 and dy1 != 0 and current == g.startFrame):
                 # Draw point on first frame
