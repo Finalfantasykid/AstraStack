@@ -1,2 +1,2 @@
-pyinstaller==5.13.2
+pyinstaller==6.0.0
 behave
