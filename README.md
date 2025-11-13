@@ -56,6 +56,17 @@ Testing uses the behave package and Gtk instructions are 'simulated' during test
 ```
 $ behave
 ```
+If you want the tests to run 'headless' you can do one of the following:
+
+- if on X11:
+```
+$ xvfb-run behave
+```
+
+- if on Wayland:
+```
+$ wlheadless-run -- behave 2> /dev/null
+```
 
 # References
 1. RegiStax - https://www.astronomie.be/registax/
