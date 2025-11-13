@@ -5,6 +5,6 @@ packaging
 psutil==6.1.0
 pycairo==1.27.0
 appdirs==1.4.4
-PyGObject==3.50.0
+PyGObject==3.54.5
 pystackreg==0.2.8
 PyWavelets==1.8.0

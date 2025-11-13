@@ -16,8 +16,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
                            --hidden-import "importlib" \
                            --exclude-module "gi.repository.Gst" \
                            AstraStack.py
-    rm -fr dist/AstraStack/*.dist-info
-    rm -fr dist/AstraStack/share/
+    rm -fr dist/AstraStack/_internal/*.dist-info
+    rm -fr dist/AstraStack/_internal/share/
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
