@@ -5,6 +5,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     LIBXCB=`ldconfig -p | grep libxcb.so.1 | grep x86-64 | sed 's/^.*=> //'`
 
     rm -fr dist
+    EXCLUDE_SSL=""
+    if [[ "$1" == "snap" ]]; then
+        EXCLUDE_SSL="ssl"
+    fi
     python3 -m PyInstaller --add-binary "$LIBXCB:." \
                            --hidden-import "cairo" \
                            --hidden-import "numpy" \
@@ -15,7 +19,12 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
                            --hidden-import "psutil" \
                            --hidden-import "importlib" \
                            --exclude-module "gi.repository.Gst" \
+                           --exclude-module "$EXCLUDE_SSL" \
+                           --strip \
                            AstraStack.py
+    
+    rm -fr dist/AstraStack/_internal/libicuuc.*                 
+    rm -fr dist/AstraStack/_internal/libicudata.*
     rm -fr dist/AstraStack/_internal/*.dist-info
     rm -fr dist/AstraStack/_internal/share/
     cp -r ui dist/AstraStack/

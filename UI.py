@@ -345,8 +345,9 @@ class UI:
                 return
         button = self.builder.get_object("newVersion")
         button.hide()
-        thread = Thread(target=callUrl, args=())
-        thread.start()
+        if('SNAP' not in os.environ):
+            thread = Thread(target=callUrl, args=())
+            thread.start()
         
     # Opens the GitHub releases page in a browser
     def clickNewVersion(self, *args):
