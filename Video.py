@@ -26,12 +26,35 @@ class Video:
         self.vidcap = None
         self.sharps = []
         self.deltas = []
+        
+    @staticmethod
+    # Reads an image file
+    def readImage(file, flags=cv2.IMREAD_COLOR, dtype=np.uint16):
+        img = cv2.imread(file, flags)
+        if(img is not None):
+            # Normal img, so return
+            return img
+        else:
+            # Image might be a FITS image so give that a try
+            from astropy.io import fits
+            img = fits.getdata(file)
+            maxVal = 1
+            try:
+                maxVal = np.iinfo(img.dtype).max
+            except:
+                pass
+            img = (img.astype(np.float32)/maxVal)*np.iinfo(dtype).max
+            cv2.normalize(np.sqrt(img), img, alpha=0, beta=np.iinfo(dtype).max, norm_type=cv2.NORM_MINMAX)
+            img = img.astype(dtype)
+            if(flags == cv2.IMREAD_COLOR):
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            return img
             
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self):
         if(isinstance(g.file, list)):
             # Image Sequence
-            h, w = cv2.imread(g.file[0]).shape[:2]
+            h, w = Video.readImage(g.file[0]).shape[:2]
             if(not g.ui.checkMemory(w, h)):
                 raise MemoryError()
         else:
@@ -58,7 +81,7 @@ class Video:
                 g.guessedColorMode = self.guessColorMode(g.file)
                 
                 progress.setMessage("Preprocessing Frames")
-                height, width = cv2.imread(g.file[0]).shape[:2]
+                height, width = Video.readImage(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
                     futures.append(g.pool.submit(loadFramesSequence, g.file[max(0, (i*countPerThread)-1):(i+1)*countPerThread], i, width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
@@ -120,12 +143,12 @@ class Video:
             colorMode = self.guessColorMode(file)
         if(isinstance(frame, str)):
             # Specific file
-            image = cv2.imread(frame, cv2.IMREAD_UNCHANGED)
+            image = Video.readImage(frame, cv2.IMREAD_UNCHANGED)
             image = Video.colorMode(image, colorMode)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         elif(isinstance(file, list)):
             # Image Sequence
-            image = cv2.imread(file[frame], cv2.IMREAD_UNCHANGED)
+            image = Video.readImage(file[frame], cv2.IMREAD_UNCHANGED)
             image = Video.colorMode(image, colorMode)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         else:
@@ -144,12 +167,12 @@ class Video:
         colorMode = Video.COLOR_RGB
         if(isinstance(file, list)):
             # Image Sequence
-            image = cv2.imread(file[0], cv2.IMREAD_UNCHANGED)
+            image = Video.readImage(file[0], cv2.IMREAD_UNCHANGED)
             colorMode = self.guessImageColor(image)
         else:
             try:
                 # First try as image
-                image = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+                image = Video.readImage(file, cv2.IMREAD_UNCHANGED)
                 colorMode = self.guessImageColor(image)
             except Exception:
                 # Now try as video
@@ -205,7 +228,7 @@ class Video:
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         else:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            if(colorMode >= Video.COLOR_RGGB_VNG):
+            if(colorMode >= Video.COLOR_RGGB_VNG and img.dtype == np.uint8): # Only do VNG if its a uint8 image
                 img = cv2.copyMakeBorder(img, 4, 2, 2, 2, cv2.BORDER_REPLICATE)
                 if(colorMode == Video.COLOR_RGGB_VNG):
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_VNG)
@@ -218,13 +241,13 @@ class Video:
                 img = img[2:h+2,2:w+2]
             else:
                 img = cv2.copyMakeBorder(img, 2, 2, 2, 2, cv2.BORDER_REPLICATE)
-                if(colorMode == Video.COLOR_RGGB):
+                if(colorMode == Video.COLOR_RGGB or colorMode == Video.COLOR_RGGB_VNG):
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_EA)
-                elif(colorMode == Video.COLOR_GRBG):
+                elif(colorMode == Video.COLOR_GRBG or colorMode == Video.COLOR_GRBG_VNG):
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR_EA)
-                elif(colorMode == Video.COLOR_GBRG):
+                elif(colorMode == Video.COLOR_GBRG or colorMode == Video.COLOR_GBRG_VNG):
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR_EA)
-                elif(colorMode == Video.COLOR_BGGR):
+                elif(colorMode == Video.COLOR_BGGR or colorMode == Video.COLOR_BGGR_VNG):
                     img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_EA)
                 img = img[2:h+2,2:w+2]
         return img
@@ -269,13 +292,13 @@ def loadFramesSequence(files, thread, width, height, colorMode, progress):
     
     prevImage = None
     if(thread > 0 and len(files) > 0):
-        prevImage = cv2.imread(files.pop(0))
+        prevImage = Video.readImage(files.pop(0), dtype=np.uint8)
         prevImage = cv2.cvtColor(Video.colorMode(prevImage, colorMode), cv2.COLOR_BGR2GRAY)
         prevImage, wScaleFactor, hScaleFactor = resize(prevImage)
     
     for i, file in enumerate(files):
         progress.count(i, len(files))
-        image = cv2.imread(file)
+        image = Video.readImage(file, dtype=np.uint8)
         h, w = image.shape[:2]
         if(h == height and w == width):
             # Only add if dimensions match

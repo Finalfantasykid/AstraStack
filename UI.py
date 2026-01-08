@@ -461,7 +461,7 @@ class UI:
             try:
                 self.video = Video()
                 g.guessedColorMode = self.video.guessColorMode(g.file)
-                img = cv2.imread(g.file)
+                img = Video.readImage(g.file)
                 h, w = img.shape[:2]
                 if(not self.checkMemory(w, h)):
                     raise MemoryError()
@@ -476,10 +476,14 @@ class UI:
                 self.builder.get_object("stackTab").set_sensitive(False)
                 self.builder.get_object("processTab").set_sensitive(True)
                 self.tabs.set_current_page(UI.SHARPEN_TAB)
-                self.frame.set_from_file(g.file)
+                
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
+                pixbuf = self.createPixbuf(img)
+                self.frame.set_from_pixbuf(pixbuf.copy())
             except MemoryError as error:
                 pass
-            except: # Open Failed
+            except Exception as error: # Open Failed
+                print(error)
                 self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
             self.enableUI()
             
@@ -567,7 +571,7 @@ class UI:
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
             try:
-                img = cv2.imread(self.openDialog.get_filename(), cv2.IMREAD_GRAYSCALE)
+                img = Video.readImage(self.openDialog.get_filename(), cv2.IMREAD_GRAYSCALE)
                 if(max(img.shape) > 100):
                     raise Exception
                 if(len(np.unique(img)) <= 1):
