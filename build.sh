@@ -26,6 +26,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     rm -fr dist/AstraStack/_internal/libicuuc.*                 
     rm -fr dist/AstraStack/_internal/libicudata.*
     rm -fr dist/AstraStack/_internal/*.dist-info
+    rm -fr dist/AstraStack/_internal/astropy_iers_data
     rm -fr dist/AstraStack/_internal/share/
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
