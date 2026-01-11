@@ -13,8 +13,21 @@ from Globals import *
 
 pool = ProcessPoolExecutor(3)
 
+def clamp(img, low, high):
+    img[img<low] = low
+    img[img>high] = high
+    return img
+
+def colorAdjust(C, adjust):
+    C *= (adjust/100)*(g.value/100)
+    return C
+
 class Sharpen:
 
+    NORMALIZE_NONE = 0
+    NORMALIZE_LINEAR = 1
+    NORMALIZE_SQRT = 2
+    NORMALIZE_LOG = 3
     LEVEL = 5
     
     # This is a crude estimate on how much memory will be used by the sharpening
@@ -33,6 +46,7 @@ class Sharpen:
         self.stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
         self.h, self.w = stackedImage.shape[:2]
         self.mask = None
+        self.thresh = None
         self.sharpenedImage = self.stackedImage
         self.debluredImage = self.stackedImage
         self.deringedImage = self.stackedImage
@@ -87,6 +101,14 @@ class Sharpen:
         
     # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self, stackedImage):
+        # Normalize
+        stackedImage = clamp(stackedImage, 0, 255)
+        if(g.normalizeP == Sharpen.NORMALIZE_LINEAR):
+            stackedImage = cv2.normalize(stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        elif(g.normalizeP == Sharpen.NORMALIZE_SQRT):
+            stackedImage = cv2.normalize(np.sqrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        elif(g.normalizeP == Sharpen.NORMALIZE_LOG):
+            stackedImage = cv2.normalize(np.log(stackedImage+1e-10), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         (R, G, B) = cv2.split(stackedImage)
 
         with Manager() as manager:
@@ -196,16 +218,8 @@ class Sharpen:
     
     # Apply brightness & color sliders
     def processColor(self):
-        def clamp(img, low, high):
-            img[img<low] = low
-            img[img>high] = high
-            return img
-            
-        def colorAdjust(C, adjust):
-            C *= (adjust/100)*(g.value/100)
-            return C
-            
         img = self.deringedImage
+        
         # Black Level
         img = (img - (g.blackLevel/255))*(255/max(1, (255-g.blackLevel)))
 

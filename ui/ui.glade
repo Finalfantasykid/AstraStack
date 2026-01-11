@@ -2727,7 +2727,7 @@ Note: Drift adjustment will still crop the image.</property>
                                     <property name="can-focus">True</property>
                                     <property name="margin-bottom">10</property>
                                     <child>
-                                      <!-- n-columns=3 n-rows=8 -->
+                                      <!-- n-columns=3 n-rows=9 -->
                                       <object class="GtkGrid">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
@@ -2743,7 +2743,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">1</property>
+                                            <property name="top-attach">2</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2757,7 +2757,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">0</property>
+                                            <property name="top-attach">1</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2772,7 +2772,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">1</property>
+                                            <property name="top-attach">2</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2780,6 +2780,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="width-request">275</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
+                                            <property name="margin-top">10</property>
                                             <property name="adjustment">blackLevelAdjust</property>
                                             <property name="round-digits">0</property>
                                             <property name="digits">0</property>
@@ -2788,7 +2789,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">0</property>
+                                            <property name="top-attach">1</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2802,7 +2803,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">3</property>
+                                            <property name="top-attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2815,7 +2816,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">4</property>
+                                            <property name="top-attach">5</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2828,7 +2829,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">5</property>
+                                            <property name="top-attach">6</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2844,7 +2845,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">3</property>
+                                            <property name="top-attach">4</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2859,7 +2860,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">4</property>
+                                            <property name="top-attach">5</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2874,7 +2875,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">5</property>
+                                            <property name="top-attach">6</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2887,7 +2888,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">6</property>
+                                            <property name="top-attach">7</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2902,7 +2903,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">6</property>
+                                            <property name="top-attach">7</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2915,7 +2916,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">2</property>
+                                            <property name="top-attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2930,7 +2931,7 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">1</property>
-                                            <property name="top-attach">2</property>
+                                            <property name="top-attach">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2940,9 +2941,44 @@ Note: Drift adjustment will still crop the image.</property>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
-                                            <property name="top-attach">7</property>
+                                            <property name="top-attach">8</property>
                                             <property name="width">2</property>
                                           </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="tooltip-text" translatable="yes">Adjusts the color intensity.</property>
+                                            <property name="label" translatable="yes">Normalize:</property>
+                                            <property name="xalign">1</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left-attach">0</property>
+                                            <property name="top-attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkComboBoxText" id="normalizeP">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="active">0</property>
+                                            <items>
+                                              <item id="0" translatable="yes">None</item>
+                                              <item id="1" translatable="yes">Linear</item>
+                                              <item id="2" translatable="yes">Square Root</item>
+                                              <item id="3" translatable="yes">Logarithm</item>
+                                            </items>
+                                            <signal name="changed" handler="sharpenImage" swapped="no"/>
+                                            <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left-attach">1</property>
+                                            <property name="top-attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
                                         </child>
                                         <child>
                                           <placeholder/>
