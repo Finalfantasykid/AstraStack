@@ -109,6 +109,7 @@ class Sharpen:
             stackedImage = cv2.normalize(np.sqrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         elif(g.normalizeP == Sharpen.NORMALIZE_LOG):
             stackedImage = cv2.normalize(np.log(stackedImage+1e-10), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+            
         (R, G, B) = cv2.split(stackedImage)
 
         with Manager() as manager:

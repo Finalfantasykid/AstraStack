@@ -473,6 +473,7 @@ class UI:
                 
                 self.updateAutoColorModeText()
                 
+                self.stack = None
                 self.sharpen = Sharpen(g.file, True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)

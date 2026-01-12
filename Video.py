@@ -44,7 +44,7 @@ class Video:
             except:
                 pass
             img = (img.astype(np.float32)/maxVal)*np.iinfo(dtype).max
-            cv2.normalize(np.sqrt(img), img, alpha=0, beta=np.iinfo(dtype).max, norm_type=cv2.NORM_MINMAX)
+            cv2.normalize(img, img, alpha=0, beta=np.iinfo(dtype).max, norm_type=cv2.NORM_MINMAX)
             img = img.astype(dtype)
             if(flags == cv2.IMREAD_COLOR):
                 img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
