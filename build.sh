@@ -73,6 +73,8 @@ elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist/AstraStack/*.dist-info
     rm -fr dist/AstraStack/share/locale/
     rm -fr dist/AstraStack/site-packages/
+	rm -fr dist/AstraStack/astropy_iers_data
+    find dist/AstraStack/astropy/ -maxdepth 1 -type d -not -name 'io' -not -name 'astropy' -exec rm -fr {} +
     cp -r ui dist/AstraStack/
     cp -r manual dist/AstraStack/
     rm dist/AstraStack/ui/logo.xcf
