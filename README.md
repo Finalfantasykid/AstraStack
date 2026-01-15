@@ -26,7 +26,7 @@ pip install numpy
 pip install -r requirements.txt
 ```
 
-You may need to install some additional system packages, ie: libcairo2-dev, pkg-config, python3-dev, libgirepository1.0-dev
+You may need to install some additional system packages, ie: libcairo2-dev, pkg-config, python3-dev, libgirepository-2.0-dev
 
 You can run the application with
 
