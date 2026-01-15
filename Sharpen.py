@@ -27,7 +27,10 @@ class Sharpen:
     NORMALIZE_NONE = 0
     NORMALIZE_LINEAR = 1
     NORMALIZE_SQRT = 2
-    NORMALIZE_LOG = 3
+    NORMALIZE_CBRT = 3
+    NORMALIZE_ASINH = 4
+    NORMALIZE_LOG = 5
+    
     LEVEL = 5
     
     # This is a crude estimate on how much memory will be used by the sharpening
@@ -101,13 +104,17 @@ class Sharpen:
         
     # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self, stackedImage):
-        # Normalize
+        # Stretch Function
         stackedImage = clamp(stackedImage, 0, 255)
-        if(g.normalizeP == Sharpen.NORMALIZE_LINEAR):
+        if(g.stretchFunction == Sharpen.NORMALIZE_LINEAR):
             stackedImage = cv2.normalize(stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.normalizeP == Sharpen.NORMALIZE_SQRT):
+        elif(g.stretchFunction == Sharpen.NORMALIZE_SQRT):
             stackedImage = cv2.normalize(np.sqrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.normalizeP == Sharpen.NORMALIZE_LOG):
+        elif(g.stretchFunction == Sharpen.NORMALIZE_CBRT):
+            stackedImage = cv2.normalize(np.cbrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        elif(g.stretchFunction == Sharpen.NORMALIZE_ASINH):
+            stackedImage = cv2.normalize(np.arcsinh(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        elif(g.stretchFunction == Sharpen.NORMALIZE_LOG):
             stackedImage = cv2.normalize(np.log(stackedImage+1e-10), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
             
         (R, G, B) = cv2.split(stackedImage)

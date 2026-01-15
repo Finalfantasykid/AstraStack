@@ -157,7 +157,7 @@ class UI:
         g.denoise = [None]*5
         g.level   = [None]*5
         
-        g.normalizeP = Sharpen.NORMALIZE_NONE
+        g.stretchFunction = Sharpen.NORMALIZE_NONE
 
         self.window.show_all()
         self.loadOpenCV()
@@ -1275,9 +1275,9 @@ class UI:
         g.blueAdjust = self.builder.get_object("blueAdjust").get_value()
         g.saturation = self.builder.get_object("saturationAdjust").get_value()
         
-        g.normalizeP = self.builder.get_object("normalizeP").get_active()
+        g.stretchFunction = self.builder.get_object("stretchFunction").get_active()
         
-        if(len(args) > 0 and (self.builder.get_object("normalizeP") == args[0])):
+        if(len(args) > 0 and (self.builder.get_object("stretchFunction") == args[0])):
             self.sharpen = None
         
         if(len(args) > 0 and (self.builder.get_object("gammaAdjust") == args[0] or
