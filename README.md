@@ -9,21 +9,21 @@ AstraStack is an easy to use application used to stack videos or images of plane
 To install you should first set up a virtual environment
 
 ```
-$ virtualenv -p python3 env
+virtualenv -p python3 env
 ```
 
 Then activate the virtual environment
 
 ```
-$ source env/bin/activate
+source env/bin/activate
 ```
 
 Install required python packages with pip.  You may need to first install numpy before running the requirements install if you don't have the numpy system package installed.
 
 
 ```
-$ pip install numpy
-$ pip install -r requirements.txt
+pip install numpy
+pip install -r requirements.txt
 ```
 
 You may need to install some additional system packages, ie: libcairo2-dev, pkg-config, python3-dev, libgirepository1.0-dev
@@ -31,21 +31,21 @@ You may need to install some additional system packages, ie: libcairo2-dev, pkg-
 You can run the application with
 
 ```
-$ python AstraStack.py
+python AstraStack.py
 ```
 
 # Developer Instructions
 There are other packages which are used for developers
 
 ```
-$ pip install -r requirements_dev.txt
+pip install -r requirements_dev.txt
 ```
 
 ## Build Instructions
 Building primarily uses pyinstaller to package into an executable.
 
 ```
-$ ./build.sh
+./build.sh
 ```
 
 The project can also be built in Windows using a mingw64 installation.  You can install the python packages via the pacman package manager that it comes with, as well as with pip.  Inno Setup is also used to create an installer file.
@@ -54,18 +54,18 @@ The project can also be built in Windows using a mingw64 installation.  You can 
 Testing uses the behave package and Gtk instructions are 'simulated' during testing.  To run the tests run the following:
 
 ```
-$ behave
+behave
 ```
 If you want the tests to run 'headless' you can do one of the following:
 
 - if on X11:
 ```
-$ xvfb-run behave
+xvfb-run behave
 ```
 
 - if on Wayland:
 ```
-$ wlheadless-run -- behave 2> /dev/null
+wlheadless-run -- behave 2> /dev/null
 ```
 
 # References
