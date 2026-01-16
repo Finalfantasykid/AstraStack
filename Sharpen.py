@@ -102,8 +102,11 @@ class Sharpen:
         # Stretch Function
         stackedImage = np.clip(stackedImage, 0, 255)
         if(g.stretchFunction is not Sharpen.STRETCH_NONE):
-            gauss = cv2.GaussianBlur(stackedImage, (0,0), 3)
-            low = gauss.min()
+            gauss = cv2.resize(stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
+            gauss = cv2.cvtColor(gauss, cv2.COLOR_RGB2HLS)
+            (H, V, S) = cv2.split(gauss)
+            V = cv2.GaussianBlur(V, (0,0), 3)
+            low = V.min()
             stackedImage -= low
             stackedImage = np.clip(stackedImage, 0, 255)
         if(g.stretchFunction == Sharpen.STRETCH_SQRT):
