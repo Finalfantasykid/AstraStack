@@ -2971,8 +2971,8 @@ Note: Drift adjustment will still crop the image.</property>
                                               <item id="1" translatable="yes">Linear</item>
                                               <item id="2" translatable="yes">Square Root</item>
                                               <item id="3" translatable="yes">Cube Root</item>
-                                              <item id="4" translatable="yes">ArcSinH</item>
-                                              <item id="5" translatable="yes">Logarithm</item>
+                                              <item id="4" translatable="yes">Logarithm</item>
+                                              <item id="5" translatable="yes">ArcSinH</item>
                                             </items>
                                             <signal name="changed" handler="sharpenImage" swapped="no"/>
                                             <signal name="scroll-event" handler="propagateScroll" swapped="no"/>

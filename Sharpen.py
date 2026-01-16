@@ -13,23 +13,18 @@ from Globals import *
 
 pool = ProcessPoolExecutor(3)
 
-def clamp(img, low, high):
-    img[img<low] = low
-    img[img>high] = high
-    return img
-
 def colorAdjust(C, adjust):
     C *= (adjust/100)*(g.value/100)
     return C
 
 class Sharpen:
 
-    NORMALIZE_NONE = 0
-    NORMALIZE_LINEAR = 1
-    NORMALIZE_SQRT = 2
-    NORMALIZE_CBRT = 3
-    NORMALIZE_ASINH = 4
-    NORMALIZE_LOG = 5
+    STRETCH_NONE = 0
+    STRETCH_LINEAR = 1
+    STRETCH_SQRT = 2
+    STRETCH_CBRT = 3
+    STRETCH_LOG = 4
+    STRETCH_ASINH = 5
     
     LEVEL = 5
     
@@ -105,17 +100,22 @@ class Sharpen:
     # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self, stackedImage):
         # Stretch Function
-        stackedImage = clamp(stackedImage, 0, 255)
-        if(g.stretchFunction == Sharpen.NORMALIZE_LINEAR):
+        stackedImage = np.clip(stackedImage, 0, 255)
+        if(g.stretchFunction is not Sharpen.STRETCH_NONE):
+            gauss = cv2.GaussianBlur(stackedImage, (0,0), 3)
+            low = gauss.min()
+            stackedImage -= low
+            stackedImage = np.clip(stackedImage, 0, 255)
+        if(g.stretchFunction == Sharpen.STRETCH_SQRT):
+            stackedImage = np.ma.sqrt(stackedImage)
+        elif(g.stretchFunction == Sharpen.STRETCH_CBRT):
+            stackedImage = np.cbrt(stackedImage)
+        elif(g.stretchFunction == Sharpen.STRETCH_LOG):
+            stackedImage = np.log((stackedImage+1))
+        elif(g.stretchFunction == Sharpen.STRETCH_ASINH):
+            stackedImage = np.arcsinh(stackedImage)
+        if(g.stretchFunction is not Sharpen.STRETCH_NONE):
             stackedImage = cv2.normalize(stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.stretchFunction == Sharpen.NORMALIZE_SQRT):
-            stackedImage = cv2.normalize(np.sqrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.stretchFunction == Sharpen.NORMALIZE_CBRT):
-            stackedImage = cv2.normalize(np.cbrt(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.stretchFunction == Sharpen.NORMALIZE_ASINH):
-            stackedImage = cv2.normalize(np.arcsinh(stackedImage), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        elif(g.stretchFunction == Sharpen.NORMALIZE_LOG):
-            stackedImage = cv2.normalize(np.log(stackedImage+1e-10), None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
             
         (R, G, B) = cv2.split(stackedImage)
 
@@ -241,7 +241,7 @@ class Sharpen:
         
         # Recompose
         img = cv2.merge([R, G, B])
-        img = clamp(img, 0, 1)
+        img = np.clip(img, 0, 1)
         
         # Saturation
         img = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
@@ -252,12 +252,12 @@ class Sharpen:
         img = cv2.cvtColor(img, cv2.COLOR_HLS2RGB)
         
         # Gamma
-        img = clamp(img, 0, 1)
+        img = np.clip(img, 0, 1)
         img = pow(img, 1/(max(1, g.gamma)/100))
         
         # Clip at 0 and 255
         img *= 255
-        img = clamp(img, 0, 255)
+        img = np.clip(img, 0, 255)
         
         self.finalImage = img
         

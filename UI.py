@@ -157,7 +157,7 @@ class UI:
         g.denoise = [None]*5
         g.level   = [None]*5
         
-        g.stretchFunction = Sharpen.NORMALIZE_NONE
+        g.stretchFunction = Sharpen.STRETCH_NONE
 
         self.window.show_all()
         self.loadOpenCV()
