@@ -105,7 +105,7 @@ class Sharpen:
             gauss = cv2.resize(stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
             gauss = cv2.cvtColor(gauss, cv2.COLOR_RGB2HLS)
             (H, V, S) = cv2.split(gauss)
-            V = cv2.GaussianBlur(V, (0,0), 3)
+            V = cv2.GaussianBlur(V, (0,0), 2)
             low = V.min()
             stackedImage -= low
             stackedImage = np.clip(stackedImage, 0, 255)
