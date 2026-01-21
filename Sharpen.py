@@ -49,7 +49,7 @@ class Sharpen:
         self.debluredImage = self.stackedImage
         self.deringedImage = self.stackedImage
         self.finalImage = self.stackedImage
-        self.calculateCoefficients(self.stackedImage)
+        self.calculateCoefficients()
         self.processAgain = False
         self.processDeblurAgain = False
         self.processDeringAgain = False
@@ -98,29 +98,29 @@ class Sharpen:
             g.ui.finishedSharpening()
         
     # Calculates the wavelet coefficents for each channel
-    def calculateCoefficients(self, stackedImage):
+    def calculateCoefficients(self):
         # Stretch Function
-        stackedImage = np.clip(stackedImage, 0, 255)
+        self.stackedImage = np.clip(self.stackedImage, 0, 255)
         if(g.stretchFunction is not Sharpen.STRETCH_NONE):
-            gauss = cv2.resize(stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
+            gauss = cv2.resize(self.stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
             gauss = cv2.cvtColor(gauss, cv2.COLOR_RGB2HLS)
             (H, V, S) = cv2.split(gauss)
             V = cv2.GaussianBlur(V, (0,0), 2)
             low = V.min()
-            stackedImage -= low
-            stackedImage = np.clip(stackedImage, 0, 255)
+            self.stackedImage -= low
+            self.stackedImage = np.clip(self.stackedImage, 0, 255)
         if(g.stretchFunction == Sharpen.STRETCH_SQRT):
-            stackedImage = np.ma.sqrt(stackedImage)
+            self.stackedImage = np.ma.sqrt(self.stackedImage)
         elif(g.stretchFunction == Sharpen.STRETCH_CBRT):
-            stackedImage = np.cbrt(stackedImage)
+            self.stackedImage = np.cbrt(self.stackedImage)
         elif(g.stretchFunction == Sharpen.STRETCH_LOG):
-            stackedImage = np.log((stackedImage+1))
+            self.stackedImage = np.log((self.stackedImage+1))
         elif(g.stretchFunction == Sharpen.STRETCH_ASINH):
-            stackedImage = np.arcsinh(stackedImage)
+            self.stackedImage = np.arcsinh(self.stackedImage)
         if(g.stretchFunction is not Sharpen.STRETCH_NONE):
-            stackedImage = cv2.normalize(stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        self.stackedImage = stackedImage
-        (R, G, B) = cv2.split(stackedImage)
+            self.stackedImage = cv2.normalize(self.stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+
+        (R, G, B) = cv2.split(self.stackedImage)
 
         with Manager() as manager:
             num = manager.Value('i', 0)
