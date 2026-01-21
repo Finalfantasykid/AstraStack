@@ -325,6 +325,7 @@
       <pattern>*.mos</pattern>
       <pattern>*.kdc</pattern>
       <pattern>*.dcr</pattern>
+      <pattern>*.x3f</pattern>
       <pattern>*.JPG</pattern>
       <pattern>*.JPEG</pattern>
       <pattern>*.PNG</pattern>
@@ -339,6 +340,7 @@
       <pattern>*.MOS</pattern>
       <pattern>*.KDC</pattern>
       <pattern>*.DCR</pattern>
+      <pattern>*.X3F</pattern>
     </patterns>
   </object>
   <object class="GtkAdjustment" id="limit">
