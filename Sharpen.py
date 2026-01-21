@@ -119,7 +119,7 @@ class Sharpen:
             stackedImage = np.arcsinh(stackedImage)
         if(g.stretchFunction is not Sharpen.STRETCH_NONE):
             stackedImage = cv2.normalize(stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-            
+        self.stackedImage = stackedImage
         (R, G, B) = cv2.split(stackedImage)
 
         with Manager() as manager:
