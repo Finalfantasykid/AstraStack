@@ -381,13 +381,13 @@ class UI:
             try:
                 # First try as image
                 video = Video()
-                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
+                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, dtype=np.uint8, thumbnail=True), cv2.COLOR_BGR2RGB).astype('uint8')
                 pixbuf = self.createPixbuf(img)
             except Exception:
                 try:
                     # Now try as video
                     video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
+                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, dtype=np.uint8, thumbnail=True), cv2.COLOR_BGR2RGB).astype('uint8')
                     pixbuf = self.createPixbuf(img)
                 except Exception:
                     pass

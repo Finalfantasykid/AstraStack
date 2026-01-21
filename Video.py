@@ -30,12 +30,15 @@ class Video:
         
     @staticmethod
     # Reads an image file
-    def readImage(file, flags=cv2.IMREAD_COLOR, dtype=np.uint16):
+    def readImage(file, flags=cv2.IMREAD_COLOR, dtype=np.uint16, thumbnail=False):
         try:
             # First see if its a raw file
             with rawpy.imread(file) as raw:
-                rgb = raw.postprocess(output_bps=16)
-                img = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+                bps = 8
+                if(dtype == np.uint16):
+                    bps = 16
+                img = raw.postprocess(half_size=thumbnail, output_bps=bps)
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
                 return img
         except:
             img = cv2.imread(file, flags)
@@ -146,17 +149,19 @@ class Video:
         progress.stop()
         g.ui.finishedVideo()
         
-    def getFrame(self, file, frame, colorMode):
-        if(colorMode == Video.COLOR_AUTO):
-            colorMode = self.guessColorMode(file)
+    def getFrame(self, file, frame, colorMode, dtype=np.uint16, thumbnail=False):
         if(isinstance(frame, str)):
             # Specific file
-            image = Video.readImage(frame, cv2.IMREAD_UNCHANGED)
+            image = Video.readImage(frame, cv2.IMREAD_UNCHANGED, dtype, thumbnail)
+            if(colorMode == Video.COLOR_AUTO):
+                colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         elif(isinstance(file, list)):
             # Image Sequence
-            image = Video.readImage(file[frame], cv2.IMREAD_UNCHANGED)
+            image = Video.readImage(file[frame], cv2.IMREAD_UNCHANGED, dtype, thumbnail)
+            if(colorMode == Video.COLOR_AUTO):
+                colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
             image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         else:
@@ -168,26 +173,29 @@ class Video:
             if(not (frame < lastTime + frameTime and frame > lastTime)):
                 self.vidcap.set(cv2.CAP_PROP_POS_MSEC, frame)
             success,image = self.vidcap.read()
+            if(colorMode == Video.COLOR_AUTO):
+                colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
         return image
       
-    def guessColorMode(self, file):
+    def guessColorMode(self, file, image=None):
         colorMode = Video.COLOR_RGB
-        if(isinstance(file, list)):
-            # Image Sequence
-            image = Video.readImage(file[0], cv2.IMREAD_UNCHANGED)
+        if(image is None):
+            
+            if(isinstance(file, list)):
+                # Image Sequence
+                image = Video.readImage(file[0], cv2.IMREAD_UNCHANGED)
+            else:
+                try:
+                    # First try as image
+                    image = Video.readImage(file, cv2.IMREAD_UNCHANGED)
+                except Exception:
+                    # Now try as video
+                    vidcap = cv2.VideoCapture(file)
+                    success,image = vidcap.read()
+                    vidcap.release()
+        if(image is not None):
             colorMode = self.guessImageColor(image)
-        else:
-            try:
-                # First try as image
-                image = Video.readImage(file, cv2.IMREAD_UNCHANGED)
-                colorMode = self.guessImageColor(image)
-            except Exception:
-                # Now try as video
-                vidcap = cv2.VideoCapture(file)
-                success,image = vidcap.read()
-                colorMode = self.guessImageColor(image)
-                vidcap.release()
         return colorMode
       
     # Very simple auto-detect of image type (far from perfect)
