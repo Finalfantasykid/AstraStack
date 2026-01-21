@@ -9,3 +9,4 @@ appdirs==1.4.4
 PyGObject==3.54.5
 pystackreg==0.2.8
 PyWavelets==1.9.0
+rawpy==0.25.1

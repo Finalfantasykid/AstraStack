@@ -1,6 +1,7 @@
 from lazy import lazy
 cv2 = lazy("cv2")
 np = lazy("numpy")
+rawpy = lazy("rawpy")
 import math
 from concurrent.futures.process import BrokenProcessPool
 from Globals import *
@@ -30,24 +31,31 @@ class Video:
     @staticmethod
     # Reads an image file
     def readImage(file, flags=cv2.IMREAD_COLOR, dtype=np.uint16):
-        img = cv2.imread(file, flags)
-        if(img is not None):
-            # Normal img, so return
-            return img
-        else:
-            # Image might be a FITS image so give that a try
-            from astropy.io import fits
-            img = fits.getdata(file)
-            maxVal = 1
-            try:
-                maxVal = np.iinfo(img.dtype).max
-            except:
-                pass
-            img = (img.astype(np.float32)/maxVal)*np.iinfo(dtype).max
-            cv2.normalize(img, img, alpha=0, beta=np.iinfo(dtype).max, norm_type=cv2.NORM_MINMAX)
-            img = img.astype(dtype)
-            if(flags == cv2.IMREAD_COLOR):
-                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        try:
+            # First see if its a raw file
+            with rawpy.imread(file) as raw:
+                rgb = raw.postprocess(output_bps=16)
+                img = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+                return img
+        except:
+            img = cv2.imread(file, flags)
+            if(img is not None):
+                # Normal img, so return
+                return img
+            else:
+                # Image might be a FITS image so give that a try
+                from astropy.io import fits
+                img = fits.getdata(file)
+                maxVal = 1
+                try:
+                    maxVal = np.iinfo(img.dtype).max
+                except:
+                    pass
+                img = (img.astype(np.float32)/maxVal)*np.iinfo(dtype).max
+                cv2.normalize(img, img, alpha=0, beta=np.iinfo(dtype).max, norm_type=cv2.NORM_MINMAX)
+                img = img.astype(dtype)
+                if(flags == cv2.IMREAD_COLOR):
+                    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             return img
             
     # Checks to see if there will be enough memory to process the image

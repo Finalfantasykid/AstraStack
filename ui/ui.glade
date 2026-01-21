@@ -317,6 +317,28 @@
       <pattern>*.tiff</pattern>
       <pattern>*.fit</pattern>
       <pattern>*.fits</pattern>
+      <pattern>*.nef</pattern>
+      <pattern>*.crw</pattern>
+      <pattern>*.cr2</pattern>
+      <pattern>*.raf</pattern>
+      <pattern>*.dng</pattern>
+      <pattern>*.mos</pattern>
+      <pattern>*.kdc</pattern>
+      <pattern>*.dcr</pattern>
+      <pattern>*.JPG</pattern>
+      <pattern>*.JPEG</pattern>
+      <pattern>*.PNG</pattern>
+      <pattern>*.TIFF</pattern>
+      <pattern>*.FIT</pattern>
+      <pattern>*.FITS</pattern>
+      <pattern>*.NEF</pattern>
+      <pattern>*.CRW</pattern>
+      <pattern>*.CR2</pattern>
+      <pattern>*.RAF</pattern>
+      <pattern>*.DNG</pattern>
+      <pattern>*.MOS</pattern>
+      <pattern>*.KDC</pattern>
+      <pattern>*.DCR</pattern>
     </patterns>
   </object>
   <object class="GtkAdjustment" id="limit">
@@ -495,6 +517,10 @@
       <pattern>*.jpeg</pattern>
       <pattern>*.png</pattern>
       <pattern>*.tiff</pattern>
+      <pattern>*.JPG</pattern>
+      <pattern>*.JPEG</pattern>
+      <pattern>*.PNG</pattern>
+      <pattern>*.TIFF</pattern>
     </patterns>
   </object>
   <object class="GtkFileChooserDialog" id="saveDialog">
@@ -3419,10 +3445,13 @@ Note: Drift adjustment will still crop the image.</property>
     </mime-types>
     <patterns>
       <pattern>*.ser</pattern>
-      <pattern>*.SER</pattern>
       <pattern>*.avi</pattern>
       <pattern>*.mov</pattern>
       <pattern>*.mp4</pattern>
+      <pattern>*.SER</pattern>
+      <pattern>*.AVI</pattern>
+      <pattern>*.MOV</pattern>
+      <pattern>*.MP4</pattern>
     </patterns>
   </object>
   <object class="GtkMessageDialog" id="warningDialog">
