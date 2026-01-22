@@ -47,3 +47,14 @@ Feature: Single Image
         And I async press "saveButton"
         And I choose file "tmp/16bit.png" from "saveDialog"
         Then "tmp/16bit.png" and "reference/16bit.png" should be equal
+        
+    Scenario: Test masking stretched image
+        Given I am on tab "Load"
+        And I async press "openImage"
+        And I choose file "test.jpg" from "openDialog"
+        And I wait until active tab is "Process"
+        And I select "ArcSinH" from "stretchFunction"
+        And I set "deringAdaptiveAdjust" to "50"
+        And I async press "saveButton"
+        And I choose file "tmp/mask.png" from "saveDialog"
+        Then "tmp/mask.png" and "reference/mask.png" should be equal
