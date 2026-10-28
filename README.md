@@ -59,21 +59,37 @@ pytest
 ```
 
 ## End-To-End Testing
-Testing uses the behave package and Gtk instructions are 'simulated' during testing.  To run the tests run the following:
+
+E2E testing leverages the `behave` framework to simulate Gtk actions in the UI.
+Test scenarios are defined under `features/`, and you can run the full test
+suite by simply running `behave`:
 
 ```
 behave
 ```
-If you want the tests to run 'headless' you can do one of the following:
 
-- if on X11:
+Alternatively run it headless:
+
 ```
+# Wayland:
+wlheadless-run -- behave 2>/dev/null
+# X11:
 xvfb-run behave
 ```
 
-- if on Wayland:
+Debugging a specific scenario is best accomplished by giving a persisted output
+path and passing the line number to the problematic scenario:
+
 ```
-wlheadless-run -- behave 2> /dev/null
+ASTRASTACK_TEST_OUTPUTS=/tmp/astrastack-outputs behave features/single.feature:3
+```
+
+Running the full E2E test suite (e.g. in CI) is normally best accomplished
+using parallel headless mode and is about 2-3x faster than bare `behave`:
+
+```
+# Prerequisite: `weston` OS package.
+scripts/run_behave.sh
 ```
 
 # References
