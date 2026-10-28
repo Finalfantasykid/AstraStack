@@ -38,13 +38,13 @@
   <object class="GtkAdjustment" id="blackLevelAdjust">
     <property name="upper">255</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="blueAdjust">
     <property name="upper">200</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="cpus">
     <property name="lower">1</property>
@@ -181,110 +181,110 @@
     <property name="upper">50</property>
     <property name="value">25</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveCircularDiameter">
     <property name="lower">1</property>
     <property name="upper">50</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveCustomAmount">
     <property name="upper">50</property>
     <property name="value">25</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveGaussianAmount">
     <property name="upper">50</property>
     <property name="value">25</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveGaussianDiameter">
     <property name="lower">1</property>
     <property name="upper">50</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveGaussianSpread">
     <property name="lower">1</property>
     <property name="upper">11</property>
     <property name="value">11</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveLinearAmount">
     <property name="upper">50</property>
     <property name="value">25</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveLinearAngle">
     <property name="upper">180</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deconvolveLinearDiameter">
     <property name="lower">1</property>
     <property name="upper">50</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise1">
     <property name="upper">10</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise2">
     <property name="upper">10</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise3">
     <property name="upper">10</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise4">
     <property name="upper">10</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="denoise5">
     <property name="upper">10</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringAdaptiveAdjust">
     <property name="upper">50</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBlendAdjust">
     <property name="upper">50</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBrightAdjust">
     <property name="upper">75</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringDarkAdjust">
     <property name="upper">75</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringSizeAdjust">
     <property name="lower">-5</property>
     <property name="upper">50</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="endFrame">
     <property name="upper">100</property>
@@ -301,13 +301,13 @@
     <property name="upper">200</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="greenAdjust">
     <property name="upper">200</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="imageFilter">
     <patterns>
@@ -479,39 +479,39 @@
   <object class="GtkAdjustment" id="radius1">
     <property name="upper">100</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius2">
     <property name="upper">100</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius3">
     <property name="upper">100</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius4">
     <property name="upper">100</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="radius5">
     <property name="upper">100</property>
     <property name="step-increment">0.10</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="redAdjust">
     <property name="upper">200</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="saturationAdjust">
     <property name="upper">200</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkFileFilter" id="saveImageFilter">
     <patterns>
@@ -611,27 +611,27 @@
   <object class="GtkAdjustment" id="sharpen1">
     <property name="upper">1</property>
     <property name="step-increment">0.001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen2">
     <property name="upper">1</property>
     <property name="step-increment">0.001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen3">
     <property name="upper">1</property>
     <property name="step-increment">0.001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen4">
     <property name="upper">1</property>
     <property name="step-increment">0.001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="sharpen5">
     <property name="upper">1</property>
     <property name="step-increment">0.001</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="startFrame">
     <property name="upper">100</property>
@@ -642,7 +642,7 @@
     <property name="upper">400</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
-    <signal name="value-changed" handler="sharpenImage" swapped="no"/>
+    <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can-focus">False</property>
@@ -1771,7 +1771,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -1793,7 +1793,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -1815,7 +1815,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -1837,7 +1837,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -1905,7 +1905,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2080,7 +2080,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2105,7 +2105,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2130,7 +2130,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2196,7 +2196,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2621,7 +2621,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="receives-default">False</property>
                                             <property name="tooltip-text" translatable="yes">Show the resulting mask in the image frame.</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="finishedSharpening" swapped="no"/>
+                                            <signal name="toggled" handler="finishedProcessing" swapped="no"/>
                                           </object>
                                           <packing>
                                             <property name="left-attach">0</property>
@@ -2637,7 +2637,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="tooltip-text" translatable="yes">Dark threshold.  Raise this value to ignore dark areas when sharpening.</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2660,7 +2660,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="tooltip-text" translatable="yes">Bright threshold.  Raise this value to ignore bright areas when sharpening.</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -2683,7 +2683,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="tooltip-text" translatable="yes">Adaptive threshold.  Raise this value to ignore areas of high contrast areas when sharpening.</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
-                                            <signal name="toggled" handler="sharpenImage" swapped="no"/>
+                                            <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="visible">True</property>
@@ -3002,7 +3002,7 @@ Note: Drift adjustment will still crop the image.</property>
                                               <item id="4" translatable="yes">Logarithm</item>
                                               <item id="5" translatable="yes">ArcSinH</item>
                                             </items>
-                                            <signal name="changed" handler="sharpenImage" swapped="no"/>
+                                            <signal name="changed" handler="processImage" swapped="no"/>
                                             <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                           </object>
                                           <packing>

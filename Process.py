@@ -17,7 +17,7 @@ def colorAdjust(C, adjust):
     C *= (adjust/100)*(g.value/100)
     return C
 
-class Sharpen:
+class Process:
 
     STRETCH_NONE = 0
     STRETCH_LINEAR = 1
@@ -31,7 +31,7 @@ class Sharpen:
     # This is a crude estimate on how much memory will be used by the sharpening
     # Width * Height * 3Channels * 4bytes * 4coefficients * 5layers * 2(worst case from copying every coefficients layer)
     def estimateMemoryUsage(width, height):
-        return width*height*3*4*4*Sharpen.LEVEL*2
+        return width*height*3*4*4*Process.LEVEL*2
 
     def __init__(self, stackedImage, isFile=False):
         if(isFile):
@@ -95,13 +95,13 @@ class Sharpen:
                 self.processDeringAgain = False
                 self.processColorAgain = False
                 self.processColor()
-            g.ui.finishedSharpening()
+            g.ui.finishedProcessing()
         
     # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self):
         # Stretch Function
         self.stackedImage = np.clip(self.stackedImage, 0, 255)
-        if(g.stretchFunction is not Sharpen.STRETCH_NONE):
+        if(g.stretchFunction is not Process.STRETCH_NONE):
             gauss = cv2.resize(self.stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
             gauss = cv2.cvtColor(gauss, cv2.COLOR_RGB2HLS)
             (H, V, S) = cv2.split(gauss)
@@ -109,15 +109,15 @@ class Sharpen:
             low = V.min()
             self.stackedImage -= low
             self.stackedImage = np.clip(self.stackedImage, 0, 255)
-        if(g.stretchFunction == Sharpen.STRETCH_SQRT):
+        if(g.stretchFunction == Process.STRETCH_SQRT):
             self.stackedImage = np.ma.sqrt(self.stackedImage)
-        elif(g.stretchFunction == Sharpen.STRETCH_CBRT):
+        elif(g.stretchFunction == Process.STRETCH_CBRT):
             self.stackedImage = np.cbrt(self.stackedImage)
-        elif(g.stretchFunction == Sharpen.STRETCH_LOG):
+        elif(g.stretchFunction == Process.STRETCH_LOG):
             self.stackedImage = np.log((self.stackedImage+1))
-        elif(g.stretchFunction == Sharpen.STRETCH_ASINH):
+        elif(g.stretchFunction == Process.STRETCH_ASINH):
             self.stackedImage = np.arcsinh(self.stackedImage)
-        if(g.stretchFunction is not Sharpen.STRETCH_NONE):
+        if(g.stretchFunction is not Process.STRETCH_NONE):
             self.stackedImage = cv2.normalize(self.stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
         (R, G, B) = cv2.split(self.stackedImage)
@@ -267,22 +267,22 @@ class Sharpen:
 # Calculates the wavelet coefficents for the specified channel
 def calculateChannelCoefficients(C, channel, num, lock):
     # Pad the image so that there is a border large enough so that edge artifacts don't occur
-    padding = 2**(Sharpen.LEVEL)
+    padding = 2**(Process.LEVEL)
     C = cv2.copyMakeBorder(C, padding, padding, padding, padding, cv2.BORDER_REFLECT)
     
     # Pad so that dimensions are multiples of 2**level
     h, w = C.shape[:2]
     
-    hR = (h % 2**Sharpen.LEVEL)
-    wR = (w % 2**Sharpen.LEVEL)
+    hR = (h % 2**Process.LEVEL)
+    wR = (w % 2**Process.LEVEL)
 
-    C = cv2.copyMakeBorder(C, 0, (2**Sharpen.LEVEL - hR), 0, (2**Sharpen.LEVEL - wR), cv2.BORDER_REFLECT)
+    C = cv2.copyMakeBorder(C, 0, (2**Process.LEVEL - hR), 0, (2**Process.LEVEL - wR), cv2.BORDER_REFLECT)
     
     C =  np.float32(C)
     C /= 255
 
     # Compute coefficients
-    g.coeffs = list(pywt.swt2(C, 'haar', level=Sharpen.LEVEL, trim_approx=True))
+    g.coeffs = list(pywt.swt2(C, 'haar', level=Process.LEVEL, trim_approx=True))
     g.channel = channel
     
     # Make sure that the other processes have completed as well
@@ -323,7 +323,7 @@ def sharpenChannelLayers(gCopy):
                     unsharp(ci, gCopy.denoise[level], -1)
     
     # Reconstruction
-    padding = 2**(Sharpen.LEVEL)
+    padding = 2**(Process.LEVEL)
     img=pywt.iswt2(c, 'haar')
     
     # Reset coefficients

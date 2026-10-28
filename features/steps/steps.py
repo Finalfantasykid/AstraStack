@@ -17,7 +17,7 @@ from Globals import g
 tabMap = {"Load": UI.LOAD_TAB,
           "Align": UI.ALIGN_TAB,
           "Stack": UI.STACK_TAB,
-          "Process": UI.SHARPEN_TAB}
+          "Process": UI.PROCESS_TAB}
 
 def delay(delay=0.1):
     time.sleep(delay)
