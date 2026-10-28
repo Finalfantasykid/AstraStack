@@ -1,2 +1,3 @@
 pyinstaller==6.16.0
 behave
+pytest==9.2.0

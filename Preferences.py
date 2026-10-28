@@ -6,11 +6,11 @@ from Globals import *
 class Preferences:
     
     FILE = "preferences.json"
+    DIR = "AstraStack"
     
     def __init__(self):
-        from UI import UI
         self.json = {}
-        self.dir = user_config_dir() + "/" + UI.TITLE + "/"
+        self.dir = user_config_dir() + "/" + Preferences.DIR + "/"
         self.file = self.dir + Preferences.FILE
         if(not g.TESTING):
             try:
