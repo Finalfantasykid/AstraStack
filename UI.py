@@ -19,7 +19,7 @@ from Preferences import Preferences
 from Video import Video
 from Align import Align, centerOfMass, dilateImg, normalizeImg
 from Stack import Stack, transform
-from Sharpen import Sharpen
+from Process import Process
 from Globals import *
 from deconvolution import *
 
@@ -32,7 +32,7 @@ class UI:
     LOAD_TAB = 0
     ALIGN_TAB = 1
     STACK_TAB = 2
-    SHARPEN_TAB = 3
+    PROCESS_TAB = 3
     
     TITLE = "AstraStack"
     VERSION = "2.5.1"
@@ -46,7 +46,7 @@ class UI:
         self.video = None
         self.align = None
         self.stack = None
-        self.sharpen = None
+        self.process = None
         self.mousePosition = None
         self.clickedDriftP1 = False
         self.clickedDriftP2 = False
@@ -157,7 +157,7 @@ class UI:
         g.denoise = [None]*5
         g.level   = [None]*5
         
-        g.stretchFunction = Sharpen.STRETCH_NONE
+        g.stretchFunction = Process.STRETCH_NONE
 
         self.window.show_all()
         self.loadOpenCV()
@@ -361,7 +361,7 @@ class UI:
     
     # Checks to see if there will be enough memory to process the image
     def checkMemory(self, w=0, h=0):
-        if(Sharpen.estimateMemoryUsage(w, h) > psutil.virtual_memory().available):
+        if(Process.estimateMemoryUsage(w, h) > psutil.virtual_memory().available):
             response = self.showWarningDialog("Your system may not have enough memory to process this file, are you sure you want to continue?")
             return (response == Gtk.ResponseType.YES)
         return True
@@ -474,11 +474,11 @@ class UI:
                 self.updateAutoColorModeText()
                 
                 self.stack = None
-                self.sharpen = Sharpen(g.file, True)
+                self.process = Process(g.file, True)
                 self.builder.get_object("alignTab").set_sensitive(False)
                 self.builder.get_object("stackTab").set_sensitive(False)
                 self.builder.get_object("processTab").set_sensitive(True)
-                self.tabs.set_current_page(UI.SHARPEN_TAB)
+                self.tabs.set_current_page(UI.PROCESS_TAB)
                 
                 img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
                 pixbuf = self.createPixbuf(img)
@@ -510,10 +510,10 @@ class UI:
                         time.sleep(0.1) # Make sure the file isn't still being processed
                     bitDepth = self.bitDepth.get_active_text()
                     if(bitDepth == "8-bit"):
-                        cv2.imwrite(fileName, cv2.cvtColor(np.around(self.sharpen.finalImage).astype('uint8'), cv2.COLOR_RGB2BGR))
+                        cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage).astype('uint8'), cv2.COLOR_RGB2BGR))
                     elif(bitDepth == "16-bit"):
                         if(fileName.endswith(".png") or fileName.endswith(".tif") or fileName.endswith(".tiff")):
-                            cv2.imwrite(fileName, cv2.cvtColor(np.around(self.sharpen.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
+                            cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
                         else:
                             self.showErrorDialog("Only .png and .tif are supported for 16-bit images")
                             start()
@@ -584,7 +584,7 @@ class UI:
                 g.deconvolveCustomFile = img
             except: # Open Failed
                 self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
-            self.sharpenImage(self.builder.get_object("deconvolveCustomFile"))
+            self.processImage(self.builder.get_object("deconvolveCustomFile"))
        
     # Updates the Auto color mode text     
     def updateAutoColorModeText(self):
@@ -629,10 +629,10 @@ class UI:
             if(len(self.video.frames) > 0):
                 self.frameScale.show()
             self.updateImage(None, page_num)
-        elif(page_num == UI.SHARPEN_TAB and self.sharpen is not None):
+        elif(page_num == UI.PROCESS_TAB and self.process is not None):
             self.frameScale.hide()
             self.colorMode.set_sensitive(False)
-            self.sharpenImage()
+            self.processImage()
         self.fixFrameSliderBug()
     
     # Changes the image frame to the frameSlider position    
@@ -894,7 +894,7 @@ class UI:
         
         color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         for i, col in enumerate(color):
-            hist = np.log(cv2.calcHist([np.around(self.sharpen.finalImage).astype('uint8')],[i],None,[256],[0,256]) + 1)
+            hist = np.log(cv2.calcHist([np.around(self.process.finalImage).astype('uint8')],[i],None,[256],[0,256]) + 1)
             cv2.normalize(hist, hist, 0, 99, cv2.NORM_MINMAX)
             hist = 99 - hist
             hist = np.int32(np.around(hist))
@@ -1221,7 +1221,7 @@ class UI:
     # Called when the stack is complete
     def finishedStack(self):
         def update():
-            self.sharpen = Sharpen(self.stack.stackedImage)
+            self.process = Process(self.stack.stackedImage)
             self.tabs.next_page()
             self.enableUI()
             self.builder.get_object("alignTab").set_sensitive(True)
@@ -1229,8 +1229,8 @@ class UI:
             self.builder.get_object("processTab").set_sensitive(True)
         GLib.idle_add(update)
         
-    # Sharpens the final Stacked image
-    def sharpenImage(self, *args):
+    # Processes the final Stacked image
+    def processImage(self, *args):
         if(g.file is None):
             return
         self.processSpinner.start()
@@ -1278,7 +1278,7 @@ class UI:
         g.stretchFunction = self.builder.get_object("stretchFunction").get_active()
         
         if(len(args) > 0 and (self.builder.get_object("stretchFunction") == args[0])):
-            self.sharpen = None
+            self.process = None
         
         if(len(args) > 0 and (self.builder.get_object("gammaAdjust") == args[0] or
                               self.builder.get_object("blackLevelAdjust") == args[0] or
@@ -1287,9 +1287,9 @@ class UI:
                               self.builder.get_object("blueAdjust") == args[0] or
                               self.builder.get_object("saturationAdjust") == args[0] or
                               self.builder.get_object("valueAdjust") == args[0])):
-            processAgain = self.sharpen.processAgain
-            processDeblur = self.sharpen.processDeblurAgain
-            processDering = self.sharpen.processDeringAgain
+            processAgain = self.process.processAgain
+            processDeblur = self.process.processDeblurAgain
+            processDering = self.process.processDeringAgain
             processColor = True
         elif(len(args) > 0 and (self.builder.get_object("deringAdaptiveAdjust") == args[0] or
                                 self.builder.get_object("deringDarkAdjust") == args[0] or
@@ -1299,8 +1299,8 @@ class UI:
                                 self.builder.get_object("showAdaptive") == args[0] or
                                 self.builder.get_object("showDark") == args[0] or
                                 self.builder.get_object("showBright") == args[0])):
-            processAgain = self.sharpen.processAgain
-            processDeblur = self.sharpen.processDeblurAgain
+            processAgain = self.process.processAgain
+            processDeblur = self.process.processDeblurAgain
             processDering = True
             processColor = False
         elif(len(args) > 0 and (self.builder.get_object("deconvolveCircular") == args[0] or
@@ -1317,7 +1317,7 @@ class UI:
                                 self.builder.get_object("deconvolveLinearAngle") == args[0] or
                                 self.builder.get_object("deconvolveCustomFile") == args[0] or
                                 self.builder.get_object("deconvolveCustomAmount") == args[0])):
-            processAgain = self.sharpen.processAgain
+            processAgain = self.process.processAgain
             processDeblur = True
             processDering = False
             processColor = False
@@ -1327,28 +1327,28 @@ class UI:
             processDering = False
             processColor = False
         
-        if(self.sharpen is None):
+        if(self.process is None):
             if(self.stack is not None):
-                self.sharpen = Sharpen(self.stack.stackedImage)
+                self.process = Process(self.stack.stackedImage)
             else:
-                self.sharpen = Sharpen(g.file, True)
+                self.process = Process(g.file, True)
         if(self.processThread != None and self.processThread.is_alive()):
-            self.sharpen.processAgain = processAgain
-            self.sharpen.processDeblurAgain = processDeblur
-            self.sharpen.processDeringAgain = processDering
-            self.sharpen.processColorAgain = processColor
+            self.process.processAgain = processAgain
+            self.process.processDeblurAgain = processDeblur
+            self.process.processDeringAgain = processDering
+            self.process.processColorAgain = processColor
         else:
-            self.processThread = Thread(target=self.sharpen.run, args=(processAgain, processDeblur, processDering, processColor))
+            self.processThread = Thread(target=self.process.run, args=(processAgain, processDeblur, processDering, processColor))
             self.processThread.start()
         self.updatePSFImage(args)
     
-    # Called when sharpening is complete
-    def finishedSharpening(self, *args):
+    # Called when processing is complete
+    def finishedProcessing(self, *args):
         def update():
-            if(self.showMask.get_active() and self.sharpen.thresh is not None):
-                pixbuf = self.createPixbuf(np.around(self.sharpen.thresh).astype('uint8'))
+            if(self.showMask.get_active() and self.process.thresh is not None):
+                pixbuf = self.createPixbuf(np.around(self.process.thresh).astype('uint8'))
             else:
-                pixbuf = self.createPixbuf(np.around(self.sharpen.finalImage).astype('uint8'))
+                pixbuf = self.createPixbuf(np.around(self.process.finalImage).astype('uint8'))
             self.frame.set_from_pixbuf(pixbuf.copy())
             self.updateHistogram()
             self.processSpinner.stop()
