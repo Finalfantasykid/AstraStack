@@ -23,6 +23,11 @@ tabMap = {"Load": UI.LOAD_TAB,
 # Up to 1% of pixel values for two images being compared are allowed to be off-by-one.
 MAX_VALUES_FRAC_OFF_BY_ONE = 0.01
 
+# Seconds to wait for a widget to become visible and sensitive before failing.
+WIDGET_TIMEOUT = 10
+TEST_INPUTS_PATH = os.path.join(os.getcwd(), "features/testFiles/inputs")
+TEST_REFERENCES_PATH = os.path.join(os.getcwd(), "features/testFiles/reference")
+
 def delay(delay=0.1):
     time.sleep(delay)
     
@@ -36,16 +41,15 @@ def idle_add_delay(fn):
         delay(0.01)
     delay(0.01) # Always delay just a bit
     
-def widgetValidation(id):
+def widgetValidation(id: str) -> None:
     widget = g.ui.builder.get_object(id)
-    i = 0
+    deadline = time.monotonic() + WIDGET_TIMEOUT
     while ((widget is None or
             not widget.is_visible() or
             not widget.is_sensitive()) and 
-           i < 10):
+           time.monotonic() < deadline):
         # Give it a chance to become valid before asserting
         delay(0.05)
-        i += 1
     assert widget != None, f"The widget '{id}' does not exist"
     assert widget.is_visible(), f"The widget '{id}' is not visible"
     assert widget.is_sensitive(), f"The widget '{id}' is not sensitive"
@@ -84,19 +88,24 @@ def asyncPressButton(context, button):
     thread.start()
     delay()
     
-@given(u'I choose file "{file}" from "{dialog}"')
-def chooseFile(context, file, dialog):
+def chooseFile(path: str, dialog: str) -> None:
+    """Selects a file in a file chooser dialog and confirms it.
+
+    Args:
+        path: Absolute path of the file to select. A "*" file name selects every file in its folder.
+        dialog: ID of the file chooser dialog.
+    """
     window = g.ui.builder.get_object(dialog)
     while(not window.is_visible()):
         delay(0.01)
     delay() # Sometimes it crashes if going to the next step too quickly, so delay a bit
     def update1():
-        window.select_filename(os.getcwd() + "/features/testFiles/" + file)
+        window.select_filename(path)
     def update2():
-        if("*" in file):
+        if("*" in path):
             window.select_all()
         if(window.get_action() == Gtk.FileChooserAction.SAVE):
-            window.set_current_name(file.split("/")[-1])
+            window.set_current_name(os.path.basename(path))
     def update3():
         window.get_widget_for_response(Gtk.ResponseType.OK).clicked()
     idle_add_delay(update1)
@@ -104,6 +113,14 @@ def chooseFile(context, file, dialog):
     idle_add_delay(update3)
     while(window.is_visible()):
         delay(0.01)
+
+@given(u'I choose input file "{file}" from "{dialog}"')
+def chooseInputFile(context: Context, file: str, dialog: str) -> None:
+    chooseFile(path=os.path.join(TEST_INPUTS_PATH, file), dialog=dialog)
+
+@given(u'I choose output file "{file}" from "{dialog}"')
+def chooseOutputFile(context: Context, file: str, dialog: str) -> None:
+    chooseFile(path=os.path.join(context.testOutputs, file), dialog=dialog)
     
 @given(u'I set "{adjustment}" to "{value}"')
 def setAdjustment(context, adjustment, value):
@@ -182,20 +199,18 @@ def shouldEqual(context, var, val):
     else:
         assert False, f"'{var}' does not exist"
     
-@then(u'"{file1}" and "{file2}" should be equal')
-def compareImages(context: Context, file1: str, file2: str) -> None:
-    """Asserts that two images under ``features/testFiles`` match.
+def assertImagesEqual(file1: str, file2: str) -> None:
+    """Asserts that two image files match.
 
     Tolerate values off by 1 in up to ``MAX_VALUES_FRAC_OFF_BY_ONE`` of the
     values because rounding floats to integers can differ by 1 between CPUs.
 
     Args:
-        context: The behave context.
-        file1: Path of the first image, relative to ``features/testFiles``.
-        file2: Path of the second image, relative to ``features/testFiles``.
+        file1: Path of the first image.
+        file2: Path of the second image.
     """
-    img1 = cv2.imread("features/testFiles/" + file1, cv2.IMREAD_UNCHANGED)
-    img2 = cv2.imread("features/testFiles/" + file2, cv2.IMREAD_UNCHANGED)
+    img1 = cv2.imread(file1, cv2.IMREAD_UNCHANGED)
+    img2 = cv2.imread(file2, cv2.IMREAD_UNCHANGED)
     assert img1 is not None and img2 is not None, f"'{file1}' or '{file2}' could not be read"
     assert img1.shape == img2.shape, f"'{file1}' {img1.shape} and '{file2}' {img2.shape} differ in shape"
     assert img1.dtype == img2.dtype, f"'{file1}' {img1.dtype} and '{file2}' {img2.dtype} differ in dtype"
@@ -204,3 +219,19 @@ def compareImages(context: Context, file1: str, file2: str) -> None:
     assert maxDiff <= 1, f"'{file1}' and '{file2}' differ by up to {maxDiff}"
     offByOneFrac = np.count_nonzero(diff) / diff.size
     assert offByOneFrac <= MAX_VALUES_FRAC_OFF_BY_ONE, f"'{file1}' and '{file2}' differ in {offByOneFrac:.1%} of values"
+
+@then(u'output "{outputFile}" and input "{inputFile}" should be equal')
+def compareOutputToInput(context: Context, outputFile: str, inputFile: str) -> None:
+    """Asserts that an output file has the same pixels as a file in ``TEST_INPUTS_PATH``."""
+    assertImagesEqual(
+        os.path.join(context.testOutputs, outputFile),
+        os.path.join(TEST_INPUTS_PATH, inputFile),
+    )
+
+@then(u'output "{outputFile}" and reference "{referenceFile}" should be equal')
+def compareOutputToReference(context: Context, outputFile: str, referenceFile: str) -> None:
+    """Asserts that an output file has the same pixels as a file in ``TEST_REFERENCES_PATH``."""
+    assertImagesEqual(
+        os.path.join(context.testOutputs, outputFile),
+        os.path.join(TEST_REFERENCES_PATH, referenceFile),
+    )

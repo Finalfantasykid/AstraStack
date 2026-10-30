@@ -3,7 +3,7 @@ Feature: Video
     Scenario: Check Best Frame
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I wait "100"
         Then "frameSlider" should equal "45.0"
@@ -13,7 +13,7 @@ Feature: Video
     Scenario: Stacking Video
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
         And I press "alignButton"
@@ -21,13 +21,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/jupiter.png" from "saveDialog"
-        Then "tmp/jupiter.png" and "reference/jupiter.png" should be equal
+        And I choose output file "jupiter.png" from "saveDialog"
+        Then output "jupiter.png" and reference "jupiter.png" should be equal
         
     Scenario: Stacking Video with drift points
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Manual" from "driftType"
         And I set point "driftP1" to "271,309"
@@ -40,13 +40,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/jupiter2.png" from "saveDialog"
-        Then "tmp/jupiter2.png" and "reference/jupiter2.png" should be equal
+        And I choose output file "jupiter2.png" from "saveDialog"
+        Then output "jupiter2.png" and reference "jupiter2.png" should be equal
         
     Scenario: Stacking Video with center of gravity
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Center of Gravity" from "driftType"
         And I select "Affine" from "transformation"
@@ -56,13 +56,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/jupiter4.png" from "saveDialog"
-        Then "tmp/jupiter4.png" and "reference/jupiter4.png" should be equal
+        And I choose output file "jupiter4.png" from "saveDialog"
+        Then output "jupiter4.png" and reference "jupiter4.png" should be equal
         
     Scenario: Stacking Video with frame deltas
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Frame Delta" from "driftType"
         And I select "Affine" from "transformation"
@@ -72,13 +72,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/jupiter5.png" from "saveDialog"
-        Then "tmp/jupiter5.png" and "reference/jupiter5.png" should be equal
+        And I choose output file "jupiter5.png" from "saveDialog"
+        Then output "jupiter5.png" and reference "jupiter5.png" should be equal
         
     Scenario: Stacking Video with drift points and trim
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I set "startFrame" to "10"
         And I set "endFrame" to "50"
@@ -94,13 +94,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/jupiter3.png" from "saveDialog"
-        Then "tmp/jupiter3.png" and "reference/jupiter3.png" should be equal
+        And I choose output file "jupiter3.png" from "saveDialog"
+        Then output "jupiter3.png" and reference "jupiter3.png" should be equal
         
     Scenario: 2X Upscaling
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
         And I press "alignButton"
@@ -110,14 +110,14 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/Jupiter2X.png" from "saveDialog"
-        Then "tmp/Jupiter2X.png" and "reference/Jupiter2X.png" should be equal
+        And I choose output file "Jupiter2X.png" from "saveDialog"
+        Then output "Jupiter2X.png" and reference "Jupiter2X.png" should be equal
         
     Scenario: 2X Upscaling (test with 1 cpu for rounding bug)
         Given I am on tab "Load"
         And I set "cpus" to "1"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
         And I press "alignButton"
@@ -127,13 +127,13 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/Jupiter2X_1cpu.png" from "saveDialog"
-        Then "tmp/Jupiter2X_1cpu.png" and "reference/Jupiter2X.png" should be equal
+        And I choose output file "Jupiter2X_1cpu.png" from "saveDialog"
+        Then output "Jupiter2X_1cpu.png" and reference "Jupiter2X.png" should be equal
         
     Scenario: 0.50X Downscaling
         Given I am on tab "Load"
         And I async press "openVideo"
-        And I choose file "Jupiter.mp4" from "openDialog"
+        And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
         And I press "alignButton"
@@ -143,5 +143,5 @@ Feature: Video
         And I press "stackButton"
         And I wait until active tab is "Process"
         And I async press "saveButton"
-        And I choose file "tmp/Jupiter0.5X.png" from "saveDialog"
-        Then "tmp/Jupiter0.5X.png" and "reference/Jupiter0.5X.png" should be equal
+        And I choose output file "Jupiter0.5X.png" from "saveDialog"
+        Then output "Jupiter0.5X.png" and reference "Jupiter0.5X.png" should be equal
