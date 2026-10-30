@@ -1,6 +1,7 @@
 import os
 import sys
 from behave import *
+from behave.runner import Context
 import time
 import cv2
 import numpy as np
@@ -18,6 +19,9 @@ tabMap = {"Load": UI.LOAD_TAB,
           "Align": UI.ALIGN_TAB,
           "Stack": UI.STACK_TAB,
           "Process": UI.PROCESS_TAB}
+
+# Up to 1% of pixel values for two images being compared are allowed to be off-by-one.
+MAX_VALUES_FRAC_OFF_BY_ONE = 0.01
 
 def delay(delay=0.1):
     time.sleep(delay)
@@ -179,7 +183,24 @@ def shouldEqual(context, var, val):
         assert False, f"'{var}' does not exist"
     
 @then(u'"{file1}" and "{file2}" should be equal')
-def compareImages(context, file1, file2):
+def compareImages(context: Context, file1: str, file2: str) -> None:
+    """Asserts that two images under ``features/testFiles`` match.
+
+    Tolerate values off by 1 in up to ``MAX_VALUES_FRAC_OFF_BY_ONE`` of the
+    values because rounding floats to integers can differ by 1 between CPUs.
+
+    Args:
+        context: The behave context.
+        file1: Path of the first image, relative to ``features/testFiles``.
+        file2: Path of the second image, relative to ``features/testFiles``.
+    """
     img1 = cv2.imread("features/testFiles/" + file1, cv2.IMREAD_UNCHANGED)
     img2 = cv2.imread("features/testFiles/" + file2, cv2.IMREAD_UNCHANGED)
-    assert np.array_equal(img1, img2), f"'{file1}' and '{file2}' are not equal"
+    assert img1 is not None and img2 is not None, f"'{file1}' or '{file2}' could not be read"
+    assert img1.shape == img2.shape, f"'{file1}' {img1.shape} and '{file2}' {img2.shape} differ in shape"
+    assert img1.dtype == img2.dtype, f"'{file1}' {img1.dtype} and '{file2}' {img2.dtype} differ in dtype"
+    diff = cv2.absdiff(img1, img2)
+    maxDiff = diff.max()
+    assert maxDiff <= 1, f"'{file1}' and '{file2}' differ by up to {maxDiff}"
+    offByOneFrac = np.count_nonzero(diff) / diff.size
+    assert offByOneFrac <= MAX_VALUES_FRAC_OFF_BY_ONE, f"'{file1}' and '{file2}' differ in {offByOneFrac:.1%} of values"
