@@ -260,8 +260,10 @@
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringAdaptiveAdjust">
-    <property name="upper">50</property>
-    <property name="step-increment">1</property>
+    <property name="lower">-0.1</property>
+    <property name="upper">0.1</property>
+    <property name="step-increment">0.001</property>
+    <property name="page-increment">0.01</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBlendAdjust">
@@ -271,13 +273,15 @@
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBrightAdjust">
-    <property name="upper">75</property>
-    <property name="step-increment">1</property>
+    <property name="upper">0.6</property>
+    <property name="step-increment">0.001</property>
+    <property name="page-increment">0.05</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringDarkAdjust">
-    <property name="upper">75</property>
-    <property name="step-increment">1</property>
+    <property name="upper">0.6</property>
+    <property name="step-increment">0.001</property>
+    <property name="page-increment">0.05</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringSizeAdjust">
@@ -2559,8 +2563,8 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="adjustment">deringDarkAdjust</property>
-                                            <property name="round-digits">0</property>
-                                            <property name="digits">0</property>
+                                            <property name="round-digits">3</property>
+                                            <property name="digits">3</property>
                                             <property name="value-pos">left</property>
                                             <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                           </object>
@@ -2603,8 +2607,8 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="adjustment">deringBrightAdjust</property>
-                                            <property name="round-digits">0</property>
-                                            <property name="digits">0</property>
+                                            <property name="round-digits">3</property>
+                                            <property name="digits">3</property>
                                             <property name="value-pos">left</property>
                                             <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                           </object>
@@ -2634,7 +2638,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="receives-default">False</property>
-                                            <property name="tooltip-text" translatable="yes">Dark threshold.  Raise this value to ignore dark areas when sharpening.</property>
+                                            <property name="tooltip-text" translatable="yes">Dark threshold.  Areas darker than this value (0-1) are not sharpened.  0 masks nothing.</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
                                             <signal name="toggled" handler="processImage" swapped="no"/>
@@ -2657,7 +2661,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="receives-default">False</property>
-                                            <property name="tooltip-text" translatable="yes">Bright threshold.  Raise this value to ignore bright areas when sharpening.</property>
+                                            <property name="tooltip-text" translatable="yes">Bright threshold.  Areas brighter than 1 minus this value are not sharpened.  0 masks nothing.</property>
                                             <property name="active">True</property>
                                             <property name="draw-indicator">True</property>
                                             <signal name="toggled" handler="processImage" swapped="no"/>
@@ -2680,8 +2684,7 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="receives-default">False</property>
-                                            <property name="tooltip-text" translatable="yes">Adaptive threshold.  Raise this value to ignore areas of high contrast areas when sharpening.</property>
-                                            <property name="active">True</property>
+                                            <property name="tooltip-text" translatable="yes">Adaptive threshold.  Areas darker than their local average plus this offset (on the 0-1 scale) are not sharpened, which protects the dark side of high contrast edges.  Raise it to mask more.  Check to enable.</property>
                                             <property name="draw-indicator">True</property>
                                             <signal name="toggled" handler="processImage" swapped="no"/>
                                             <child>
@@ -2704,8 +2707,8 @@ Note: Drift adjustment will still crop the image.</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="adjustment">deringAdaptiveAdjust</property>
-                                            <property name="round-digits">0</property>
-                                            <property name="digits">0</property>
+                                            <property name="round-digits">3</property>
+                                            <property name="digits">3</property>
                                             <property name="value-pos">left</property>
                                             <signal name="scroll-event" handler="propagateScroll" swapped="no"/>
                                           </object>

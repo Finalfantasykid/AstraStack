@@ -156,14 +156,12 @@ class Video:
             if(colorMode == Video.COLOR_AUTO):
                 colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
-            image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         elif(isinstance(file, list)):
             # Image Sequence
             image = Video.readImage(file[frame], cv2.IMREAD_UNCHANGED, dtype, thumbnail)
             if(colorMode == Video.COLOR_AUTO):
                 colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
-            image = (image.astype(np.float32)/np.iinfo(image.dtype).max)*255
         else:
             # Video
             if(self.vidcap is None):
@@ -176,6 +174,7 @@ class Video:
             if(colorMode == Video.COLOR_AUTO):
                 colorMode = self.guessColorMode(file, image=image)
             image = Video.colorMode(image, colorMode)
+        image = image.astype(np.float32)/np.iinfo(image.dtype).max
         return image
       
     def guessColorMode(self, file, image=None):
