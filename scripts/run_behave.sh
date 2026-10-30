@@ -13,6 +13,11 @@ export ASTRASTACK_TEST_SHARDS=${ASTRASTACK_TEST_SHARDS:-$(( PHYSICAL / 2 < 4 ? P
 export ASTRASTACK_TEST_CPUS=${ASTRASTACK_TEST_CPUS:-$(( (LOGICAL - ASTRASTACK_TEST_SHARDS) / ASTRASTACK_TEST_SHARDS ))}
 
 TMP_ROOT=$(mktemp -d -t astrastack-run-XXXXXX)
+# Weston needs XDG_RUNTIME_DIR for its sockets, which may be unset in CI.
+if [ -z "$XDG_RUNTIME_DIR" ]; then
+    export XDG_RUNTIME_DIR="$TMP_ROOT/xdg"
+    mkdir -m 700 "$XDG_RUNTIME_DIR"
+fi
 WESTONS=(); WORKERS=()
 
 cleanup() {
