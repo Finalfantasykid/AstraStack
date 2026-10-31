@@ -28,7 +28,8 @@ Feature: Single Image
         And I choose input file "dso.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I set "sharpen2" to "0.100"
-        And I set "deringAdaptiveAdjust" to "24"
+        And I check "showAdaptive"
+        And I set "deringAdaptiveAdjust" to "-0.022"
         And I set "deringSizeAdjust" to "1"
         And I set "deringBlendAdjust" to "2"
         And I async press "saveButton"
@@ -48,13 +49,24 @@ Feature: Single Image
         And I choose output file "16bit.png" from "saveDialog"
         Then output "16bit.png" and reference "16bit.png" should be equal
         
+    Scenario: Test making no changes to 16bit image
+        Given I am on tab "Load"
+        And I async press "openImage"
+        And I choose input file "16bit.png" from "openDialog"
+        And I wait until active tab is "Process"
+        And I async press "saveButton"
+        And I select "16-bit" from "bitDepth"
+        And I choose output file "16bit_unchanged.png" from "saveDialog"
+        Then output "16bit_unchanged.png" and input "16bit.png" should be equal
+        
     Scenario: Test masking stretched image
         Given I am on tab "Load"
         And I async press "openImage"
         And I choose input file "test.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I select "ArcSinH" from "stretchFunction"
-        And I set "deringAdaptiveAdjust" to "50"
+        And I check "showAdaptive"
+        And I set "deringAdaptiveAdjust" to "0.078"
         And I async press "saveButton"
         And I choose output file "mask.png" from "saveDialog"
         Then output "mask.png" and reference "mask.png" should be equal

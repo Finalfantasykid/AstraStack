@@ -1,3 +1,4 @@
+import sys
 from lazy import lazy
 cv2 = lazy("cv2")
 np = lazy("numpy")
@@ -326,20 +327,34 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
     progress.countExtra()
     return (tmats, minX, minY, maxX, maxY)
 
-# Calculates the center of mass (coordinates) of the image
-def centerOfMass(img):
+# Pixels at or below this background level are ignored when calculating the
+# center of mass. This represents ~11.8% signal value.
+CENTER_OF_MASS_BACKGROUND = 15/255
+
+def centerOfMass(img: np.ndarray) -> tuple[float, float]:
+    """Calculates the center of mass of a greyscale image.
+
+    Each pixel is weighted by its squared value above CENTER_OF_MASS_BACKGROUND.
+
+    Args:
+        img: Greyscale image on the 0-1 scale.
+
+    Returns:
+        The (x, y) coordinates of the center of mass.
+    """
     y = range(0, img.shape[0])
     x = range(0, img.shape[1])
 
     (X,Y) = np.meshgrid(x,y)
 
     img = img.astype(np.float32)
-    img -= 15
+    img -= CENTER_OF_MASS_BACKGROUND
     img[img<0] = 0
     
     img = img**2
 
-    imgSum = max(1,img.sum())
+    # Avoid dividing by 0 when there is nothing above the background
+    imgSum = max(sys.float_info.min, img.sum())
 
     x_coord = (X*img).sum() / imgSum
     y_coord = (Y*img).sum() / imgSum
@@ -362,13 +377,43 @@ def shiftOrigin(M, x, y):
     return M
 
 # Dilates image
-def dilateImg(img, kSize=25, blurSize=5):
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kSize, kSize))
-    return cv2.dilate(cv2.medianBlur(img, blurSize), kernel)
+def dilateImg(img: np.ndarray, kSize: int = 25, blurSize: int = 5) -> np.ndarray:
+    """Median blurs and dilates an image so alignment follows the overall shape rather than fine detail.
 
-# Nomalizes pixel values between 0 and 255
-def normalizeImg(img):
-    return cv2.normalize(img, img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+    OpenCV's median blur and dilation are several times faster on uint8 than on float32, so a float image is
+    stretched from its own minimum-maximum range to 0-255, filtered as uint8, and mapped back.
+
+    Args:
+        img: uint8 or float32 grayscale or color image.
+        kSize: Diameter of the elliptical dilation kernel.
+        blurSize: Aperture of the median blur.
+
+    Returns:
+        The filtered image, with the input's dtype and value range.
+    """
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kSize, kSize))
+    if(img.dtype == np.uint8):
+        return cv2.dilate(cv2.medianBlur(img, blurSize), kernel)
+    low, high = float(img.min()), float(img.max())
+    if(high <= low):
+        return img.copy()
+    scale = 255/(high - low)
+    img8 = cv2.convertScaleAbs(img, alpha=scale, beta=-low*scale)
+    img8 = cv2.dilate(cv2.medianBlur(img8, blurSize), kernel)
+    return img8.astype(np.float32)/np.float32(scale) + np.float32(low)
+
+def normalizeImg(img: np.ndarray) -> np.ndarray:
+    """Stretches an image's values to fill the 0-1 range, in place.
+
+    NOTE: This does NOT preserve colors. Avoid using for anything but greyscale images.
+
+    Args:
+        img: Floating point image.
+
+    Returns:
+        The normalized image.
+    """
+    return cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
 # Returns the similarity between the two images
 def calculateDiff(ref, mov, xFactor, yFactor, M, i):
@@ -388,7 +433,7 @@ def calculateDiff(ref, mov, xFactor, yFactor, M, i):
 
     # Modified Means Squared Difference
     try:
-        diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32)/255, ref.astype(np.float32)/255)) ** 2)/(h*w)
+        diff = 1 - np.sum((cv2.absdiff(mov.astype(np.float32), ref.astype(np.float32))) ** 2)/(h*w)
     except:
         diff = 0
     return diff

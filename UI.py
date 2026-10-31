@@ -381,13 +381,13 @@ class UI:
             try:
                 # First try as image
                 video = Video()
-                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, dtype=np.uint8, thumbnail=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, dtype=np.uint8, thumbnail=True)*255, cv2.COLOR_BGR2RGB).astype('uint8')
                 pixbuf = self.createPixbuf(img)
             except Exception:
                 try:
                     # Now try as video
                     video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, dtype=np.uint8, thumbnail=True), cv2.COLOR_BGR2RGB).astype('uint8')
+                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, dtype=np.uint8, thumbnail=True)*255, cv2.COLOR_BGR2RGB).astype('uint8')
                     pixbuf = self.createPixbuf(img)
                 except Exception:
                     pass
@@ -480,7 +480,7 @@ class UI:
                 self.builder.get_object("processTab").set_sensitive(True)
                 self.tabs.set_current_page(UI.PROCESS_TAB)
                 
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode), cv2.COLOR_BGR2RGB).astype('uint8')
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode)*255, cv2.COLOR_BGR2RGB).astype('uint8')
                 pixbuf = self.createPixbuf(img)
                 self.frame.set_from_pixbuf(pixbuf.copy())
             except MemoryError as error:
@@ -510,10 +510,10 @@ class UI:
                         time.sleep(0.1) # Make sure the file isn't still being processed
                     bitDepth = self.bitDepth.get_active_text()
                     if(bitDepth == "8-bit"):
-                        cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage).astype('uint8'), cv2.COLOR_RGB2BGR))
+                        cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage*255).astype('uint8'), cv2.COLOR_RGB2BGR))
                     elif(bitDepth == "16-bit"):
                         if(fileName.endswith(".png") or fileName.endswith(".tif") or fileName.endswith(".tiff")):
-                            cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage*255).astype('uint16'), cv2.COLOR_RGB2BGR))
+                            cv2.imwrite(fileName, cv2.cvtColor(np.around(self.process.finalImage*65535).astype('uint16'), cv2.COLOR_RGB2BGR))
                         else:
                             self.showErrorDialog("Only .png and .tif are supported for 16-bit images")
                             start()
@@ -645,10 +645,10 @@ class UI:
             videoIndex = int(self.frameSlider.get_value())
             if(len(self.video.frames) == 0):
                 # Single Image
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.actualColor()), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.actualColor()), cv2.COLOR_BGR2RGB)
             else:
                 # Video/Sequence
-                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.actualColor()), cv2.COLOR_BGR2RGB).astype(np.uint8)
+                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.actualColor()), cv2.COLOR_BGR2RGB)
                 
             height, width = img.shape[:2]
             
@@ -657,6 +657,8 @@ class UI:
                 img = dilateImg(img)
             # Normalize
             if(g.normalize):
+                # TODO: Change this to a better alternative that actually preserves colors.
+                # normalizeImage() performs a naive subtraction which alters the R:G:B ratios.
                 img = normalizeImg(img)
             # Center of Gravity
             if(g.driftType == Align.DRIFT_GRAVITY):
@@ -679,7 +681,7 @@ class UI:
                     C[1][2] = -C[1][2]
                 img = cv2.warpAffine(img, C, (width, height), flags=cv2.INTER_NEAREST)
 
-            pixbuf = self.createPixbuf(img)
+            pixbuf = self.createPixbuf((img*255).astype(np.uint8))
             self.frame.set_from_pixbuf(pixbuf.copy())
         elif(page_num == UI.STACK_TAB and self.stack is not None):
             if(int(self.frameSlider.get_value()) >= len(self.stack.tmats)):
@@ -687,9 +689,9 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = self.video.getFrame(g.file, videoIndex, g.actualColor()).astype(np.uint8)
+            img = (self.video.getFrame(g.file, videoIndex, g.actualColor())*255).astype(np.uint8)
             if(g.autoCrop):
-                ref = self.stack.refBG.astype(np.uint8)
+                ref = (self.stack.refBG*255).astype(np.uint8)
             else:
                 ref = None
             img = transform(img, ref, M, self.align.minX, self.align.maxX, self.align.minY, self.align.maxY, g)
@@ -894,7 +896,7 @@ class UI:
         
         color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         for i, col in enumerate(color):
-            hist = np.log(cv2.calcHist([np.around(self.process.finalImage).astype('uint8')],[i],None,[256],[0,256]) + 1)
+            hist = np.log(cv2.calcHist([np.around(self.process.finalImage*255).astype('uint8')],[i],None,[256],[0,256]) + 1)
             cv2.normalize(hist, hist, 0, 99, cv2.NORM_MINMAX)
             hist = 99 - hist
             hist = np.int32(np.around(hist))
@@ -1260,9 +1262,9 @@ class UI:
         g.showAdaptive = self.builder.get_object("showAdaptive").get_active()
         g.showDark = self.builder.get_object("showDark").get_active()
         g.showBright = self.builder.get_object("showBright").get_active()
-        g.deringAdaptive = int(self.builder.get_object("deringAdaptiveAdjust").get_value())
-        g.deringDark = int(self.builder.get_object("deringDarkAdjust").get_value())
-        g.deringBright = int(self.builder.get_object("deringBrightAdjust").get_value())
+        g.deringAdaptive = self.builder.get_object("deringAdaptiveAdjust").get_value()
+        g.deringDark = self.builder.get_object("deringDarkAdjust").get_value()
+        g.deringBright = self.builder.get_object("deringBrightAdjust").get_value()
         g.deringSize = int(self.builder.get_object("deringSizeAdjust").get_value())
         g.deringBlend = int(self.builder.get_object("deringBlendAdjust").get_value())
         
@@ -1346,9 +1348,9 @@ class UI:
     def finishedProcessing(self, *args):
         def update():
             if(self.showMask.get_active() and self.process.thresh is not None):
-                pixbuf = self.createPixbuf(np.around(self.process.thresh).astype('uint8'))
+                pixbuf = self.createPixbuf(np.around(self.process.thresh*255).astype('uint8'))
             else:
-                pixbuf = self.createPixbuf(np.around(self.process.finalImage).astype('uint8'))
+                pixbuf = self.createPixbuf(np.around(self.process.finalImage*255).astype('uint8'))
             self.frame.set_from_pixbuf(pixbuf.copy())
             self.updateHistogram()
             self.processSpinner.stop()

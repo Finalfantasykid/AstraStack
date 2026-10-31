@@ -27,6 +27,9 @@ class Process:
     STRETCH_ASINH = 5
     
     LEVEL = 5
+
+    # Side of the square neighbourhood the adaptive dering threshold takes its local mean over
+    DERING_ADAPTIVE_BLOCK_SIZE = 15
     
     # This is a crude estimate on how much memory will be used by the sharpening
     # Width * Height * 3Channels * 4bytes * 4coefficients * 5layers * 2(worst case from copying every coefficients layer)
@@ -100,7 +103,7 @@ class Process:
     # Calculates the wavelet coefficents for each channel
     def calculateCoefficients(self):
         # Stretch Function
-        self.stackedImage = np.clip(self.stackedImage, 0, 255)
+        self.stackedImage = np.clip(self.stackedImage, 0, 1)
         if(g.stretchFunction is not Process.STRETCH_NONE):
             gauss = cv2.resize(self.stackedImage, (100, 100), interpolation=cv2.INTER_LINEAR)
             gauss = cv2.cvtColor(gauss, cv2.COLOR_RGB2HLS)
@@ -108,17 +111,25 @@ class Process:
             V = cv2.GaussianBlur(V, (0,0), 2)
             low = V.min()
             self.stackedImage -= low
-            self.stackedImage = np.clip(self.stackedImage, 0, 255)
+            self.stackedImage = np.clip(self.stackedImage, 0, 1)
         if(g.stretchFunction == Process.STRETCH_SQRT):
             self.stackedImage = np.ma.sqrt(self.stackedImage)
         elif(g.stretchFunction == Process.STRETCH_CBRT):
             self.stackedImage = np.cbrt(self.stackedImage)
         elif(g.stretchFunction == Process.STRETCH_LOG):
-            self.stackedImage = np.log((self.stackedImage+1))
+            # Log and arcsinh aren't scale invariant, and they were originally intended
+            # for 0-255 signals but we now use 0-1 signals, so they need to be
+            # premultiplied by 255. Bare log(x+1) and arcsinh(x) are more closely related
+            # to gamma=1.2 which is near-linear, whereas the original intent is a stretch
+            # that resembles gamma=5.
+            self.stackedImage = np.log((self.stackedImage*255+1))
         elif(g.stretchFunction == Process.STRETCH_ASINH):
-            self.stackedImage = np.arcsinh(self.stackedImage)
+            self.stackedImage = np.arcsinh(self.stackedImage*255)
         if(g.stretchFunction is not Process.STRETCH_NONE):
-            self.stackedImage = cv2.normalize(self.stackedImage, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+            # TODO: Stop doing black level normalizations that accidentally shift colors.
+            # Either adjust black level somewhere else in the pipeline, or use an
+            # alternative black level algorithm that preserves R:G:B ratios.
+            self.stackedImage = cv2.normalize(self.stackedImage, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
         (R, G, B) = cv2.split(self.stackedImage)
 
@@ -187,23 +198,30 @@ class Process:
         img[img<0] = 0
         self.debluredImage = img
         
-    # Apply dering/star mask to sharpened image
-    def dering(self):
-        if((g.showAdaptive and g.deringAdaptive > 0) or 
-           (g.showDark and g.deringDark > 0) or 
-           (g.showBright and g.deringBright > 0)):
-            gray = cv2.cvtColor(self.stackedImage, cv2.COLOR_RGB2GRAY)
-            # Calculate Dark & Bright thresholds and merge them
-            threshAdaptive = np.zeros((self.h, self.w), dtype = "uint8")
-            threshDark = np.zeros((self.h, self.w), dtype = "uint8")
-            threshBright = np.zeros((self.h, self.w), dtype = "uint8")
-            if(g.showAdaptive and g.deringAdaptive > 0):
-                threshAdaptive = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 30-g.deringAdaptive)
-            if(g.showDark and g.deringDark > 0):
-                ret,threshDark = cv2.threshold(gray, (g.deringDark*2)-1, 255, cv2.THRESH_BINARY_INV)
-            if(g.showBright and g.deringBright > 0):
-                ret,threshBright = cv2.threshold(gray, 255-(g.deringBright*2), 255, cv2.THRESH_BINARY)
-            thresh = np.maximum(np.maximum(threshAdaptive, threshDark), threshBright)
+    def dering(self) -> None:
+        """Prevent dark halos around bright objects by excluding their dark surroundings from sharpening.
+
+        The dering mask is computed and used to blend together the unsharpened (self.stackedImage) and
+        sharpened (self.debluredImage) images.  The final result is stored in self.deringedImage.
+        """
+        adaptive = g.showAdaptive
+        dark = g.showDark and g.deringDark > 0
+        bright = g.showBright and g.deringBright > 0
+        if(adaptive or dark or bright):
+            gray = cv2.cvtColor(self.stackedImage.astype(np.float32), cv2.COLOR_RGB2GRAY)
+            thresh = np.zeros((self.h, self.w), dtype=np.float32)
+            if(adaptive):
+                localMean = cv2.GaussianBlur(
+                    src=gray,
+                    ksize=(Process.DERING_ADAPTIVE_BLOCK_SIZE, Process.DERING_ADAPTIVE_BLOCK_SIZE),
+                    sigmaX=0,
+                    borderType=cv2.BORDER_REPLICATE,
+                )
+                thresh[gray < localMean + g.deringAdaptive] = 1
+            if(dark):
+                thresh[gray < g.deringDark] = 1
+            if(bright):
+                thresh[gray > 1 - g.deringBright] = 1
             
             # Dialate the threshold
             if(g.deringSize != 0):
@@ -218,13 +236,13 @@ class Process:
                 thresh = cv2.GaussianBlur(thresh, (0,0), g.deringBlend)
             
             self.thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
-            mask = self.thresh.astype(np.float32)/255
+            mask = self.thresh
             inv_mask = 1 - mask
-            orig = self.stackedImage.astype(np.float32)/255 * mask
+            orig = self.stackedImage.astype(np.float32) * mask
             processed = self.debluredImage * inv_mask
             self.deringedImage = orig + processed
         else:
-            self.thresh = cv2.cvtColor(np.zeros((self.h, self.w), dtype = "uint8"), cv2.COLOR_GRAY2RGB)
+            self.thresh = np.zeros((self.h, self.w, 3), dtype=np.float32)
             self.deringedImage = self.debluredImage
     
     # Apply brightness & color sliders
@@ -258,9 +276,8 @@ class Process:
         img = np.clip(img, 0, 1)
         img = pow(img, 1/(max(1, g.gamma)/100))
         
-        # Clip at 0 and 255
-        img *= 255
-        img = np.clip(img, 0, 255)
+        # Clip at 0 and 1
+        img = np.clip(img, 0, 1)
         
         self.finalImage = img
         
@@ -279,7 +296,6 @@ def calculateChannelCoefficients(C, channel, num, lock):
     C = cv2.copyMakeBorder(C, 0, (2**Process.LEVEL - hR), 0, (2**Process.LEVEL - wR), cv2.BORDER_REFLECT)
     
     C =  np.float32(C)
-    C /= 255
 
     # Compute coefficients
     g.coeffs = list(pywt.swt2(C, 'haar', level=Process.LEVEL, trim_approx=True))
