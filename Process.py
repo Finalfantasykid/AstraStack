@@ -6,7 +6,6 @@ import copy
 from concurrent.futures import wait
 from time import sleep
 from deconvolution import *
-from Video import Video
 from Globals import *
 from WorkerPools import CHANNEL_POOL, PROCESS_CONTEXT
 
@@ -33,14 +32,7 @@ class Process:
     def estimateMemoryUsage(width, height):
         return width*height*3*4*4*Process.LEVEL*2
 
-    def __init__(self, stackedImage, isFile=False):
-        if(isFile):
-            # Single image provided
-            video = Video()
-            stackedImage = video.getFrame(None, stackedImage, g.actualColor())
-        else:
-            # Use the higher bit depth version from the stacking process
-            pass
+    def __init__(self, stackedImage: np.ndarray) -> None:
         self.stackedImage = cv2.cvtColor(stackedImage, cv2.COLOR_BGR2RGB)
         self.h, self.w = stackedImage.shape[:2]
         self.mask = None

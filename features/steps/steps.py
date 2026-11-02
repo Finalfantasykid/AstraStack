@@ -187,6 +187,40 @@ def setPoint(context, var, point):
     idle_add_delay(update1)
     idle_add_delay(update2)
     
+@step(u'active tab should be "{tab}"')
+def activeTabShouldBe(context: Context, tab: str) -> None:
+    """Asserts which tab is active.
+
+    Args:
+        context: The behave context.
+        tab: The tab's name.
+    """
+    assert g.ui.tabs.get_current_page() == tabMap[tab], f"The active tab is not '{tab}'"
+
+@step(u'the error dialog says "{message}"')
+def dismissErrorDialog(context: Context, message: str) -> None:
+    """Waits for the error dialog, asserts its message and dismisses it.
+
+    Args:
+        context: The behave context.
+        message: The expected message.
+    """
+    dialog = g.ui.builder.get_object("errorDialog")
+    deadline = time.monotonic() + WIDGET_TIMEOUT
+    while(not dialog.is_visible() and time.monotonic() < deadline):
+        delay(0.01)
+    assert dialog.is_visible(), "The error dialog was not shown"
+    shown = []
+    def update() -> None:
+        shown.append(dialog.get_property("secondary-text"))
+        dialog.response(Gtk.ResponseType.OK)
+    idle_add_delay(update)
+    deadline = time.monotonic() + WIDGET_TIMEOUT
+    while(dialog.is_visible() and time.monotonic() < deadline):
+        delay(0.01)
+    assert not dialog.is_visible(), "The error dialog was not dismissed"
+    assert shown[0] == message, f"The error dialog says '{shown[0]}'"
+
 @then(u'"{var}" should equal "{val}"')
 def shouldEqual(context, var, val):
     if(hasattr(g, var)):

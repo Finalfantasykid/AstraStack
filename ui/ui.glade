@@ -677,7 +677,7 @@
                     <property name="margin-right">5</property>
                     <signal name="switch-page" handler="changeTab" swapped="no"/>
                     <child>
-                      <!-- n-columns=2 n-rows=9 -->
+                      <!-- n-columns=2 n-rows=3 -->
                       <object class="GtkGrid" id="loadTab">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -688,13 +688,12 @@
                         <property name="row-spacing">5</property>
                         <property name="column-homogeneous">True</property>
                         <child>
-                          <object class="GtkButton" id="openVideo">
-                            <property name="label" translatable="yes">Open Video</property>
+                          <object class="GtkButton" id="openFile">
+                            <property name="label" translatable="yes">Open</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="margin-bottom">10</property>
-                            <signal name="clicked" handler="openVideo" swapped="no"/>
+                            <signal name="clicked" handler="openFile" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -706,7 +705,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Video</property>
+                            <property name="label" translatable="yes">Open</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
                             </attributes>
@@ -721,94 +720,11 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Choose a video file to stack</property>
+                            <property name="label" translatable="yes">Choose a video or images</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
                             <property name="top-attach">1</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Image Sequence</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">3</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Select multiple images to stack</property>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">4</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="openSequence">
-                            <property name="label" translatable="yes">Open Image Sequence</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="margin-bottom">10</property>
-                            <signal name="clicked" handler="openImageSequence" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">5</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Image</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">6</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Select a single image to process</property>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">7</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="openImage">
-                            <property name="label" translatable="yes">Open Image</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <signal name="clicked" handler="openImage" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">8</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -3435,7 +3351,7 @@ Note: Drift adjustment will still crop the image.</property>
       <placeholder/>
     </child>
   </object>
-  <object class="GtkFileFilter" id="videoFilter">
+  <object class="GtkFileFilter" id="supportedInputsFilter">
     <mime-types>
       <mime-type>video/quicktime</mime-type>
       <mime-type>video/x-msvideo</mime-type>
@@ -3449,6 +3365,36 @@ Note: Drift adjustment will still crop the image.</property>
       <mime-type>video/x-ms-wmv</mime-type>
     </mime-types>
     <patterns>
+      <pattern>*.jpg</pattern>
+      <pattern>*.jpeg</pattern>
+      <pattern>*.png</pattern>
+      <pattern>*.tiff</pattern>
+      <pattern>*.fit</pattern>
+      <pattern>*.fits</pattern>
+      <pattern>*.nef</pattern>
+      <pattern>*.crw</pattern>
+      <pattern>*.cr2</pattern>
+      <pattern>*.raf</pattern>
+      <pattern>*.dng</pattern>
+      <pattern>*.mos</pattern>
+      <pattern>*.kdc</pattern>
+      <pattern>*.dcr</pattern>
+      <pattern>*.x3f</pattern>
+      <pattern>*.JPG</pattern>
+      <pattern>*.JPEG</pattern>
+      <pattern>*.PNG</pattern>
+      <pattern>*.TIFF</pattern>
+      <pattern>*.FIT</pattern>
+      <pattern>*.FITS</pattern>
+      <pattern>*.NEF</pattern>
+      <pattern>*.CRW</pattern>
+      <pattern>*.CR2</pattern>
+      <pattern>*.RAF</pattern>
+      <pattern>*.DNG</pattern>
+      <pattern>*.MOS</pattern>
+      <pattern>*.KDC</pattern>
+      <pattern>*.DCR</pattern>
+      <pattern>*.X3F</pattern>
       <pattern>*.ser</pattern>
       <pattern>*.avi</pattern>
       <pattern>*.mov</pattern>

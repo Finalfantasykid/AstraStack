@@ -13,7 +13,8 @@ from packaging import version
 from threading import Thread
 
 from Preferences import Preferences
-from Video import Video
+from Video import Video, loadPsf
+from FrameSource import FrameSource
 from Align import Align, centerOfMass, dilateImg, normalizeImg
 from Stack import Stack, transform
 from Process import Process
@@ -37,7 +38,7 @@ class UI:
     SNAP_DIR = ""
     HOME_DIR = "~"
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.preferences = Preferences()
         self.newVersionUrl = ""
         self.video = None
@@ -172,7 +173,7 @@ class UI:
         self.setAutoCrop()
         self.frameScale.set_sensitive(False)
         
-        g.file = None
+        g.source = None
         g.reference = "0"
         g.deconvolveCustomFile = None
         
@@ -346,24 +347,24 @@ class UI:
         height, width = img.shape[:2]
         return GdkPixbuf.Pixbuf.new_from_bytes(Z, GdkPixbuf.Colorspace.RGB, False, 8, width, height, width*3)
     
-    # Shows preview image in file chooser dialog
-    def updatePreview(self, dialog):
+    def updatePreview(self, dialog: Gtk.FileChooser) -> None:
+        """Shows a thumbnail of the file selected in the file chooser, or hides the preview.
+
+        Args:
+            dialog: The file chooser.
+        """
         path = dialog.get_preview_filename()
         pixbuf = None
         if(path != None and os.path.isfile(path)):
             try:
-                # First try as image
-                video = Video()
-                img = cv2.cvtColor(video.getFrame(path, path, g.colorMode, dtype=np.uint8, thumbnail=True)*255, cv2.COLOR_BGR2RGB).astype('uint8')
-                pixbuf = self.createPixbuf(img)
-            except Exception:
+                source = FrameSource.open(path)
                 try:
-                    # Now try as video
-                    video = Video()
-                    img = cv2.cvtColor(video.getFrame(path, 0, g.colorMode, dtype=np.uint8, thumbnail=True)*255, cv2.COLOR_BGR2RGB).astype('uint8')
-                    pixbuf = self.createPixbuf(img)
-                except Exception:
-                    pass
+                    img = Video(source).thumbnail()
+                finally:
+                    source.close()
+                pixbuf = self.createPixbuf(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            except Exception:
+                pass
         if(pixbuf is not None):
             # Valid pixbuf
             maxwidth, maxheight = 250, 250
@@ -378,102 +379,130 @@ class UI:
             dialog.set_preview_widget_active(True)
         else:
             dialog.set_preview_widget_active(False)
-    
-    # Opens the file chooser to open load a file
-    def openVideo(self, *args):
-        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
-        self.openDialog.set_select_multiple(False)
-        self.openDialog.set_filter(self.builder.get_object("videoFilter"))
-        response = self.openDialog.run()
-        self.openDialog.hide()
-        if(response == Gtk.ResponseType.OK):
-            try:
-                # For some reason respawning the pool after loading drastically speeds up execution 
-                # maybe because the preview image 'preloads' the video and then the processes are re-forked?  May only work on Linux...
-                if os.name == 'posix':
-                    self.setThreads()
-                
-                g.file = self.openDialog.get_filename()
-                self.video = Video()
-                self.video.checkMemory()
-                thread = Thread(target=self.video.run, args=())
-                thread.start()
-                self.disableUI()
-            except MemoryError:
-                self.enableUI()
-            
-    # Opens the file chooser to open load a file
-    def openImageSequence(self, *args):
+
+    def openFile(self, *args: object) -> None:
+        """Opens the file chooser and loads the chosen video, image or image sequence.
+
+        Args:
+            *args: The signal's arguments, unused.
+        """
+        self.openDialog.set_filter(self.builder.get_object("supportedInputsFilter"))
         self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(True)
-        self.openDialog.set_filter(self.builder.get_object("imageFilter"))
         response = self.openDialog.run()
         self.openDialog.hide()
-        if(response == Gtk.ResponseType.OK):
-            try:
-                g.file = self.openDialog.get_filenames()
-                self.video = Video()
-                self.video.checkMemory()
-                thread = Thread(target=self.video.run, args=())
-                thread.start()
-                self.disableUI()
-            except MemoryError:
-                pass
-            except: # Open Failed
-                self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
-            self.enableUI()
-            
-    # Opens the file chooser to open load a file
-    def openImage(self, *args):
-        self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
-        self.openDialog.set_select_multiple(False)
-        self.openDialog.set_filter(self.builder.get_object("imageFilter"))
-        response = self.openDialog.run()
-        self.openDialog.hide()
+        chosenPaths = self.openDialog.get_filenames()
         if(response == Gtk.ResponseType.OK):
             self.disableUI()
-            g.file = self.openDialog.get_filename()
-            try:
-                self.video = Video()
-                g.guessedColorMode = self.video.guessColorMode(g.file)
-                img = Video.readImage(g.file)
-                h, w = img.shape[:2]
-                if(not self.checkMemory(w, h)):
-                    raise MemoryError()
-                
-                self.window.set_title(os.path.split(g.file)[1] + " - " + UI.TITLE)
-                self.saveDialog.set_current_name("")
-                
-                self.updateAutoColorModeText()
-                
-                self.stack = None
-                self.process = Process(g.file, True)
-                self.builder.get_object("alignTab").set_sensitive(False)
-                self.builder.get_object("stackTab").set_sensitive(False)
-                self.builder.get_object("processTab").set_sensitive(True)
-                self.tabs.set_current_page(UI.PROCESS_TAB)
-                
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode)*255, cv2.COLOR_BGR2RGB).astype('uint8')
-                pixbuf = self.createPixbuf(img)
-                self.frame.set_from_pixbuf(pixbuf.copy())
-            except MemoryError:
-                pass
-            except Exception as error: # Open Failed
-                print(error)
-                self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
+            thread = Thread(target=self.openSource, args=(chosenPaths,))
+            thread.start()
+
+    def openSource(self, paths: list[str]) -> None:
+        """Opens the chosen files as a source and counts its frames, then loads it on the GTK thread.
+
+        Runs in its own thread, since opening a source and counting its frames can be slow.
+
+        Args:
+            paths: The chosen files.
+        """
+        try:
+            source = FrameSource.open(paths[0] if len(paths) == 1 else paths)
+        except ValueError as error:
+            message = str(error)
+            def showError() -> None:
+                """Shows why the files couldn't be opened and loads nothing."""
+                self.showErrorDialog(message)
+                self.enableUI()
+            GLib.idle_add(showError)
+            return
+        frameCount = source.frameCount()
+        def load() -> None:
+            """Loads the source: one frame goes straight to Process, more go through Align and Stack."""
+            if(frameCount == 1):
+                self.loadSingleFrame(source)
+            else:
+                self.loadFrames(source)
+        GLib.idle_add(load)
+
+    def loadFrames(self, source: FrameSource) -> None:
+        """Starts loading a source of several frames to align and stack. finishedVideo is called when it's done.
+
+        Args:
+            source: The source.
+        """
+        try:
+            g.source = source
+            self.video = Video(source)
+            self.video.checkMemory()
+            thread = Thread(target=self.video.run, args=())
+            thread.start()
+        except MemoryError:
             self.enableUI()
-            
+
+    def loadSingleFrame(self, source: FrameSource) -> None:
+        """Loads a source of one frame straight into the Process tab.
+
+        Args:
+            source: The source.
+        """
+        g.source = source
+        try:
+            self.video = Video(source)
+            g.guessedColorMode = self.video.guessColorMode()
+            self.video.checkMemory()
+
+            self.window.set_title(self.sourceTitle() + " - " + UI.TITLE)
+            self.saveDialog.set_current_name("")
+
+            self.updateAutoColorModeText()
+
+            self.stack = None
+            self.process = Process(self.video.getFrame(index=0,
+                                                       colorMode=g.actualColor()))
+            self.builder.get_object("alignTab").set_sensitive(False)
+            self.builder.get_object("stackTab").set_sensitive(False)
+            self.builder.get_object("processTab").set_sensitive(True)
+            self.tabs.set_current_page(UI.PROCESS_TAB)
+
+            img = cv2.cvtColor(
+                self.video.getFrame(
+                    index=0,
+                    colorMode=g.actualColor(),
+                    toDtype=np.uint8,
+                ),
+                cv2.COLOR_BGR2RGB,
+            )
+            pixbuf = self.createPixbuf(img)
+            self.frame.set_from_pixbuf(pixbuf.copy())
+        except MemoryError:
+            pass
+        except Exception as error: # Open Failed
+            print(error)
+            self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
+        self.enableUI()
+
+    def sourceTitle(self) -> str:
+        """Returns the name of the loaded source for the window title.
+
+        Returns:
+            The file's name, or the first and last file names of an image sequence.
+        """
+        paths = g.source.filePaths()
+        if(len(paths) > 1):
+            return os.path.basename(paths[0]) + " ... " + os.path.basename(paths[-1])
+        return os.path.basename(paths[0])
+
     # Opens the file chooser to save the final image
-    def saveFileDialog(self, *args):
+    def saveFileDialog(self, *args: object) -> None:
         from pathlib import Path
         self.saveDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         if(self.saveDialog.get_current_name() == ""):
             # Set default file to save if empty
-            if(isinstance(g.file, list)):
-                sList = g.file
-                self.saveDialog.set_current_name(Path(sList[0]).stem + "_" + Path(sList[-1]).stem + ".png")
+            paths = g.source.filePaths()
+            if(len(paths) > 1):
+                self.saveDialog.set_current_name(Path(paths[0]).stem + "_" + Path(paths[-1]).stem + ".png")
             else:
-                self.saveDialog.set_current_name(Path(g.file).stem + ".png")
+                self.saveDialog.set_current_name(Path(paths[0]).stem + ".png")
         def start():
             response = self.saveDialog.run()
             if(response == Gtk.ResponseType.OK):
@@ -495,8 +524,8 @@ class UI:
         start()
         self.saveDialog.hide()
         
-    # Called when the video is finished loading
-    def finishedVideo(self):
+    def finishedVideo(self) -> None:
+        """Handler for when the frames finish loading; prepares and moves on to the Align tab."""
         def update():
             self.tabs.next_page()
            
@@ -523,13 +552,12 @@ class UI:
             self.setEndFrame()
             self.setDriftPoint()
             self.enableUI()
-            if(isinstance(g.file, list)):
-                sList = g.file
-                if(len(sList) != len(self.video.frames)):
-                    self.showErrorDialog("Not all images were added to the stack.  Make sure they are all the same dimensions.")
-                self.window.set_title(os.path.split(sList[0])[1] + " ... " + os.path.split(sList[-1])[1] +  " - " + UI.TITLE)
-            else:
-                self.window.set_title(os.path.split(g.file)[1] + " - " + UI.TITLE)
+            if self.video.skippedCount() > 0:
+                self.showErrorDialog(
+                    "Not all images were added to the stack.  "
+                    "Make sure they are all the same dimensions."
+                )
+            self.window.set_title(self.sourceTitle() + " - " + UI.TITLE)
             self.saveDialog.set_current_name("")
 
             self.builder.get_object("alignTab").set_sensitive(True)
@@ -538,8 +566,12 @@ class UI:
             self.stack = None
         GLib.idle_add(update)
         
-    # Opens the file chooser to open load a psf file (g.deconvolveCustomFile)
-    def openPSF(self, *args):
+    def openPSF(self, *args: object) -> None:
+        """Opens the file chooser and loads the chosen image as the custom PSF.
+
+        Args:
+            *args: The signal's arguments, unused.
+        """
         self.openDialog.set_current_folder(os.path.expanduser(UI.HOME_DIR))
         self.openDialog.set_select_multiple(False)
         self.openDialog.set_filter(self.builder.get_object("imageFilter"))
@@ -547,15 +579,8 @@ class UI:
         self.openDialog.hide()
         if(response == Gtk.ResponseType.OK):
             try:
-                img = Video.readImage(self.openDialog.get_filename(), cv2.IMREAD_GRAYSCALE)
-                if(max(img.shape) > 100):
-                    raise Exception
-                if(len(np.unique(img)) <= 1):
-                    raise Exception
-                img = np.float32(img)/255
-                cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-                g.deconvolveCustomFile = img
-            except: # Open Failed
+                g.deconvolveCustomFile = loadPsf(self.openDialog.get_filename())
+            except Exception:
                 self.showErrorDialog("There was an error opening the PSF, make sure it is a valid image.  The PSF should be no larger than 100x100.")
             self.processImage(self.builder.get_object("deconvolveCustomFile"))
        
@@ -608,8 +633,13 @@ class UI:
             self.processImage()
         self.fixFrameSliderBug()
     
-    # Changes the image frame to the frameSlider position    
-    def updateImage(self, adjustment=None, page_num=None):
+    def updateImage(self, adjustment: Gtk.Adjustment | None = None, page_num: int | None = None) -> None:
+        """Shows the frame at the frame slider's position, as the tab shows it.
+
+        Args:
+            adjustment: The frame slider's adjustment, when called by its signal; unused.
+            page_num: The tab to show the frame for; the current tab if None.
+        """
         if(self.video is None):
             return
         if(page_num is None):
@@ -618,11 +648,12 @@ class UI:
             videoIndex = int(self.frameSlider.get_value())
             if(len(self.video.frames) == 0):
                 # Single Image
-                img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.actualColor()), cv2.COLOR_BGR2RGB)
+                img = cv2.cvtColor(self.video.getFrame(index=0, colorMode=g.actualColor()), cv2.COLOR_BGR2RGB)
             else:
                 # Video/Sequence
                 videoIndex = min(videoIndex, len(self.video.frames)-1)
-                img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.actualColor()), cv2.COLOR_BGR2RGB)
+                img = cv2.cvtColor(self.video.getFrame(self.video.frames[videoIndex], g.actualColor()),
+                                   cv2.COLOR_BGR2RGB)
                 
             height, width = img.shape[:2]
             
@@ -663,7 +694,11 @@ class UI:
             tmat = self.stack.tmats[int(self.frameSlider.get_value())]
             videoIndex = tmat[0]
             M = tmat[1]
-            img = (self.video.getFrame(g.file, videoIndex, g.actualColor())*255).astype(np.uint8)
+            img = self.video.getFrame(
+                index=videoIndex,
+                colorMode=g.actualColor(),
+                toDtype=np.uint8,
+            )
             if(g.autoCrop):
                 ref = (self.stack.refBG*255).astype(np.uint8)
             else:
@@ -883,9 +918,9 @@ class UI:
         self.histImage.set_from_pixbuf(pixbuf.copy())
         
     # Sets the reference frame to the current visible frame
-    def setReference(self, *args):
+    def setReference(self, *args: object) -> None:
         g.reference = str(int(self.frameSlider.get_value()))
-        self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
+        self.reference = self.video.getFrame(self.video.frames[int(g.reference)], g.actualColor())
         self.builder.get_object("referenceLabel").set_text(g.reference)
         self.builder.get_object("alignButton").set_sensitive(True)
         if(self.tabs.get_current_page() == UI.ALIGN_TAB):
@@ -903,7 +938,7 @@ class UI:
         GLib.idle_add(update)
         
     # Sets the start frame for trimming
-    def setStartFrame(self, *args):
+    def setStartFrame(self, *args: object) -> None:
         g.startFrame = int(self.startFrame.get_value())
         self.endFrame.set_lower(g.startFrame+1)
         self.frameSlider.set_lower(g.startFrame)
@@ -912,13 +947,13 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.startFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
-            self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
+            self.reference = self.video.getFrame(self.video.frames[int(g.reference)], g.actualColor())
         self.fixFrameSliderBug()
         if(self.tabs.get_current_page() == UI.ALIGN_TAB):
             self.updateImage()
         
     # Sets the end frame for trimming
-    def setEndFrame(self, *args):
+    def setEndFrame(self, *args: object) -> None:
         g.endFrame = int(self.endFrame.get_value())
         self.startFrame.set_upper(g.endFrame-1)
         self.frameSlider.set_upper(g.endFrame)
@@ -927,7 +962,7 @@ class UI:
             # Reference is outside of the range, fix it
             g.reference = str(int(g.endFrame))
             self.builder.get_object("referenceLabel").set_text(g.reference)
-            self.reference = self.video.getFrame(g.file, self.video.frames[int(g.reference)], g.actualColor())
+            self.reference = self.video.getFrame(self.video.frames[int(g.reference)], g.actualColor())
         self.fixFrameSliderBug()
         if(self.tabs.get_current_page() == UI.ALIGN_TAB):
             self.updateImage()
@@ -1197,8 +1232,8 @@ class UI:
         GLib.idle_add(update)
         
     # Processes the final Stacked image
-    def processImage(self, *args):
-        if(g.file is None):
+    def processImage(self, *args: object) -> None:
+        if(g.source is None):
             return
         self.processSpinner.start()
         self.processSpinner.show()
@@ -1298,7 +1333,8 @@ class UI:
             if(self.stack is not None):
                 self.process = Process(self.stack.stackedImage)
             else:
-                self.process = Process(g.file, True)
+                self.process = Process(self.video.getFrame(index=0,
+                                                           colorMode=g.actualColor()))
         if(self.processThread != None and self.processThread.is_alive()):
             self.process.processAgain = processAgain
             self.process.processDeblurAgain = processDeblur

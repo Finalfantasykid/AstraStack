@@ -2,7 +2,7 @@ Feature: Video
 
     Scenario: Check Best Frame
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I wait "100"
@@ -12,7 +12,7 @@ Feature: Video
 
     Scenario: Stacking Video
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
@@ -26,7 +26,7 @@ Feature: Video
         
     Scenario: Stacking Video with drift points
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Manual" from "driftType"
@@ -45,7 +45,7 @@ Feature: Video
         
     Scenario: Stacking Video with center of gravity
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Center of Gravity" from "driftType"
@@ -61,7 +61,7 @@ Feature: Video
         
     Scenario: Stacking Video with frame deltas
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Frame Delta" from "driftType"
@@ -77,7 +77,7 @@ Feature: Video
         
     Scenario: Stacking Video with drift points and trim
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I set "startFrame" to "10"
@@ -99,7 +99,7 @@ Feature: Video
         
     Scenario: 2X Upscaling
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
@@ -116,7 +116,7 @@ Feature: Video
     Scenario: 2X Upscaling (test with 1 cpu for rounding bug)
         Given I am on tab "Load"
         And I set "cpus" to "1"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
@@ -132,7 +132,7 @@ Feature: Video
         
     Scenario: 0.50X Downscaling
         Given I am on tab "Load"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "Jupiter.mp4" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Affine" from "transformation"
@@ -150,7 +150,7 @@ Feature: Video
         Given I am on tab "Load"
         # 8+ CPUs easily hangs loading this short video due to a loadFramesVideo limitation, so set a conservatively small count
         And I set "cpus" to "2"
-        And I async press "openVideo"
+        And I async press "openFile"
         And I choose input file "avi8_rggb.avi" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Bayer RGGB" from "colorMode"
