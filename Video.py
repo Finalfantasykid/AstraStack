@@ -5,6 +5,7 @@ rawpy = lazy("rawpy")
 import math
 from concurrent.futures.process import BrokenProcessPool
 from Globals import *
+from WorkerPools import FRAME_POOL
 from ProgressBar import *
 
 class Video:
@@ -94,7 +95,7 @@ class Video:
                 progress.setMessage("Preprocessing Frames")
                 height, width = Video.readImage(g.file[0]).shape[:2]
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesSequence, g.file[max(0, (i*countPerThread)-1):(i+1)*countPerThread], i, width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
+                    futures.append(FRAME_POOL.submit(loadFramesSequence, g.file[max(0, (i*countPerThread)-1):(i+1)*countPerThread], i, width, height, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp, deltas = futures[i].result()
                     self.frames += frames
@@ -111,7 +112,7 @@ class Video:
                 progress.setMessage("Preprocessing Frames")
                 countPerThread = math.ceil(progress.total/g.nThreads)
                 for i in range(0, g.nThreads):
-                    futures.append(g.pool.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
+                    futures.append(FRAME_POOL.submit(loadFramesVideo, g.file, i*countPerThread, countPerThread, g.actualColor(), ProgressCounter(progress.counter(i), g.nThreads)))
                 for i in range(0, g.nThreads):
                     frames, sharp, deltas, wScaleFactor, hScaleFactor = futures[i].result()
                     self.frames += frames

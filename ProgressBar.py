@@ -1,8 +1,8 @@
 from time import sleep
 import math
 from threading import Thread
-from multiprocessing import Manager
 from Globals import g
+from WorkerPools import PROCESS_CONTEXT
 
 class ProgressBar:
 
@@ -10,7 +10,7 @@ class ProgressBar:
     
     def __init__(self):
         if(ProgressBar.manager is None):
-            ProgressBar.manager = Manager()
+            ProgressBar.manager = PROCESS_CONTEXT.Manager()
         self.counters = []
         # Have 1 counter per process to avoid using locks, which kills performance
         for i in range(0, g.nThreads):

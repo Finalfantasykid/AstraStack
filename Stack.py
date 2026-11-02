@@ -6,6 +6,7 @@ import math
 import copy
 from concurrent.futures.process import BrokenProcessPool
 from Globals import *
+from WorkerPools import FRAME_POOL
 from Video import Video
 from Align import Align
 from ProgressBar import *
@@ -58,9 +59,9 @@ class Stack:
                     ref = self.refBG
                 else:
                     ref = None
-                futures.append(g.pool.submit(blendAverage, frames, ref,
-                                             g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY,
-                                             ProgressCounter(progress.counter(i), g.nThreads), gCopy))
+                futures.append(FRAME_POOL.submit(blendAverage, frames, ref,
+                                                 g.ui.align.minX, g.ui.align.maxX, g.ui.align.minY, g.ui.align.maxY,
+                                                 ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
                 result = futures[i].result()
