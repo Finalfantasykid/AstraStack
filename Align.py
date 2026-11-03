@@ -6,6 +6,7 @@ pystackreg = lazy("pystackreg")
 import math
 from concurrent.futures.process import BrokenProcessPool
 from Globals import *
+from WorkerPools import FRAME_POOL
 from Video import Video
 from ProgressBar import *
 
@@ -134,9 +135,9 @@ class Align:
             for i in range(0, g.nThreads):
                 nFrames = math.ceil(len(self.frames)/g.nThreads)
                 frames = self.frames[i*nFrames:(i+1)*nFrames]
-                futures.append(g.pool.submit(align, frames, ref, refOrig, self.width, self.height, w, h, scaleFactor,
-                                             totalFrames, i*nFrames, dx, dy, rfdx1, rfdy1, aoi1, aoi2, deltas,
-                                             ProgressCounter(progress.counter(i), g.nThreads), gCopy))
+                futures.append(FRAME_POOL.submit(align, frames, ref, refOrig, self.width, self.height, w, h,
+                                                 scaleFactor, totalFrames, i*nFrames, dx, dy, rfdx1, rfdy1, aoi1, aoi2,
+                                                 deltas, ProgressCounter(progress.counter(i), g.nThreads), gCopy))
             
             for i in range(0, g.nThreads):
                 tmats, minX, minY, maxX, maxY = futures[i].result()

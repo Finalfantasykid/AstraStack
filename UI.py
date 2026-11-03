@@ -12,8 +12,6 @@ import math
 import time
 from packaging import version
 from threading import Thread
-from multiprocessing import active_children, get_start_method
-from concurrent.futures import ProcessPoolExecutor
 
 from Preferences import Preferences
 from Video import Video
@@ -21,6 +19,7 @@ from Align import Align, centerOfMass, dilateImg, normalizeImg
 from Stack import Stack, transform
 from Process import Process
 from Globals import *
+from WorkerPools import FRAME_POOL
 from deconvolution import *
 
 from gi import require_version
@@ -41,7 +40,6 @@ class UI:
     
     def __init__(self):
         self.preferences = Preferences()
-        self.pids = []
         self.newVersionUrl = ""
         self.video = None
         self.align = None
@@ -127,7 +125,6 @@ class UI:
         
         self.cpus.set_upper(min(61, os.cpu_count())) # 61 is the maximum that Windows allows
         self.cpus.set_value(min(61, math.ceil(self.preferences.get("cpus", os.cpu_count()/2))))
-        g.pool = None
 
         self.processThread = None
         
@@ -291,32 +288,10 @@ class UI:
         
     # Sets the number of threads to use
     def setThreads(self, *args):
-        def initPool(method=None):
-            if(method == "spawn"):
-                GLib.idle_add(self.disableUI)
-            g.nThreads = int(self.cpus.get_value())
-            self.preferences.set("cpus", g.nThreads)
-            if(g.pool is not None):
-                g.pool.shutdown()
-            g.pool = ProcessPoolExecutor(g.nThreads)
-            
-            # This seems like the most reliable way to get the pid of pool processes
-            self.pids = []
-            before = list(map(lambda p : p.pid, active_children()))
-            g.pool.submit(dummy, ()).result()
-            after = list(map(lambda p : p.pid, active_children()))
-            for pid in after:
-                if(pid not in before):
-                    self.pids.append(pid)
-            if(method == "spawn"):
-                GLib.idle_add(self.enableUI)
-        
-        # Behave a bit differently depending on platform
-        if(get_start_method() == "spawn"):
-            thread = Thread(target=initPool, args=(get_start_method(),))
-            thread.start()
-        else:
-            initPool()
+        g.nThreads = int(self.cpus.get_value())
+        self.preferences.set("cpus", g.nThreads)
+        # The next job creates a pool of the new size
+        FRAME_POOL.drop()
             
     # Change the theme of the application
     def changeTheme(self, *args):
@@ -1165,18 +1140,9 @@ class UI:
         thread.start()
         self.disableUI()
         
-    # Kills all pool processes
-    def killPool(self):
-        for pid in self.pids:
-            if(psutil.pid_exists(pid)):
-                p = psutil.Process(pid)
-                p.kill()
-        
     # Stops the current action being performed
     def stopProcessing(self, *args):
-        self.killPool()
-        g.pool = None
-        self.setThreads()
+        FRAME_POOL.kill()
         self.setProgress()
         self.enableUI()
         
@@ -1364,12 +1330,8 @@ class UI:
 
     # Closes the application
     def close(self, *args):
-        self.killPool()
+        FRAME_POOL.kill()
         Gtk.main_quit()
-
-# Used to initialize pids
-def dummy(*args):
-    return True
 
 def run():
     if('SNAP' in os.environ):

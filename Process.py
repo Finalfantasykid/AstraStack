@@ -4,14 +4,13 @@ np = lazy("numpy")
 pywt = lazy("pywt")
 import math
 import copy
-from concurrent.futures import ProcessPoolExecutor, wait
-from multiprocessing import Manager, Lock
+from concurrent.futures import wait
+from multiprocessing import Lock
 from time import sleep
 from deconvolution import *
 from Video import Video
 from Globals import *
-
-pool = ProcessPoolExecutor(3)
+from WorkerPools import CHANNEL_POOL, PROCESS_CONTEXT
 
 def colorAdjust(C, adjust):
     C *= (adjust/100)*(g.value/100)
@@ -133,14 +132,14 @@ class Process:
 
         (R, G, B) = cv2.split(self.stackedImage)
 
-        with Manager() as manager:
+        with PROCESS_CONTEXT.Manager() as manager:
             num = manager.Value('i', 0)
             lock = manager.Lock()
                 
             futures = []
-            futures.append(pool.submit(calculateChannelCoefficients, R, 'R', num, lock))
-            futures.append(pool.submit(calculateChannelCoefficients, G, 'G', num, lock))
-            futures.append(pool.submit(calculateChannelCoefficients, B, 'B', num, lock))
+            futures.append(CHANNEL_POOL.submit(calculateChannelCoefficients, R, 'R', num, lock))
+            futures.append(CHANNEL_POOL.submit(calculateChannelCoefficients, G, 'G', num, lock))
+            futures.append(CHANNEL_POOL.submit(calculateChannelCoefficients, B, 'B', num, lock))
             
             wait(futures)
         
@@ -149,9 +148,9 @@ class Process:
         gCopy = cloneGlobals()
 
         futures = []
-        futures.append(pool.submit(sharpenChannelLayers, gCopy))
-        futures.append(pool.submit(sharpenChannelLayers, gCopy))
-        futures.append(pool.submit(sharpenChannelLayers, gCopy))
+        futures.append(CHANNEL_POOL.submit(sharpenChannelLayers, gCopy))
+        futures.append(CHANNEL_POOL.submit(sharpenChannelLayers, gCopy))
+        futures.append(CHANNEL_POOL.submit(sharpenChannelLayers, gCopy))
         
         for future in futures:
             result = future.result()
@@ -178,9 +177,9 @@ class Process:
             gCopy = cloneGlobals()
             
             futures = []
-            futures.append(pool.submit(deconvolve, R, gCopy))
-            futures.append(pool.submit(deconvolve, G, gCopy))
-            futures.append(pool.submit(deconvolve, B, gCopy))
+            futures.append(CHANNEL_POOL.submit(deconvolve, R, gCopy))
+            futures.append(CHANNEL_POOL.submit(deconvolve, G, gCopy))
+            futures.append(CHANNEL_POOL.submit(deconvolve, B, gCopy))
             
             R = futures[0].result()
             G = futures[1].result()
