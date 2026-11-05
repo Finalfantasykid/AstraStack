@@ -28,3 +28,30 @@ Feature: Image Sequence
         And I async press "saveButton"
         And I choose output file "CA.png" from "saveDialog"
         Then output "CA.png" and reference "CA.png" should be equal
+
+    Scenario: Stacking a 16-bit Bayer RGGB DNG sequence
+        Given I am on tab "Load"
+        And I async press "openSequence"
+        And I choose input file "dng16_rggb_sequence/*" from "openDialog"
+        And I wait until active tab is "Align"
+        And I press "alignButton"
+        And I wait until active tab is "Stack"
+        And I press "stackButton"
+        And I wait until active tab is "Process"
+        And I async press "saveButton"
+        And I choose output file "dng16_rggb_sequence.png" from "saveDialog"
+        Then output "dng16_rggb_sequence.png" and reference "dng16_rggb_sequence.png" should be equal
+
+    Scenario: Stacking a 16-bit Bayer RGGB FITS sequence
+        Given I am on tab "Load"
+        And I async press "openSequence"
+        And I choose input file "fits16_rggb_sequence/*" from "openDialog"
+        And I wait until active tab is "Align"
+        And I select "Bayer RGGB" from "colorMode"
+        And I press "alignButton"
+        And I wait until active tab is "Stack"
+        And I press "stackButton"
+        And I wait until active tab is "Process"
+        And I async press "saveButton"
+        And I choose output file "fits16_rggb_sequence.png" from "saveDialog"
+        Then output "fits16_rggb_sequence.png" and reference "fits16_rggb_sequence.png" should be equal
