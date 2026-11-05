@@ -6,27 +6,19 @@ AstraStack is an easy to use application used to stack videos or images of plane
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/astrastack)
 
 # Development Installation
-To install you should first set up a virtual environment
+First set up and activate a virtual environment:
 
 ```
-virtualenv -p python3 env
-```
-
-Then activate the virtual environment
-
-```
+python3 -m venv env
 source env/bin/activate
 ```
 
-Install required python packages with pip.  You may need to first install numpy before running the requirements install if you don't have the numpy system package installed.
-
+Then install the required system packages (Debian/Ubuntu) and python packages:
 
 ```
-pip install numpy
-pip install -r requirements.txt
+sudo apt-get install libcairo2-dev pkg-config python3-dev libgirepository-2.0-dev gir1.2-gtk-3.0 weston
+pip install -r requirements.txt -r requirements_dev.txt
 ```
-
-You may need to install some additional system packages, ie: libcairo2-dev, pkg-config, python3-dev, libgirepository-2.0-dev
 
 You can run the application with
 
@@ -35,11 +27,6 @@ python AstraStack.py
 ```
 
 # Developer Instructions
-There are other packages which are used for developers
-
-```
-pip install -r requirements_dev.txt
-```
 
 ## Build Instructions
 Building primarily uses pyinstaller to package into an executable.
@@ -88,7 +75,6 @@ Running the full E2E test suite (e.g. in CI) is normally best accomplished
 using parallel headless mode and is about 2-3x faster than bare `behave`:
 
 ```
-# Prerequisite: `weston` OS package.
 scripts/run_behave.sh
 ```
 
