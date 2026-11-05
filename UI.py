@@ -623,6 +623,7 @@ class UI:
                 img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.actualColor()), cv2.COLOR_BGR2RGB)
             else:
                 # Video/Sequence
+                videoIndex = min(videoIndex, len(self.video.frames)-1)
                 img = cv2.cvtColor(self.video.getFrame(g.file, self.video.frames[videoIndex], g.actualColor()), cv2.COLOR_BGR2RGB)
                 
             height, width = img.shape[:2]
