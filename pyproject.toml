@@ -1,3 +1,12 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# Only Pyflakes (F) rules.
+select = ["F"]
+# Tolerate star imports, like `from Globals import *`.
+ignore = ["F403", "F405"]

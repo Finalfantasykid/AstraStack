@@ -2,10 +2,8 @@ from lazy import lazy
 cv2 = lazy("cv2")
 np = lazy("numpy")
 pywt = lazy("pywt")
-import math
 import copy
 from concurrent.futures import wait
-from multiprocessing import Lock
 from time import sleep
 from deconvolution import *
 from Video import Video
@@ -354,5 +352,12 @@ def sharpenChannelLayers(gCopy):
 # Applies an unsharp mask to the specified image
 def unsharp(image, radius, strength):
     blur = cv2.GaussianBlur(image, (0,0), radius)
-    sharp = cv2.addWeighted(image, 1+strength, blur, -strength, 0, image)
+    cv2.addWeighted(
+        src1=image,
+        alpha=1+strength,
+        src2=blur,
+        beta=-strength,
+        gamma=0,
+        dst=image,
+    )
 

@@ -9,7 +9,7 @@ from threading import Thread
 from multiprocessing import Value
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, GLib
 sys.path.insert(0, os.getcwd())
 
 from UI import UI

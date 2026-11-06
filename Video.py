@@ -289,7 +289,7 @@ def calculateDelta(image, prevImage, wScaleFactor, hScaleFactor):
             M = np.identity(3, dtype=np.float64)
             M[0][2] = T[0][2]/wScaleFactor # X
             M[1][2] = T[1][2]/hScaleFactor # Y
-        except Exception as e:
+        except Exception:
             M = np.identity(3)
     else:
         M = np.identity(3)
