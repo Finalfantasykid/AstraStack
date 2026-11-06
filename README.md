@@ -45,6 +45,14 @@ Unit tests use `pytest` and live under `tests/`.  Run them using `pytest`:
 pytest
 ```
 
+## Linting
+
+CI runs `ruff`.  Run it locally using:
+
+```
+ruff check .
+```
+
 ## End-To-End Testing
 
 E2E testing leverages the `behave` framework to simulate Gtk actions in the UI.

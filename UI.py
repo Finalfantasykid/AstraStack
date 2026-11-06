@@ -8,7 +8,6 @@ urllib = lazy("urllib")
 json = lazy("json")
 import subprocess, os, sys
 import math
-import math
 import time
 from packaging import version
 from threading import Thread
@@ -217,7 +216,7 @@ class UI:
         dialog = self.builder.get_object("about")
         dialog.set_program_name(UI.TITLE)
         dialog.set_version(UI.VERSION)
-        response = dialog.run()
+        dialog.run()
         dialog.hide()
         
     # Resets the env to a 'clean' version not tainted by pyinstaller
@@ -281,7 +280,7 @@ class UI:
     def loadOpenCV(self):
         def load():
             time.sleep(0.5)
-            import cv2
+            import cv2  # noqa: F401
             return
         thread = Thread(target=load, args=())
         thread.start()
@@ -297,7 +296,6 @@ class UI:
     def changeTheme(self, *args):
         theme1 = self.builder.get_object("theme1")
         theme2 = self.builder.get_object("theme2")
-        theme3 = self.builder.get_object("theme3")
         settings = Gtk.Settings.get_default()
         if(theme1.get_active()):
             settings.set_property("gtk-application-prefer-dark-theme", False)
@@ -401,7 +399,7 @@ class UI:
                 thread = Thread(target=self.video.run, args=())
                 thread.start()
                 self.disableUI()
-            except MemoryError as error:
+            except MemoryError:
                 self.enableUI()
             
     # Opens the file chooser to open load a file
@@ -419,7 +417,7 @@ class UI:
                 thread = Thread(target=self.video.run, args=())
                 thread.start()
                 self.disableUI()
-            except MemoryError as error:
+            except MemoryError:
                 pass
             except: # Open Failed
                 self.showErrorDialog("There was an error opening the image, make sure it is a valid image.")
@@ -458,7 +456,7 @@ class UI:
                 img = cv2.cvtColor(self.video.getFrame(g.file, g.file, g.colorMode)*255, cv2.COLOR_BGR2RGB).astype('uint8')
                 pixbuf = self.createPixbuf(img)
                 self.frame.set_from_pixbuf(pixbuf.copy())
-            except MemoryError as error:
+            except MemoryError:
                 pass
             except Exception as error: # Open Failed
                 print(error)
@@ -1184,7 +1182,7 @@ class UI:
             thread = Thread(target=self.stack.run, args=())
             thread.start()
             self.disableUI()
-        except MemoryError as error:
+        except MemoryError:
             self.enableUI()
         
     # Called when the stack is complete

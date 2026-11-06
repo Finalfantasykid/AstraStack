@@ -6,6 +6,19 @@ on:
     branches: [master]
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install $(grep '^ruff==' requirements_dev.txt)
+      - name: Run ruff
+        run: ruff check --output-format=github .
+
   unit:
     name: Unit tests
     runs-on: ubuntu-24.04

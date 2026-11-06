@@ -1,6 +1,5 @@
 """Unit tests for WorkerPools.py."""
 import time
-from collections.abc import Callable, Iterator
 from concurrent.futures.process import BrokenProcessPool
 
 import pytest

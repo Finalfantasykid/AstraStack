@@ -143,8 +143,6 @@ def transform(image, ref, tmat, minX, maxX, minY, maxY, gCopy):
     else:
         # Auto Crop
         borderMode = cv2.BORDER_CONSTANT
-    i = 0
-    I = np.identity(3)
     h, w = image.shape[:2]
     M = tmat.copy()
     
