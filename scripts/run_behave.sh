@@ -2,6 +2,11 @@
 # Runs the behave suite in parallel shards, each on its own headless Weston compositor.
 # Usage: [ASTRASTACK_TEST_SHARDS=n] [ASTRASTACK_TEST_CPUS=n] scripts/run_behave.sh [behave args...]
 
+BOLD=$'\e[1m';
+GREEN=$'\e[32m';
+RED=$'\e[31m';
+RESET=$'\e[0m'
+
 LOGICAL=$(nproc)
 PHYSICAL=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
 
@@ -51,14 +56,29 @@ for n in $(seq 0 $((ASTRASTACK_TEST_SHARDS - 1))); do
 done
 
 status=0
+SUMMARY=()
 for n in $(seq 0 $((ASTRASTACK_TEST_SHARDS - 1))); do
-    if wait "${WORKERS[$n]}"; then
-        echo "== Shard $n passed"
+    wait "${WORKERS[$n]}"
+    [ $? -eq 0 ] && result="passed" || result="failed"
+    echo "== Shard $n ${result}:"
+    if [ "$result" = "passed" ]; then
+        # Only print behave's 4-line summary for this successful shard.
         tail -n 4 "$TMP_ROOT/$n/behave.log"
+        COLOR=$GREEN
     else
         status=1
-        echo "== Shard $n failed"
+        # Print behave's entire output.
         cat "$TMP_ROOT/$n/behave.log"
+        # Print stderr too (e.g. a hung scenario's tracebacks), minus the warnings GDK always causes under headless.
+        grep -v -E "^$|Gdk-CRITICAL " "$TMP_ROOT/$n/stderr.log"
+        COLOR=$RED
     fi
+    # Accumulate a final summary for the very end.
+    SUMMARY+=("== Shard $n ${BOLD}${COLOR}${result}${RESET}: $(grep -E '^[0-9]+ scenarios? ' "$TMP_ROOT/$n/behave.log" || echo 'see logs')")
 done
+
+# Print final summary.
+echo
+echo "${BOLD}== Summary:${RESET}"
+printf '%s\n' "${SUMMARY[@]}"
 exit $status

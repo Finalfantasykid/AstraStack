@@ -1,3 +1,4 @@
+import faulthandler
 import os
 import sys
 import shutil
@@ -19,6 +20,8 @@ SHARDS = int(os.environ.get("ASTRASTACK_TEST_SHARDS", 1))
 SHARD_INDEX = int(os.environ.get("ASTRASTACK_TEST_SHARD_INDEX", 0))
 OUTPUTS = os.environ.get("ASTRASTACK_TEST_OUTPUTS")
 GTK_TIMEOUT = 30
+# After 1 minute, kill a hung scenario and dump tracebacks.
+SCENARIO_TIMEOUT = 60
 
 def before_all(context: Context) -> None:
     if(OUTPUTS is not None):
@@ -35,6 +38,7 @@ def before_feature(context: Context, feature: Feature) -> None:
             scenario.skip()
 
 def before_scenario(context: Context, scenario: Scenario) -> None:
+    faulthandler.dump_traceback_later(SCENARIO_TIMEOUT, exit=True, file=sys.__stderr__)
     g.TESTING = True
     g.ui = UI()
     g.ui.builder.get_object("wavelets").set_expanded(True)
@@ -49,11 +53,13 @@ def before_scenario(context: Context, scenario: Scenario) -> None:
     assert mapped.wait(GTK_TIMEOUT), "The main window was not mapped"
 
 def after_scenario(context: Context, scenario: Scenario) -> None:
-    if(not hasattr(context, "gtkThread")):
-        return
-    g.ui.window.close()
-    context.gtkThread.join(GTK_TIMEOUT)
-    assert not context.gtkThread.is_alive(), "The GTK main loop did not exit"
+    try:
+        if(hasattr(context, "gtkThread")):
+            g.ui.window.close()
+            context.gtkThread.join(GTK_TIMEOUT)
+            assert not context.gtkThread.is_alive(), "The GTK main loop did not exit"
+    finally:
+        faulthandler.cancel_dump_traceback_later()
 
 def after_all(context: Context) -> None:
     if(OUTPUTS is None):
