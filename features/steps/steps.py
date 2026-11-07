@@ -1,3 +1,4 @@
+import glob
 import os
 import sys
 from behave import *
@@ -31,16 +32,36 @@ TEST_REFERENCES_PATH = os.path.join(os.getcwd(), "features/testFiles/reference")
 def delay(delay=0.1):
     time.sleep(delay)
     
-def idle_add_delay(fn):
+def idle_add_delay(fn, until=None):
+    """Runs a function on the GTK thread and waits for it to finish.
+
+    Args:
+        fn: The function to run.
+        until: If given, also waits after fn until this returns True, or WIDGET_TIMEOUT seconds
+            pass. It is checked on the GTK thread every 50ms.
+
+    Returns:
+        Whether until returned True, or True if it wasn't given.
+    """
+    deadline = time.monotonic() + WIDGET_TIMEOUT
     updateDone = Value('b', False)
-    def update(updateDone):
+    succeeded = Value('b', False)
+    def finished():
+        succeeded.value = until is None or until()
+        updateDone.value = succeeded.value or time.monotonic() >= deadline
+        return updateDone.value
+    def update():
         fn()
-        updateDone.value = True
-    GLib.idle_add(update, updateDone)
+        if(not finished()):
+            # GLib calls this again every 50ms until it returns False.
+            GLib.timeout_add(50, lambda: not finished())
+        return False
+    GLib.idle_add(update)
     while(not updateDone.value):
         delay(0.01)
     delay(0.01) # Always delay just a bit
-    
+    return succeeded.value
+
 def widgetValidation(id: str) -> None:
     widget = g.ui.builder.get_object(id)
     deadline = time.monotonic() + WIDGET_TIMEOUT
@@ -88,39 +109,84 @@ def asyncPressButton(context, button):
     thread.start()
     delay()
     
-def chooseFile(path: str, dialog: str) -> None:
-    """Selects a file in a file chooser dialog and confirms it.
+def waitForDialog(dialog: str) -> Gtk.FileChooserDialog:
+    """Waits for a file chooser dialog to open in the app's home folder.
+
+    The app sets the dialog's folder to its home folder just before opening it, but the dialog
+    changes folders asynchronously: it first looks up the folder, and only then switches to it,
+    clearing the selection. Until then, it is still in the folder it was last closed in, and
+    selecting a file there would be undone once the switch lands.
 
     Args:
-        path: Absolute path of the file to select. A "*" file name selects every file in its folder.
         dialog: ID of the file chooser dialog.
+
+    Returns:
+        The dialog.
     """
     window = g.ui.builder.get_object(dialog)
-    while(not window.is_visible()):
-        delay(0.01)
+    assert idle_add_delay(lambda: None, until=window.is_visible), f"'{dialog}' did not open"
     delay() # Sometimes it crashes if going to the next step too quickly, so delay a bit
-    def update1():
-        window.select_filename(path)
-    def update2():
-        if("*" in path):
-            window.select_all()
-        if(window.get_action() == Gtk.FileChooserAction.SAVE):
-            window.set_current_name(os.path.basename(path))
-    def update3():
+    homeFolder = os.path.expanduser(UI.HOME_DIR)
+    def inHomeFolder():
+        return window.get_current_folder() == homeFolder
+    assert idle_add_delay(lambda: None, until=inHomeFolder), f"'{dialog}' did not open in {homeFolder}"
+    return window
+
+def confirmDialog(window: Gtk.FileChooserDialog) -> None:
+    """Clicks OK in a file chooser dialog and waits for it to close.
+
+    Args:
+        window: The file chooser dialog.
+    """
+    def clickOk():
         window.get_widget_for_response(Gtk.ResponseType.OK).clicked()
-    idle_add_delay(update1)
-    idle_add_delay(update2)
-    idle_add_delay(update3)
-    while(window.is_visible()):
-        delay(0.01)
+    def closed():
+        return not window.is_visible()
+    assert idle_add_delay(clickOk, until=closed), "The dialog did not close"
 
 @given(u'I choose input file "{file}" from "{dialog}"')
 def chooseInputFile(context: Context, file: str, dialog: str) -> None:
-    chooseFile(path=os.path.join(TEST_INPUTS_PATH, file), dialog=dialog)
+    """Selects the input files in a file open dialog.
+
+    This only supports selecting one file (file="file.avi") OR every file in a
+    folder (file="path/to/dir/*"), but nothing in between (e.g. "*.png" in a
+    directory containing other types) or else it raises AssertionError.
+    """
+    desiredPaths = sorted(glob.glob(os.path.join(TEST_INPUTS_PATH, file)))
+    assert desiredPaths, f"No input file matches '{file}'"
+    window = waitForDialog(dialog)
+    actualPaths = []
+
+    # Select the first (or only) file. Since it's in another folder, the dialog
+    # switches to that folder, and selects the file once the folder has loaded.
+    def selectFirst():
+        window.select_filename(desiredPaths[0])
+    def firstSelected():
+        return desiredPaths[0] in window.get_filenames()
+    assert idle_add_delay(selectFirst, until=firstSelected), f"Timed out selecting {desiredPaths[0]}"
+
+    # If every file in a folder is desired, select the entire folder.
+    def selectAll():
+        if(len(desiredPaths) > 1):
+            window.select_all()
+        actualPaths[:] = sorted(window.get_filenames())
+    idle_add_delay(selectAll)
+
+    # If this assertion fails, the glob probably matched only a subset of the
+    # files in the directory, which is unsupported.
+    assert actualPaths == desiredPaths, f"Selected {actualPaths} instead of {desiredPaths}"
+
+    # Finally, click OK and wait for the window to close.
+    confirmDialog(window)
 
 @given(u'I choose output file "{file}" from "{dialog}"')
 def chooseOutputFile(context: Context, file: str, dialog: str) -> None:
-    chooseFile(path=os.path.join(context.testOutputs, file), dialog=dialog)
+    window = waitForDialog(dialog)
+    def selectFile():
+        window.select_filename(os.path.join(context.testOutputs, file))
+        window.set_current_name(file)
+    idle_add_delay(selectFile)
+    confirmDialog(window)
     
 @given(u'I set "{adjustment}" to "{value}"')
 def setAdjustment(context, adjustment, value):
