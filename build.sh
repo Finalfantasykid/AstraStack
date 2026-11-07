@@ -55,6 +55,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
     rm -fr dist
     pyinstaller --windowed \
                 --icon "ui/logo.ico" \
+                --additional-hooks-dir="scripts/pyinstaller_hooks" \
                 --hidden-import "packaging.requirements" \
                 --hidden-import "pkg_resources.py2_warn" \
                 --hidden-import "cairo" \
