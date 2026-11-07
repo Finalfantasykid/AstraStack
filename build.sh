@@ -9,7 +9,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [[ "$1" == "snap" ]]; then
         EXCLUDE_SSL="ssl"
     fi
-    python3 -m PyInstaller --add-binary "$LIBXCB:." \
+    python3 -m PyInstaller --additional-hooks-dir="scripts/pyinstaller_hooks" \
+                           --add-binary "$LIBXCB:." \
                            --hidden-import "cairo" \
                            --hidden-import "numpy" \
                            --hidden-import "cv2" \
