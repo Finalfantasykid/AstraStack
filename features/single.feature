@@ -2,7 +2,7 @@ Feature: Single Image
 
     Scenario: Test making no changes to single image
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "test.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I async press "saveButton"
@@ -11,7 +11,7 @@ Feature: Single Image
   
     Scenario: Test processing single image
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "test.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I set "sharpen1" to "0.150"
@@ -24,7 +24,7 @@ Feature: Single Image
         
     Scenario: Test dering
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "dso.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I set "sharpen2" to "0.100"
@@ -38,7 +38,7 @@ Feature: Single Image
         
     Scenario: Test processing 16bit image
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "16bit.png" from "openDialog"
         And I wait until active tab is "Process"
         And I set "sharpen1" to "0.600"
@@ -51,7 +51,7 @@ Feature: Single Image
         
     Scenario: Test making no changes to 16bit image
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "16bit.png" from "openDialog"
         And I wait until active tab is "Process"
         And I async press "saveButton"
@@ -61,7 +61,7 @@ Feature: Single Image
         
     Scenario: Test masking stretched image
         Given I am on tab "Load"
-        And I async press "openImage"
+        And I async press "openFile"
         And I choose input file "test.jpg" from "openDialog"
         And I wait until active tab is "Process"
         And I select "ArcSinH" from "stretchFunction"
