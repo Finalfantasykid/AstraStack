@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # ------------------------------------------------------------------
 
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules, \
+from PyInstaller.utils.hooks import collect_data_files, \
     copy_metadata, is_module_satisfies
 
 # Astropy includes a number of non-Python files that need to be present
