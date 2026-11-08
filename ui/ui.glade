@@ -260,8 +260,8 @@
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringAdaptiveAdjust">
-    <property name="lower">-0.1</property>
-    <property name="upper">0.1</property>
+    <property name="lower">-0.10</property>
+    <property name="upper">0.10</property>
     <property name="step-increment">0.001</property>
     <property name="page-increment">0.01</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
@@ -273,13 +273,13 @@
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringBrightAdjust">
-    <property name="upper">0.6</property>
+    <property name="upper">0.59999999999999998</property>
     <property name="step-increment">0.001</property>
     <property name="page-increment">0.05</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="deringDarkAdjust">
-    <property name="upper">0.6</property>
+    <property name="upper">0.59999999999999998</property>
     <property name="step-increment">0.001</property>
     <property name="page-increment">0.05</property>
     <signal name="value-changed" handler="processImage" swapped="no"/>
@@ -642,6 +642,60 @@
     <property name="step-increment">1</property>
     <signal name="value-changed" handler="setStartFrame" swapped="no"/>
   </object>
+  <object class="GtkFileFilter" id="supportedInputsFilter">
+    <mime-types>
+      <mime-type>video/quicktime</mime-type>
+      <mime-type>video/x-msvideo</mime-type>
+      <mime-type>video/avi</mime-type>
+      <mime-type>video/mp4</mime-type>
+      <mime-type>video/mpeg</mime-type>
+      <mime-type>video/ogg</mime-type>
+      <mime-type>video/webm</mime-type>
+      <mime-type>video/3gpp</mime-type>
+      <mime-type>video/3gpp2</mime-type>
+      <mime-type>video/x-ms-wmv</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>*.jpg</pattern>
+      <pattern>*.jpeg</pattern>
+      <pattern>*.png</pattern>
+      <pattern>*.tiff</pattern>
+      <pattern>*.fit</pattern>
+      <pattern>*.fits</pattern>
+      <pattern>*.nef</pattern>
+      <pattern>*.crw</pattern>
+      <pattern>*.cr2</pattern>
+      <pattern>*.raf</pattern>
+      <pattern>*.dng</pattern>
+      <pattern>*.mos</pattern>
+      <pattern>*.kdc</pattern>
+      <pattern>*.dcr</pattern>
+      <pattern>*.x3f</pattern>
+      <pattern>*.JPG</pattern>
+      <pattern>*.JPEG</pattern>
+      <pattern>*.PNG</pattern>
+      <pattern>*.TIFF</pattern>
+      <pattern>*.FIT</pattern>
+      <pattern>*.FITS</pattern>
+      <pattern>*.NEF</pattern>
+      <pattern>*.CRW</pattern>
+      <pattern>*.CR2</pattern>
+      <pattern>*.RAF</pattern>
+      <pattern>*.DNG</pattern>
+      <pattern>*.MOS</pattern>
+      <pattern>*.KDC</pattern>
+      <pattern>*.DCR</pattern>
+      <pattern>*.X3F</pattern>
+      <pattern>*.ser</pattern>
+      <pattern>*.avi</pattern>
+      <pattern>*.mov</pattern>
+      <pattern>*.mp4</pattern>
+      <pattern>*.SER</pattern>
+      <pattern>*.AVI</pattern>
+      <pattern>*.MOV</pattern>
+      <pattern>*.MP4</pattern>
+    </patterns>
+  </object>
   <object class="GtkAdjustment" id="valueAdjust">
     <property name="upper">400</property>
     <property name="value">100</property>
@@ -677,7 +731,7 @@
                     <property name="margin-right">5</property>
                     <signal name="switch-page" handler="changeTab" swapped="no"/>
                     <child>
-                      <!-- n-columns=2 n-rows=3 -->
+                      <!-- n-columns=2 n-rows=2 -->
                       <object class="GtkGrid" id="loadTab">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -697,7 +751,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">2</property>
+                            <property name="top-attach">1</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -705,26 +759,13 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Open</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">0</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="margin-top">5</property>
+                            <property name="margin-bottom">10</property>
                             <property name="label" translatable="yes">Choose a video or images</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">1</property>
+                            <property name="top-attach">0</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -3350,60 +3391,6 @@ Note: Drift adjustment will still crop the image.</property>
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkFileFilter" id="supportedInputsFilter">
-    <mime-types>
-      <mime-type>video/quicktime</mime-type>
-      <mime-type>video/x-msvideo</mime-type>
-      <mime-type>video/avi</mime-type>
-      <mime-type>video/mp4</mime-type>
-      <mime-type>video/mpeg</mime-type>
-      <mime-type>video/ogg</mime-type>
-      <mime-type>video/webm</mime-type>
-      <mime-type>video/3gpp</mime-type>
-      <mime-type>video/3gpp2</mime-type>
-      <mime-type>video/x-ms-wmv</mime-type>
-    </mime-types>
-    <patterns>
-      <pattern>*.jpg</pattern>
-      <pattern>*.jpeg</pattern>
-      <pattern>*.png</pattern>
-      <pattern>*.tiff</pattern>
-      <pattern>*.fit</pattern>
-      <pattern>*.fits</pattern>
-      <pattern>*.nef</pattern>
-      <pattern>*.crw</pattern>
-      <pattern>*.cr2</pattern>
-      <pattern>*.raf</pattern>
-      <pattern>*.dng</pattern>
-      <pattern>*.mos</pattern>
-      <pattern>*.kdc</pattern>
-      <pattern>*.dcr</pattern>
-      <pattern>*.x3f</pattern>
-      <pattern>*.JPG</pattern>
-      <pattern>*.JPEG</pattern>
-      <pattern>*.PNG</pattern>
-      <pattern>*.TIFF</pattern>
-      <pattern>*.FIT</pattern>
-      <pattern>*.FITS</pattern>
-      <pattern>*.NEF</pattern>
-      <pattern>*.CRW</pattern>
-      <pattern>*.CR2</pattern>
-      <pattern>*.RAF</pattern>
-      <pattern>*.DNG</pattern>
-      <pattern>*.MOS</pattern>
-      <pattern>*.KDC</pattern>
-      <pattern>*.DCR</pattern>
-      <pattern>*.X3F</pattern>
-      <pattern>*.ser</pattern>
-      <pattern>*.avi</pattern>
-      <pattern>*.mov</pattern>
-      <pattern>*.mp4</pattern>
-      <pattern>*.SER</pattern>
-      <pattern>*.AVI</pattern>
-      <pattern>*.MOV</pattern>
-      <pattern>*.MP4</pattern>
-    </patterns>
   </object>
   <object class="GtkMessageDialog" id="warningDialog">
     <property name="can-focus">False</property>
