@@ -119,11 +119,18 @@ class Stack:
             progress.setMessage("Aligning RGB", True)
         
 # Multiprocess function which sums the given images
-def blendAverage(frames, ref, minX, maxX, minY, maxY, progress, gCopy):
-    video = Video()
+def blendAverage(frames: list[np.ndarray],
+                 ref: np.ndarray | None,
+                 minX: int,
+                 maxX: int,
+                 minY: int,
+                 maxY: int,
+                 progress: ProgressCounter,
+                 gCopy: Object) -> np.ndarray | None:
+    video = Video(gCopy.source)
     stackedImage = None
     for c, (frame, M, diff, sharp) in enumerate(frames):
-        image = video.getFrame(gCopy.file, frame, gCopy.actualColor())
+        image = video.getFrame(frame, gCopy.actualColor())
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY, gCopy).astype(np.float64)
         if stackedImage is None:

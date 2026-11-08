@@ -31,7 +31,7 @@ class Align:
         self.maxY = 0
         self.height, self.width = g.ui.reference.shape[:2]
         
-    def run(self):
+    def run(self) -> None:
         progress = ProgressBar()
         progress.total = len(self.frames)
         
@@ -72,10 +72,7 @@ class Align:
 
         # Aligning
         futures = []
-        if(int(g.reference) in self.frames):
-            referenceIndex = self.frames.index(int(g.reference))
-        else:
-            referenceIndex = int(g.reference) - g.startFrame
+        referenceIndex = int(g.reference) - g.startFrame
             
         try:
             progress.setMessage("Aligning Frames")
@@ -205,11 +202,29 @@ class Align:
         return (minX, maxX, minY, maxY)
 
 # Multiprocess function to calculation the transform matricies of each image 
-def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFrame, dx, dy, rfdx1, rfdy1, aoi1, aoi2, deltas, progress, gCopy):
+def align(frames: list[int],
+          ref: np.ndarray,
+          refOrig: np.ndarray,
+          w1: int,
+          h1: int,
+          w: int,
+          h: int,
+          scaleFactor: float,
+          totalFrames: int,
+          startFrame: int,
+          dx: float,
+          dy: float,
+          rfdx1: float,
+          rfdy1: float,
+          aoi1: tuple[int, int],
+          aoi2: tuple[int, int],
+          deltas: list[np.ndarray],
+          progress: ProgressCounter,
+          gCopy: Object) -> tuple[list[list], float, float, float, float]:
     i = startFrame
     tmats = []
     minX = minY = maxX = maxY = 0
-    video = Video()
+    video = Video(gCopy.source)
     
     # Calculate specific scaleFactor for width since it is likely *slightly* different than the height
     wScaleFactor = (int(w*scaleFactor))/w
@@ -222,7 +237,7 @@ def align(frames, ref, refOrig, w1, h1, w, h, scaleFactor, totalFrames, startFra
     for c, frame in enumerate(frames):
         try:
             # Load Frame
-            movOrig = mov = cv2.cvtColor(video.getFrame(gCopy.file, frame, gCopy.actualColor()), cv2.COLOR_BGR2GRAY)
+            movOrig = mov = cv2.cvtColor(video.getFrame(frame, gCopy.actualColor()), cv2.COLOR_BGR2GRAY)
 
             # Dilate
             if(gCopy.dilate):

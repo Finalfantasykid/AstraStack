@@ -2,8 +2,8 @@ Feature: Image Sequence
 
     Scenario: Stacking Image Sequence
         Given I am on tab "Load"
-        And I async press "openSequence"
-        And I choose input file "sequence/*" from "openDialog"
+        And I async press "openFile"
+        And I choose input file "png8_sequence/*" from "openDialog"
         And I wait until active tab is "Align"
         And I press "alignButton"
         And I wait until active tab is "Stack"
@@ -16,8 +16,8 @@ Feature: Image Sequence
         
     Scenario: Testing Align RGB
         Given I am on tab "Load"
-        And I async press "openSequence"
-        And I choose input file "CA.png" from "openDialog"
+        And I async press "openFile"
+        And I choose input file "ca_sequence/*" from "openDialog"
         And I wait until active tab is "Align"
         And I select "None" from "transformation"
         And I press "alignButton"
@@ -31,7 +31,7 @@ Feature: Image Sequence
 
     Scenario: Stacking a 16-bit Bayer RGGB DNG sequence
         Given I am on tab "Load"
-        And I async press "openSequence"
+        And I async press "openFile"
         And I choose input file "dng16_rggb_sequence/*" from "openDialog"
         And I wait until active tab is "Align"
         And I press "alignButton"
@@ -44,7 +44,7 @@ Feature: Image Sequence
 
     Scenario: Stacking a 16-bit Bayer RGGB FITS sequence
         Given I am on tab "Load"
-        And I async press "openSequence"
+        And I async press "openFile"
         And I choose input file "fits16_rggb_sequence/*" from "openDialog"
         And I wait until active tab is "Align"
         And I select "Bayer RGGB" from "colorMode"
@@ -55,3 +55,11 @@ Feature: Image Sequence
         And I async press "saveButton"
         And I choose output file "fits16_rggb_sequence.png" from "saveDialog"
         Then output "fits16_rggb_sequence.png" and reference "fits16_rggb_sequence.png" should be equal
+
+    Scenario: Opening a video with images shows an error
+        Given I am on tab "Load"
+        And I async press "openFile"
+        And I choose input file "video_and_image/*" from "openDialog"
+        Then the error dialog says "The chosen files can't be opened. Choose one video, or one or more images."
+        And active tab should be "Load"
+        And "source" should equal "None"
