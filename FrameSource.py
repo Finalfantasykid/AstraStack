@@ -234,18 +234,23 @@ class VideoSource(FrameSource):
 
     @staticmethod
     def canOpen(path: str | list[str]) -> bool:
-        """Accepts a single file OpenCV opens and reads at least two frames from.
+        """Accepts a single file PyAV demuxes at least two video frames from.
 
         One-frame videos are rejected, and left to other FrameSource implementations to handle.
         """
         if(not isinstance(path, str)):
             return False
-        container = av.open(path)
         try:
-            container.decode(video=0)
-            return True
-        finally:
-            container.close()
+            with av.open(path) as container:
+                stream = container.streams.video[0]
+                packets = 0
+                for packet in container.demux(stream):
+                    packets += packet.size > 0
+                    if(packets >= 2):
+                        return True
+        except Exception:
+            pass
+        return False
 
     def filePaths(self) -> list[str]:
         return [self.path]
@@ -290,7 +295,7 @@ class VideoSource(FrameSource):
             # Return a Greyscale mozaiced image
             # TODO: This should also inform the bayer guess
             image = videoFrame.to_ndarray()
-        if("yuv" in videoFrame.format.name or videoFrame.format.is_rgb):
+        elif("yuv" in videoFrame.format.name or videoFrame.format.is_rgb):
             # Return an BGR image
             image = cv2.cvtColor(videoFrame.to_rgb().to_ndarray(), cv2.COLOR_RGB2BGR)
         else:
