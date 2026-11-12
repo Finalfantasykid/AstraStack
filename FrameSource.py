@@ -4,7 +4,6 @@ cv2 = lazy("cv2")
 av = lazy("av")
 np = lazy("numpy")
 rawpy = lazy("rawpy")
-import bisect
 from abc import ABC, abstractmethod
 from natsort import natsorted, ns
 
@@ -287,6 +286,10 @@ class VideoSource(FrameSource):
 
     def frameToImage(self, videoFrame: av.VideoFrame) -> np.ndarray:
         image = None
+        if("bayer_" in videoFrame.format.name):
+            # Return a Greyscale mozaiced image
+            # TODO: This should also inform the bayer guess
+            image = videoFrame.to_ndarray()
         if("yuv" in videoFrame.format.name or videoFrame.format.is_rgb):
             # Return an BGR image
             image = cv2.cvtColor(videoFrame.to_rgb().to_ndarray(), cv2.COLOR_RGB2BGR)
