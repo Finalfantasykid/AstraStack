@@ -3,6 +3,7 @@ import pickle
 import unittest
 from collections.abc import Sequence
 
+import av
 import cv2
 import ddt
 import numpy as np
@@ -119,11 +120,11 @@ class TestVideoSource(unittest.TestCase):
     def test_frameCount_is_counted_once(self) -> None:
         """The frames are counted once, the first time the count is needed."""
         source = VideoSource(MP4_YUV8)
-        assert source.times is None
+        assert source.timestamps is None
         # Reading just the first frame does not trigger a full read. This
         # behavior is what makes thumbnail generation quick.
         source.readFrame(0)
-        assert source.times is None
+        assert source.timestamps is None
 
         assert source.frameCount() == MP4_YUV8_FRAME_COUNT
         source.path = "missing.avi"
@@ -150,13 +151,13 @@ class TestVideoSource(unittest.TestCase):
         """An open source pickles as its path and frame times, and the copy reads the same frames in any order."""
         source = VideoSource(MP4_YUV8)
         sequential = [source.readFrame(index) for index in range(source.frameCount())]
-        times = source.times
+        times = source.timestamps
 
         source = pickle.loads(pickle.dumps(source))
 
         assert source.path == MP4_YUV8
-        assert source.times == times
-        assert source._capture is None
+        assert source.timestamps == times
+        assert source.container is None
         for index in [2, 0, 5, 5, 3, 1, 4]:
             assert np.array_equal(source.readFrame(index), sequential[index])
 
@@ -188,9 +189,9 @@ class TestVideoSource(unittest.TestCase):
 
         Other tests rely on this video having missing frames.
         """
-        capture = cv2.VideoCapture(DROPPED_FRAMES_AVI)
-        headerCount = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        capture.release()
+        container = av.open(DROPPED_FRAMES_AVI)
+        headerCount = container.streams.video[0].frames
+        container.close()
         source = VideoSource(DROPPED_FRAMES_AVI)
         assert headerCount > source.frameCount()
 
