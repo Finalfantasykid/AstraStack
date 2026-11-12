@@ -1,6 +1,6 @@
 natsort==8.4.0
 numpy==1.26.4
-opencv-python-headless==4.11.0.86
+opencv-python-headless==4.11.0.86 --no-binary=opencv-python-headless
 av==19.0.2
 astropy==7.2.0
 packaging
