@@ -1,6 +1,7 @@
 from __future__ import annotations
 from lazy import lazy
 cv2 = lazy("cv2")
+av = lazy("av")
 np = lazy("numpy")
 rawpy = lazy("rawpy")
 import bisect
@@ -216,23 +217,21 @@ class VideoSource(FrameSource):
             path: The video file.
         """
         self.path = path
-        self.times: list[float] | None = None
-        self._capture: cv2.VideoCapture | None = None
-        self.nextPosition: int | None = 0
+        self.timestamps: list[int] | None = None
+        self.container: av.container.InputContainer | None = None
 
     def __getstate__(self) -> dict[str, str | list[float] | None]:
         """Only pickle things that are relevant to a new process.
 
         E.g. force new processes to open new file descriptors by *not* pickling self._capture.
         """
-        return {"path": self.path, "times": self.times}
+        return {"path": self.path, "timestamps": self.timestamps}
 
     def __setstate__(self, state: dict[str, str | list[float] | None]) -> None:
         """Restores a pickled source, which opens its capture when first read."""
         self.path = state["path"]
-        self.times = state["times"]
-        self._capture = None
-        self.nextPosition = 0
+        self.timestamps = state["timestamps"]
+        self.container = None
 
     @staticmethod
     def canOpen(path: str | list[str]) -> bool:
@@ -242,116 +241,100 @@ class VideoSource(FrameSource):
         """
         if(not isinstance(path, str)):
             return False
-        capture = cv2.VideoCapture(path)
+        container = av.open(path)
         try:
-            return capture.isOpened() and capture.read()[0] and capture.grab()
+            container.decode(video=0)
+            return True
         finally:
-            capture.release()
+            container.close()
 
     def filePaths(self) -> list[str]:
         return [self.path]
+        
+    def openContainer(self) -> None:
+        """Opens the video, if needed, and describes it from its stream's color tags."""
+        if(self.container is not None):
+            return
+        self.container = av.open(self.path)
+        self.stream = self.container.streams.video[0]
+        codec = self.stream.codec_context
+        self.width, self.height = codec.width, codec.height
+        self.videoBits = 8
+        self.decoder = None
+        self.lastTimestamp = None
+        self.lastFrame = None
 
-    @property
-    def capture(self) -> cv2.VideoCapture:
-        """The capture, opened at the first frame if it isn't open."""
-        if(self._capture is None):
-            self._capture = cv2.VideoCapture(self.path)
-            self.nextPosition = 0
-        return self._capture
-
-    def _frameTimes(self) -> list[float]:
-        """Returns the cached times of the frames.
-
-        The times are read by grabbing every frame sequentially the first time.
+    def frameTimestamps(self) -> list[int]:
+        """Returns the presentation timestamps of the frames, read from the packets the first time.
 
         Returns:
-            The frame times in milliseconds, in frame order.
+            The sorted timestamps, in the stream's time base.
         """
-        if(self.times is None):
-            capture = cv2.VideoCapture(self.path)
-            try:
-                times = []
-                while(capture.grab()):
-                    times.append(capture.get(cv2.CAP_PROP_POS_MSEC))
-                self.times = times
-            finally:
-                capture.release()
-        return self.times
+        if(self.timestamps is None):
+            self.openContainer()
+            timestamps = set()
+            for packet in self.container.demux(self.stream):
+                timestamp = packet.pts if packet.pts is not None else packet.dts
+                if(timestamp is not None and packet.size > 0):
+                    timestamps.add(timestamp)
+            self.decoder = None
+            self.timestamps = sorted(timestamps)
+        return self.timestamps
 
     def frameCount(self) -> int:
-        """The count comes from grabbing every frame, since CAP_PROP_FRAME_COUNT is only the container's estimate."""
-        return len(self._frameTimes())
+        """The count is the number of distinct timestamps among the video's packets."""
+        return len(self.frameTimestamps())
 
-    def _seekBefore(self, index: int) -> None:
-        """Seeks to the frame, or to an earlier frame that reading forward reaches it from.
-
-        Usage: To find your desired frame at `index`, run _seekBefore() then sequentially
-        read frames until `self.nextPosition == index + 1`.
-
-        A naive approach that simply seeks to the time given by the index is NOT
-        guaranteed to make OpenCV return the expected frame.  Often, a seek + read() will
-        give you 2, 3 or even more frames into the future depending on how many missing
-        frames there are inside the file container. This is likely some combination of
-        file corruption and OpenCV bug.
-
-        Args:
-            index: The frame's index.
-        """
-        times = self._frameTimes()
-        start = index
-        back = 1
-        while(True):
-            self.capture.set(cv2.CAP_PROP_POS_MSEC, times[start])
-            if(self.capture.grab()):
-                time: float = self.capture.get(cv2.CAP_PROP_POS_MSEC)
-                landed: int = bisect.bisect_left(times, time)
-                if(landed <= index):
-                    self.nextPosition = landed + 1
-                    return
-            if(start == 0):
-                break
-            start = max(0, index - back)
-            back *= 2
-        # We gave up on rewinding, so just close the capture. Callers will start searching from frame 0.
-        self.close()
-
-    def readFrame(self, index: int) -> np.ndarray | None:
-        # Skip seeking when the next frame is already what you want.
-        # This improves performance drastically.
-        shouldSeek = index != self.nextPosition
-        if(shouldSeek):
-            # Don't seek to some far off place beyond the end of the frame.
-            if(index >= len(self._frameTimes())):
-                return None
-            self._seekBefore(index)
-            if(self.nextPosition == index + 1):
-                return self._retrieve()
-        # Read forward to the desired frame.
-        while(self.capture.grab()):
-            currentPosition = self.nextPosition
-            self.nextPosition += 1
-            if(currentPosition == index):
-                return self._retrieve()
-        self.nextPosition = None
-        return None
-
-    def _retrieve(self) -> np.ndarray | None:
-        """Decodes the frame the capture last grabbed.
-
-        Returns:
-            The frame, or None if it can't be decoded.
-        """
-        success, image = self.capture.retrieve()
-        if(not success):
-            self.nextPosition = None
-            return None
+    def frameToImage(self, videoFrame: av.VideoFrame) -> np.ndarray:
+        image = None
+        if("yuv" in videoFrame.format.name or videoFrame.format.is_rgb):
+            # Return an BGR image
+            image = cv2.cvtColor(videoFrame.to_rgb().to_ndarray(), cv2.COLOR_RGB2BGR)
+        else:
+            # Return a Greyscale image
+            image = videoFrame.to_ndarray()
         return image
 
+    def readFrame(self, index: int) -> np.ndarray | None:
+        """Frames are converted to 16-bit BGR, whatever the stream's depth."""
+        if(index == 0 and self.timestamps is None):
+            # Decoded in a container of its own, without reading every packet's timestamp, so thumbnails are quick
+            self.openContainer()
+            with av.open(self.path) as container:
+                videoFrame = next(container.decode(video=0), None)
+            if(videoFrame is None):
+                return None
+            return self.frameToImage(videoFrame)
+        timestamps = self.frameTimestamps()
+        if(index >= len(timestamps)):
+            return None
+        self.openContainer()
+        target = timestamps[index]
+        if(self.lastFrame is None or target != self.lastTimestamp):
+            if(self.decoder is None or self.lastTimestamp is None or target < self.lastTimestamp or
+               target - self.lastTimestamp > 1/self.stream.time_base):
+                self.container.seek(target, stream=self.stream, backward=True)
+                self.decoder = self.container.decode(self.stream)
+            self.lastFrame = None
+            for videoFrame in self.decoder:
+                timestamp = videoFrame.pts if videoFrame.pts is not None else videoFrame.dts
+                if(timestamp is not None and timestamp >= target):
+                    self.lastTimestamp = timestamp
+                    self.lastFrame = videoFrame
+                    break
+            if(self.lastFrame is None):
+                self.decoder = None
+                return None
+        if(self.lastTimestamp != target):
+            # The frame couldn't be decoded
+            return None
+        return self.frameToImage(self.lastFrame)
+
     def frameSize(self) -> tuple[int, int]:
-        return (int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        self.openContainer()
+        return (self.width, self.height)
 
     def close(self) -> None:
-        if(self._capture is not None):
-            self._capture.release()
-            self._capture = None
-            self.nextPosition = 0
+        if(self.container is not None):
+            self.container.close()
+            self.container = None

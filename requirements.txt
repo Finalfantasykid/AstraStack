@@ -1,6 +1,7 @@
 natsort==8.4.0
 numpy==1.26.4
 opencv-python-headless==4.11.0.86
+av==19.0.2
 astropy==7.2.0
 packaging
 psutil==7.2.1
