@@ -202,11 +202,12 @@ class ImageSequenceSource(FrameSource):
         return (width, height)
 
 class VideoSource(FrameSource):
-    """A video file read with cv2.VideoCapture.
+    """A video file decoded with PyAV.
 
-    Frame indexes always represent unique frames in the data stream, and that's
-    all consumers should care about. Under the hood, we map each unique frame
-    to their time and later use that time for seeking to the frame.
+    Frames are indexed by their position in presentation order and found by seeking to their
+    timestamps. Reading a frame less than a second after the last one read decodes forward
+    instead of seeking. The timestamps are read from the video's packets, without decoding,
+    the first time they are needed, and pickled so worker processes don't read them again.
     """
 
     def __init__(self, path: str) -> None:
@@ -226,8 +227,12 @@ class VideoSource(FrameSource):
         """
         return {"path": self.path, "timestamps": self.timestamps}
 
-    def __setstate__(self, state: dict[str, str | list[float] | None]) -> None:
-        """Restores a pickled source, which opens its capture when first read."""
+    def __setstate__(self, state: dict[str, str | list[int] | None]) -> None:
+        """Restores a pickled source, which opens its container when first read.
+
+        Args:
+            state: The state from __getstate__.
+        """
         self.path = state["path"]
         self.timestamps = state["timestamps"]
         self.container = None
@@ -263,7 +268,6 @@ class VideoSource(FrameSource):
         self.stream = self.container.streams.video[0]
         codec = self.stream.codec_context
         self.width, self.height = codec.width, codec.height
-        self.videoBits = 8
         self.decoder = None
         self.lastTimestamp = None
         self.lastFrame = None
