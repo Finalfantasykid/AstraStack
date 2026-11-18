@@ -311,7 +311,6 @@ class VideoSource(FrameSource):
         """Frames are converted to 16-bit BGR, whatever the stream's depth."""
         if(index == 0 and self.timestamps is None):
             # Decoded in a container of its own, without reading every packet's timestamp, so thumbnails are quick
-            self.openContainer()
             with av.open(self.path) as container:
                 videoFrame = next(container.decode(video=0), None)
             if(videoFrame is None):
