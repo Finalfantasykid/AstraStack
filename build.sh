@@ -20,6 +20,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
                            --hidden-import "psutil" \
                            --hidden-import "importlib" \
                            --hidden-import "rawpy" \
+                           --hidden-import "av" \
                            --exclude-module "gi.repository.Gst" \
                            --exclude-module "$EXCLUDE_SSL" \
                            --strip \
@@ -67,6 +68,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
                 --hidden-import "psutil" \
                 --hidden-import "importlib" \
                 --hidden-import "rawpy" \
+                --hidden-import "av" \
                 --exclude-module "FixTk" \
                 --exclude-module "tcl" \
                 --exclude-module "tk" \
