@@ -4,7 +4,7 @@ from concurrent.futures.process import BrokenProcessPool
 
 import pytest
 
-from FrameSource import ImageSequenceSource
+from FrameSource import CameraRawSource
 from tests.inputs import DNG16_RGGB_SEQUENCE
 from WorkerPools import LazyProcessPool
 
@@ -71,7 +71,7 @@ def test_workers_cannot_submit(makePool):
 
 def test_pool_loads_raw_after_raw_decoded_in_main_process(makePool):
     """Pool workers decode RAW files even after the main process has, which deadlocks workers forked from it."""
-    source = ImageSequenceSource(DNG16_RGGB_SEQUENCE)
+    source = CameraRawSource(DNG16_RGGB_SEQUENCE)
     source.readFrame(0)
     pool = makePool(1)
 

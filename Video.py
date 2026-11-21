@@ -10,18 +10,6 @@ from FrameSource import FrameSource, ImageSequenceSource
 
 class Video:
 
-    COLOR_AUTO = 0
-    COLOR_RGB = 1
-    COLOR_GRAYSCALE = 2
-    COLOR_RGGB = 3
-    COLOR_GRBG = 4
-    COLOR_GBRG = 5
-    COLOR_BGGR = 6
-    COLOR_RGGB_VNG = 7
-    COLOR_GRBG_VNG = 8
-    COLOR_GBRG_VNG = 9
-    COLOR_BGGR_VNG = 10
-
     def __init__(self, source: FrameSource) -> None:
         self.source = source
         # Source indices of the frames kept on load; wrong-size or unreadable frames are left out
@@ -44,8 +32,6 @@ class Video:
             progress.total = self.source.frameCount()
             countPerThread = math.ceil(progress.total/g.nThreads)
 
-            g.guessedColorMode = self.guessColorMode()
-
             progress.setMessage("Preprocessing Frames")
             frameSize = self.source.frameSize()
             # Release the main process's file handles while the workers read; each worker opens its own
@@ -56,7 +42,6 @@ class Video:
                                                  source=self.source,
                                                  indices=indices,
                                                  frameSize=frameSize,
-                                                 colorMode=g.actualColor(),
                                                  progress=ProgressCounter(progress.counter(i), g.nThreads)))
             for i in range(0, g.nThreads):
                 frames, sharps, deltas = futures[i].result()
@@ -82,188 +67,24 @@ class Video:
     def getFrame(
         self,
         index: int,
-        colorMode: int,
         toDtype: type = np.float32,
+        fastestDemosaic: bool = False,
     ) -> np.ndarray:
-        """Reads a frame of the source and converts it to BGR.
+        """Reads a frame of the source as BGR, demosaiced as the source's demosaic params say.
 
         Args:
             index: The frame's index in the source.
-            colorMode: The color mode the frame is in; COLOR_AUTO resolves it from the source
-                and the frame.
-            toDtype: The output's dtype, as for _bgrFromSourceFrame.
+            toDtype: The output's dtype, as for FrameSource.convertDepth.
+            fastestDemosaic: Whether to demosaic with the fastest algorithm, as for FrameSource.readFrame.
 
         Returns:
             The frame as BGR.
         """
-        image = self.source.readFrame(index)
-        if colorMode == Video.COLOR_AUTO:
-            colorMode = self.guessColorMode(image)
-        return Video._bgrFromSourceFrame(
-            image=image,
-            colorMode=colorMode,
+        return FrameSource.convertDepth(
+            image=self.source.readFrame(index, fastestDemosaic=fastestDemosaic),
             toDtype=toDtype,
         )
 
-    def thumbnail(self) -> np.ndarray:
-        """Makes a display-ready thumbnail of the source.
-
-        Returns:
-            The source's fast preview if it has one, or else its first frame in the Auto color
-            mode; as uint8 BGR.
-        """
-        preview = self.source.fastPreview()
-        if preview is not None:
-            return preview
-        return self.getFrame(
-            index=0,
-            colorMode=Video.COLOR_AUTO,
-            toDtype=np.uint8,
-        )
-
-    def guessColorMode(self, image: np.ndarray | None = None) -> int:
-        """Resolves the Auto color mode for the source.
-
-        Args:
-            image: A frame of the source to guess from; the first frame is read if None.
-
-        Returns:
-            The color mode guessed from the frame's pixels.
-        """
-        if(image is None):
-            image = self.source.readFrame(0)
-        if(image is None):
-            return Video.COLOR_RGB
-        return self.guessImageColor(image)
-
-    def guessImageColor(self, image: np.ndarray) -> int:
-        """Guesses a frame's color mode from its pixels.
-
-        A very simple guess, far from perfect: a frame with equal channels is grayscale unless
-        demosaicing it reveals a Bayer pattern. The pattern is only told apart as RGGB/BGGR or
-        GRBG/GBRG, and the user's last chosen Bayer mode replaces it if there is one.
-
-        Args:
-            image: A frame as FrameSource.readFrame returns it.
-
-        Returns:
-            The guessed color mode.
-        """
-        # Assume its color to start with
-        colorMode = Video.COLOR_RGB
-        rgb = Video._bgrFromSourceFrame(image, Video.COLOR_RGB)
-        if(np.array_equal(rgb[:,:,0],rgb[:,:,1]) and 
-           np.array_equal(rgb[:,:,1],rgb[:,:,2])):
-            # Not a color image
-            colorMode = Video.COLOR_GRAYSCALE
-            
-            # Calculate all bayer options
-            rggb = Video._bgrFromSourceFrame(image, Video.COLOR_RGGB)
-            grbg = Video._bgrFromSourceFrame(image, Video.COLOR_GRBG)
-            gbrg = Video._bgrFromSourceFrame(image, Video.COLOR_GBRG)
-            bggr = Video._bgrFromSourceFrame(image, Video.COLOR_BGGR)
-            
-            diff1 = np.average(cv2.absdiff(cv2.cvtColor(rggb, cv2.COLOR_BGR2GRAY), cv2.cvtColor(bggr, cv2.COLOR_BGR2GRAY)))
-            diff2 = np.average(cv2.absdiff(cv2.cvtColor(grbg, cv2.COLOR_BGR2GRAY), cv2.cvtColor(gbrg, cv2.COLOR_BGR2GRAY)))
-            diff = 0
-            if(diff1 > 0.0001 and diff2 > 0.0001):
-                diff = abs(diff1 - diff2)/min(diff1, diff2)
-            if(diff > 0.2):
-                # Probably uses a bayer pattern, but which one...
-                rggbDiff = np.average(cv2.absdiff(rggb[:,:,0], rggb[:,:,2]))
-                grbgDiff = np.average(cv2.absdiff(grbg[:,:,0], grbg[:,:,2]))
-                if(rggbDiff >= grbgDiff):
-                    # Probably either RGGB or BGGR
-                    colorMode = Video.COLOR_RGGB
-                else:
-                    # Probably either GRBG or GBRG
-                    colorMode = Video.COLOR_GRBG
-                colorMode = g.ui.preferences.get("bayerGuess", colorMode)
-        return colorMode
-      
-    @staticmethod
-    def _bgrFromSourceFrame(
-        image: np.ndarray,
-        colorMode: int,
-        toDtype: type | None = None,
-    ) -> np.ndarray:
-        """Converts a frame read from a source to BGR, interpreting it by its color mode.
-
-        The color mode is applied at the frame's depth, then the depth is converted.
-
-        Args:
-            image: A frame as FrameSource.readFrame returns it.
-            colorMode: The color mode the frame is in. COLOR_AUTO isn't supported; resolve it
-                with Video.guessColorMode first.
-            toDtype: The output's dtype: np.float32 for a 0-1 scale, np.uint8 for 8 bits
-                (16-bit frames keep their high byte), or None to keep the input's dtype.
-
-        Returns:
-            The frame as BGR.
-
-        Raises:
-            ValueError: If colorMode is COLOR_AUTO, or the frame's dtype or toDtype isn't supported.
-        """
-        if colorMode == Video.COLOR_AUTO:
-            raise ValueError("COLOR_AUTO must be resolved before converting a frame")
-        if image.dtype not in (np.uint8, np.uint16):
-            raise ValueError(f"Unsupported frame dtype: {image.dtype}")
-        if toDtype not in (None, np.float32, np.uint8):
-            raise ValueError(f"Unsupported toDtype: {toDtype}")
-        image = Video._applyColorMode(img=image, colorMode=colorMode)
-        if toDtype == np.float32:
-            return image.astype(np.float32) / np.iinfo(image.dtype).max
-        if toDtype == np.uint8 and image.dtype == np.uint16:
-            return (image >> 8).astype(np.uint8)
-        return image
-
-    @staticmethod
-    def _applyColorMode(img: np.ndarray, colorMode: int) -> np.ndarray:
-        """Demosaics or grays a frame by its color mode, keeping its depth.
-
-        VNG demosaicing is only done on uint8 frames; deeper frames are demosaiced edge-aware.
-
-        Args:
-            img: A frame as FrameSource.readFrame returns it.
-            colorMode: The color mode the frame is in; not COLOR_AUTO.
-
-        Returns:
-            The frame as BGR.
-        """
-        h, w = img.shape[:2]
-        if(len(img.shape) == 2):
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        if(colorMode == Video.COLOR_RGB):
-            pass
-        elif(colorMode == Video.COLOR_GRAYSCALE):
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        else:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            if(colorMode >= Video.COLOR_RGGB_VNG and img.dtype == np.uint8): # Only do VNG if its a uint8 image
-                img = cv2.copyMakeBorder(img, 4, 2, 2, 2, cv2.BORDER_REPLICATE)
-                if(colorMode == Video.COLOR_RGGB_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_VNG)
-                elif(colorMode == Video.COLOR_GRBG_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR_VNG)
-                elif(colorMode == Video.COLOR_GBRG_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR_VNG)
-                elif(colorMode == Video.COLOR_BGGR_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_VNG)
-                img = img[2:h+2,2:w+2]
-            else:
-                img = cv2.copyMakeBorder(img, 2, 2, 2, 2, cv2.BORDER_REPLICATE)
-                if(colorMode == Video.COLOR_RGGB or colorMode == Video.COLOR_RGGB_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2BGR_EA)
-                elif(colorMode == Video.COLOR_GRBG or colorMode == Video.COLOR_GRBG_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR_EA)
-                elif(colorMode == Video.COLOR_GBRG or colorMode == Video.COLOR_GBRG_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR_EA)
-                elif(colorMode == Video.COLOR_BGGR or colorMode == Video.COLOR_BGGR_VNG):
-                    img = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2BGR_EA)
-                img = img[2:h+2,2:w+2]
-        return img
-      
 # Resize image so it does things faster
 def resize(image):
     from Align import dilateImg
@@ -299,18 +120,17 @@ def calculateSharpness(image):
 def loadFrames(source: FrameSource,
                indices: range,
                frameSize: tuple[int, int],
-               colorMode: int,
                progress: ProgressCounter) -> tuple[list[int], list[float], list[np.ndarray]]:
     """Reads a chunk of frames, calculating each one's sharpness and its delta from the previous frame.
 
     Runs in a worker process.
 
     Args:
-        source: The source to read from.
+        source: The source to read from, demosaiced as its demosaic params say before calculating sharpness and
+            deltas.
         indices: The consecutive frame indices of the chunk. The frame before the chunk is read
             too, as the previous frame for the first delta.
         frameSize: The (width, height) frames must have; frames of any other size are skipped.
-        colorMode: The color mode to apply before calculating sharpness and deltas.
         progress: Counts the frames as they are read.
 
     Returns:
@@ -325,9 +145,8 @@ def loadFrames(source: FrameSource,
         prevImage = source.readFrame(indices.start - 1)
         if(prevImage is not None):
             prevImage = cv2.cvtColor(
-                Video._bgrFromSourceFrame(
+                FrameSource.convertDepth(
                     image=prevImage,
-                    colorMode=colorMode,
                     toDtype=np.uint8,
                 ),
                 cv2.COLOR_BGR2GRAY,
@@ -345,9 +164,8 @@ def loadFrames(source: FrameSource,
             continue
         frames.append(index)
         # Sharpness and deltas are measured at 8 bits, which their thresholds were tuned on
-        image = Video._bgrFromSourceFrame(
+        image = FrameSource.convertDepth(
             image=image,
-            colorMode=colorMode,
             toDtype=np.uint8,
         )
 
@@ -383,7 +201,7 @@ def loadPsf(path: str) -> np.ndarray:
     source = ImageSequenceSource(path)
     try:
         psf = cv2.cvtColor(
-            Video(source).getFrame(index=0, colorMode=Video.COLOR_GRAYSCALE),
+            Video(source).getFrame(index=0),
             cv2.COLOR_BGR2GRAY,
         )
     finally:
