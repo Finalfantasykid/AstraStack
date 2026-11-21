@@ -16,6 +16,8 @@ PNG16 = str(INPUTS_DIR / "16bit.png")
 JPG8 = str(INPUTS_DIR / "test.jpg")
 # The (width, height) of JPG8.
 JPG8_DIMENSIONS = (191, 125)
+# A simulated Nikon camera JPEG, which LibRaw opens but can't decode.
+JPG8_NIKON = str(INPUTS_DIR / "nikon.jpg")
 # An 8-bit YUV video of Jupiter.
 MP4_YUV8 = str(INPUTS_DIR / "Jupiter.mp4")
 MP4_YUV8_FRAME_COUNT = 60

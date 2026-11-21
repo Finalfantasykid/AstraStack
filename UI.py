@@ -12,6 +12,7 @@ import time
 from packaging import version
 from threading import Thread
 
+from Constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
 from Preferences import Preferences
 from Video import Video, loadPsf
 from FrameSource import FrameSource
@@ -93,6 +94,16 @@ class UI:
         self.showMask = self.builder.get_object("showMask")
         self.reference = None
         
+        # GTK 3's patterns are case-sensitive, so each extension is matched in lower and upper case
+        for filterName, extensions in [
+            ("imageFilter", IMAGE_EXTENSIONS),
+            ("supportedInputsFilter", IMAGE_EXTENSIONS | VIDEO_EXTENSIONS),
+        ]:
+            fileFilter = self.builder.get_object(filterName)
+            for extension in sorted(extensions):
+                fileFilter.add_pattern("*" + extension)
+                fileFilter.add_pattern("*" + extension.upper())
+
         self.openDialog.set_preview_widget(Gtk.Image())
         self.saveDialog.set_preview_widget(Gtk.Image())
         

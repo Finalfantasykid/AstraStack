@@ -4,8 +4,11 @@ cv2 = lazy("cv2")
 np = lazy("numpy")
 rawpy = lazy("rawpy")
 import bisect
+import os
 from abc import ABC, abstractmethod
 from natsort import natsorted, ns
+
+from Constants import LIBRAW_EXTENSIONS
 
 class FrameSource(ABC):
     """A sequence of frames stored in one or more files, addressed by integer index.
@@ -122,11 +125,10 @@ class ImageSequenceSource(FrameSource):
         """
         paths = [path] if isinstance(path, str) else path
         for file in paths:
-            try:
-                with rawpy.imread(file):
-                    continue
-            except Exception:
-                pass
+            raw = ImageSequenceSource._openRaw(file)
+            if(raw is not None):
+                raw.close()
+                continue
             if(cv2.haveImageReader(file)):
                 continue
             try:
@@ -152,6 +154,26 @@ class ImageSequenceSource(FrameSource):
         return ImageSequenceSource._readImageFile(self.paths[index])
 
     @staticmethod
+    def _openRaw(file: str) -> rawpy.RawPy | None:
+        """Opens a raw camera file with LibRaw, without decoding its pixels.
+
+        Only a file with a raw camera extension is tried: LibRaw opens some other files, such as
+        JPEGs from Nikon cameras, then fails to decode them.
+
+        Args:
+            file: The file.
+
+        Returns:
+            The opened file, for the caller to close; or None if it isn't a raw camera file.
+        """
+        if(os.path.splitext(file)[1].lower() not in LIBRAW_EXTENSIONS):
+            return None
+        try:
+            return rawpy.imread(file)
+        except Exception:
+            return None
+
+    @staticmethod
     def _readImageFile(file: str) -> np.ndarray:
         """Decodes an image file as a raw camera file, else an image OpenCV reads, else FITS.
 
@@ -163,10 +185,7 @@ class ImageSequenceSource(FrameSource):
             keeps its stored depth and channels, and a FITS image is stretched to the full
             16-bit range.
         """
-        try:
-            raw = rawpy.imread(file)
-        except Exception:
-            raw = None
+        raw = ImageSequenceSource._openRaw(file)
         if raw is not None:
             with raw:
                 return cv2.cvtColor(raw.postprocess(output_bps=16), cv2.COLOR_RGB2BGR)
@@ -187,9 +206,8 @@ class ImageSequenceSource(FrameSource):
         # TODO: Read a raw camera file's embedded JPEG preview (rawpy's extract_thumb) instead,
         # falling back to the half size decode for files without one. It is far quicker, and it
         # keeps LibRaw's OpenMP code out of the main process.
-        try:
-            raw = rawpy.imread(self.paths[0])
-        except Exception:
+        raw = ImageSequenceSource._openRaw(self.paths[0])
+        if(raw is None):
             return None
         with raw:
             return cv2.cvtColor(
