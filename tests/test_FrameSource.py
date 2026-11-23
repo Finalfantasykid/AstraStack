@@ -16,6 +16,7 @@ from tests.inputs import (
     FITS16_RGGB_SEQUENCE_DIMENSIONS,
     JPG8,
     JPG8_DIMENSIONS,
+    JPG8_NIKON,
     MP4_YUV8,
     MP4_YUV8_DIMENSIONS,
     MP4_YUV8_FRAME_COUNT,
@@ -335,6 +336,10 @@ class TestOpen(unittest.TestCase):
         assert source.readFrame(0) is not None
         assert source.readFrame(source.frameCount() - 1) is not None
         assert source.readFrame(source.frameCount()) is None
+
+    def test_jpeg_libraw_opens_is_read_by_opencv(self) -> None:
+        """A camera-generated JPEG loads, rather than being mistaken for a raw file because LibRaw opens it."""
+        assert FrameSource.open(JPG8_NIKON).readFrame(0) is not None
 
     @ddt.data(
         # A single image is a one-frame sequence.
