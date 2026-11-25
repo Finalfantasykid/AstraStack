@@ -4,7 +4,6 @@ np = lazy("numpy")
 pystackreg = lazy("pystackreg")
 webbrowser = lazy("webbrowser")
 psutil = lazy("psutil")
-urllib = lazy("urllib")
 json = lazy("json")
 import subprocess, os, sys
 import math
@@ -320,6 +319,7 @@ class UI:
     def checkNewVersion(self):
         def callUrl():
             import ssl
+            import urllib.request
             ssl._create_default_https_context = ssl._create_unverified_context
             try:
                 if(not g.TESTING):
