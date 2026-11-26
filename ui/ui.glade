@@ -3086,12 +3086,63 @@ Note: Drift adjustment will still crop the image.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel">
-                        <property name="width-request">50</property>
+                      <object class="GtkBox" id="demosaicBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="margin-left">10</property>
-                        <property name="label" translatable="yes">Color:</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkLabel" id="demosaicLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Raw sensor data is often a mosaic of single-color pixels, which is turned into a full-color image by demosaicing.</property>
+                            <property name="label" translatable="yes">Demosaic:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="mosaicPattern">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Demosaic pattern: the arrangement of color pixels in the input.
+
+• Auto: Determine the pattern from the file's metadata, or else guess from the pixel values.  Guessing can't reliably distinguish RGGB from BGGR, or GRBG from GBRG, so your last pattern selection breaks the tie.
+• Off: Treat input as non-color.  Never demosaic.
+• RGGB, BGGR, GRBG, GBRG: Always demosaic with this pattern.</property>
+                            <signal name="changed" handler="setMosaicPattern" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="demosaicAlgorithm">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Demosaic algorithm: the method used to reconstruct a full-color image from incomplete color samples.
+
+• Edge-aware: Very fast, and sharp along edges.  Suits most recordings.
+• Bilinear: Very fast, but the softest.
+• VNG: Slow, but with fewer color fringes.
+• PPG: Fast, and sharper than Bilinear.
+• AHD: Fast, with few color fringes and maze patterns.  A good general choice.
+• DCB: Slow, but keeps fine detail with few artifacts.
+• DHT: Slow, but sharp, with clean diagonal edges.
+• AAHD: Slowest, but like AHD with fewer artifacts in fine detail.</property>
+                            <signal name="changed" handler="setDemosaicAlgorithm" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -3152,32 +3203,6 @@ Note: Drift adjustment will still crop the image.</property>
                         <property name="fill">True</property>
                         <property name="pack-type">end</property>
                         <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="colorMode">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="active">0</property>
-                        <items>
-                          <item id="0" translatable="yes">Auto</item>
-                          <item id="1" translatable="yes">RGB</item>
-                          <item id="2" translatable="yes">Grayscale</item>
-                          <item id="3" translatable="yes">Bayer RGGB</item>
-                          <item id="4" translatable="yes">Bayer GRBG</item>
-                          <item id="5" translatable="yes">Bayer GBRG</item>
-                          <item id="6" translatable="yes">Bayer BGGR</item>
-                          <item id="7" translatable="yes">Bayer RGGB (VNG)</item>
-                          <item id="8" translatable="yes">Bayer GRBG (VNG)</item>
-                          <item id="9" translatable="yes">Bayer GBRG (VNG)</item>
-                          <item id="10" translatable="yes">Bayer BGGR (VNG)</item>
-                        </items>
-                        <signal name="changed" handler="setColorMode" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>

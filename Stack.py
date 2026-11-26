@@ -130,7 +130,7 @@ def blendAverage(frames: list[np.ndarray],
     video = Video(gCopy.source)
     stackedImage = None
     for c, (frame, M, diff, sharp) in enumerate(frames):
-        image = video.getFrame(frame, gCopy.actualColor())
+        image = video.getFrame(frame)
         image = transform(image, ref, M, 
                           minX, maxX, minY, maxY, gCopy).astype(np.float64)
         if stackedImage is None:

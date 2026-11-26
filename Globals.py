@@ -1,8 +1,7 @@
 import copy
 
 class Object():
-    def actualColor(self):
-        return (self.colorMode or self.guessedColorMode)
+    pass
 
 g = Object()
 
